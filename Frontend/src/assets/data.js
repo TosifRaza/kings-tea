@@ -513,174 +513,26 @@
 //     popular: false,
 //   },
 // ];
+
+
+
+
+
+
 // Products and categories are now fetched from the API via Redux
 // These are kept as empty arrays for any leftover references
+// ============================================================
+// Frontend/src/assets/data.js — CLEANED: All data now comes from API
+// ============================================================
+// INSTRUCTIONS: Replace your existing data.js with this file.
+// All products, categories, collections, testimonials, blogPosts,
+// and subscriptionPlans are now fetched from the backend API.
+// These arrays are kept empty as fallback/placeholder.
+// ============================================================
+
 export const products = [];
 export const categories = [];
-
-export const collections = [
-  {
-    id: '1',
-    name: 'By Origin',
-    description: "Explore teas from the world's finest gardens",
-    gradient: 'from-emerald-800 to-tea-green',
-    image: '/images/tea-collection.png',
-  },
-  {
-    id: '2',
-    name: 'By Fermentation',
-    description: 'From delicate white to bold black',
-    gradient: 'from-amber-700 to-royal-terracotta',
-    image: '/images/tea-collection.png',
-  },
-  {
-    id: '3',
-    name: 'By Season',
-    description: 'Seasonal harvests at their peak',
-    gradient: 'from-teal-700 to-tea-green-light',
-    image: '/images/tea-collection.png',
-  },
-];
-
-export const testimonials = [
-  {
-    id: '1',
-    name: 'Alexandra Chen',
-    location: 'London, United Kingdom',
-    quote: "The Imperial Dragon Well is unlike any green tea I've encountered. Each sip reveals new layers of complexity — it's truly a meditation in a cup. KING'S TEA has ruined all other teas for me.",
-    rating: 5,
-    avatar: 'AC',
-  },
-  {
-    id: '2',
-    name: 'James Harrington III',
-    location: 'New York, United States',
-    quote: "As a third-generation tea merchant myself, I can attest to the extraordinary quality of KING'S TEA selections. Their Silver Needle Reserve is the finest I've tasted outside of Fujian province.",
-    rating: 5,
-    avatar: 'JH',
-  },
-  {
-    id: '3',
-    name: 'Dr. Marie Dubois',
-    location: 'Paris, France',
-    quote: 'The subscription box has become the highlight of my month. Each selection is accompanied by detailed tasting notes and brewing guides that have transformed my tea practice entirely.',
-    rating: 5,
-    avatar: 'MD',
-  },
-  {
-    id: '4',
-    name: 'Kenji Watanabe',
-    location: 'Tokyo, Japan',
-    quote: 'Their Kyoto Matcha Ceremonial rivals the finest from Uji itself. The umami depth and creamy texture speak to the meticulous sourcing and handling. A remarkable achievement.',
-    rating: 5,
-    avatar: 'KW',
-  },
-  {
-    id: '5',
-    name: 'Isabella Rossi',
-    location: 'Milan, Italy',
-    quote: 'The Royal Earl Grey is perfection — the bergamot is bright and natural, not the artificial flavor that plagues most blends. I serve it at every dinner party and guests always ask for the source.',
-    rating: 4,
-    avatar: 'IR',
-  },
-  {
-    id: '6',
-    name: 'Hans Müller',
-    location: 'Zurich, Switzerland',
-    quote: "I've been collecting aged pu-erh for over twenty years, and KING'S TEA's 2005 vintage is exceptional value. Properly stored with genuine complexity. I've already purchased three cakes.",
-    rating: 5,
-    avatar: 'HM',
-  },
-];
-
-export const blogPosts = [
-  {
-    id: '1',
-    title: 'The Ancient Art of Chinese Tea Ceremony',
-    excerpt: 'Discover the meditative practice of Gongfu Cha and how it transforms the simple act of drinking tea into a profound ritual of mindfulness and appreciation.',
-    category: 'Tea Ceremony',
-    date: 'November 15, 2024',
-    readTime: '8 min read',
-    gradient: 'from-emerald-800 to-teal-600',
-  },
-  {
-    id: '2',
-    title: 'Understanding Tea Fermentation: A Complete Guide',
-    excerpt: 'From white to black and everything in between — learn how the degree of fermentation shapes the flavor, aroma, and character of every tea in your cup.',
-    category: 'Education',
-    date: 'November 8, 2024',
-    readTime: '12 min read',
-    gradient: 'from-amber-700 to-orange-500',
-  },
-  {
-    id: '3',
-    title: 'The Perfect Brew: Temperature and Timing Guide',
-    excerpt: 'Master the crucial elements of tea brewing with our comprehensive temperature and steeping time guide for every variety of tea.',
-    category: 'Brewing Guide',
-    date: 'October 28, 2024',
-    readTime: '6 min read',
-    gradient: 'from-teal-700 to-cyan-500',
-  },
-  {
-    id: '4',
-    title: 'Sourcing the Finest: Our Journey Through Yunnan',
-    excerpt: 'Join us on an intimate journey through the ancient tea forests of Yunnan province, where we select our most prized pu-erh and golden tip teas.',
-    category: 'Behind the Scenes',
-    date: 'October 15, 2024',
-    readTime: '10 min read',
-    gradient: 'from-stone-700 to-amber-600',
-  },
-];
-
-export const subscriptionPlans = [
-  {
-    id: 'monthly',
-    name: 'Monthly Discovery',
-    price: 49,
-    period: 'month',
-    description: 'A curated monthly selection of premium teas',
-    features: [
-      '3 premium tea samples (30g each)',
-      'Tasting notes & brewing guide',
-      'Free shipping',
-      '10% off all shop purchases',
-      'Access to members-only content',
-    ],
-    popular: false,
-  },
-  {
-    id: 'quarterly',
-    name: 'Quarterly Journey',
-    price: 129,
-    period: 'quarter',
-    description: 'An immersive quarterly tea experience',
-    features: [
-      '6 premium tea samples (40g each)',
-      'Tasting notes & brewing guide',
-      'Complimentary teaware gift',
-      '15% off all shop purchases',
-      'Priority access to limited editions',
-      'Exclusive virtual tasting events',
-      'Free shipping',
-    ],
-    popular: true,
-  },
-  {
-    id: 'annual',
-    name: 'Annual Connoisseur',
-    price: 499,
-    period: 'year',
-    description: "The ultimate tea connoisseur's membership",
-    features: [
-      '8 premium tea samples (50g each) quarterly',
-      'Premium teaware collection',
-      '20% off all shop purchases',
-      'First access to rare & limited editions',
-      'Private virtual tastings with tea masters',
-      'Annual exclusive tea gift box',
-      'Free express shipping worldwide',
-      'Personal tea consultation',
-    ],
-    popular: false,
-  },
-];
+export const collections = [];
+export const testimonials = [];
+export const blogPosts = [];
+export const subscriptionPlans = [];

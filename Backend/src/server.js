@@ -1,175 +1,172 @@
-console.log('SERVER FILE LOADED');
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const { connectDB } = require('./config/DatabaseConfig');
-const { successResponse, errorResponse } = require('./utils/ResponseHandler');
-
-const AuthRoutes = require('./routes/AuthRoutes');
-const ProductRoutes = require('./routes/ProductRoutes');
-const CategoryRoutes = require('./routes/CategoryRoutes');
-const OrderRoutes = require('./routes/OrderRoutes');
-const UserRoutes = require('./routes/UserRoutes');
-const CartRoutes = require('./routes/CartRoutes');
-const WishlistRoutes = require('./routes/WishlistRoutes');
-const ReviewRoutes = require('./routes/ReviewRoutes');
-const BlogRoutes = require('./routes/BlogRoutes');
-const SubscriptionRoutes = require('./routes/SubscriptionRoutes');
-const NewsletterRoutes = require('./routes/NewsletterRoutes');
-const ContactRoutes = require('./routes/ContactRoutes');
-const StatsRoutes = require('./routes/StatsRoutes');
-
-const User = require('./models/UserModel');
-const Product = require('./models/ProductModel');
-const Category = require('./models/CategoryModel');
-
-const fs = require('fs');
+const mongoose = require('mongoose');
 const path = require('path');
+const fs = require('fs');
+require('dotenv').config();
 
-// Create uploads directory if it doesn't exist
+// Import routes
+const authRoutes = require('./routes/AuthRoutes');
+const productRoutes = require('./routes/ProductRoutes');
+const categoryRoutes = require('./routes/CategoryRoutes');
+const collectionRoutes = require('./routes/CollectionRoutes');
+const testimonialRoutes = require('./routes/TestimonialRoutes');
+const blogRoutes = require('./routes/BlogRoutes');
+const subscriptionRoutes = require('./routes/SubscriptionRoutes');
+const orderRoutes = require('./routes/OrderRoutes');
+const cartRoutes = require('./routes/CartRoutes');
+const wishlistRoutes = require('./routes/WishlistRoutes');
+const reviewRoutes = require('./routes/ReviewRoutes');
+const contactRoutes = require('./routes/ContactRoutes');
+const newsletterRoutes = require('./routes/NewsletterRoutes');
+const userRoutes = require('./routes/UserRoutes');
+const statsRoutes = require('./routes/StatsRoutes');
+
+// Import models for seeding
+const Category = require('./models/CategoryModel');
+const Product = require('./models/ProductModel');
+const Collection = require('./models/CollectionModel');
+const Testimonial = require('./models/TestimonialModel');
+const BlogPost = require('./models/BlogPostModel');
+const Subscription = require('./models/SubscriptionModel');
+const User = require('./models/UserModel');
+
+const app = express();
+
+// Create uploads directory
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const app = express();
-
+// Middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:5174'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie']
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://localhost:5174'],
+  credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+
+// Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-app.get('/', (req, res) => {
-  return successResponse(res, {
-    name: "KING'S TEA API",
-    version: '1.0.0',
-    status: 'running'
-  }, "Welcome to KING'S TEA API Server");
-});
 
-app.use('/api/auth', AuthRoutes);
-app.use('/api/products', ProductRoutes);
-app.use('/api/categories', CategoryRoutes);
-app.use('/api/orders', OrderRoutes);
-app.use('/api/users', UserRoutes);
-app.use('/api/cart', CartRoutes);
-app.use('/api/wishlist', WishlistRoutes);
-app.use('/api/reviews', ReviewRoutes);
-app.use('/api/blog', BlogRoutes);
-app.use('/api/subscriptions', SubscriptionRoutes);
-app.use('/api/newsletter', NewsletterRoutes);
-app.use('/api/contact', ContactRoutes);
-app.use('/api/stats', StatsRoutes);
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/stats', statsRoutes);
 
+// Seed route
 app.get('/api/seed', async (req, res) => {
   try {
-    await Product.deleteMany({});
+    // Clear existing data
     await Category.deleteMany({});
+    await Product.deleteMany({});
+    await Collection.deleteMany({});
+    await Testimonial.deleteMany({});
+    await BlogPost.deleteMany({});
+    await Subscription.deleteMany({});
+    await User.deleteMany({});
 
-    const categories = [
+    // ============ SEED ADMIN USER (MUST BE FIRST - needed for subscriptions) ============
+    const admin = await User.create({
+      name: 'Admin',
+      email: 'admin@kingstea.com',
+      password: 'admin123',
+      role: 'admin',
+      isActive: true
+    });
+
+    // ============ SEED CATEGORIES ============
+    const categories = await Category.insertMany([
       {
         name: 'Black Tea',
         slug: 'black-tea',
-        description: 'Bold and robust, our black tea collection features the finest full-oxidized leaves from legendary tea estates around the world.',
-        image: '/images/categories/black-tea.jpg',
+        description: 'Bold, robust, and full-bodied teas with rich flavors. Our black tea collection features the finest leaves from renowned estates across India, Sri Lanka, and China.',
+        image: '',
         featured: true,
-        sortOrder: 1
+        sortOrder: 1,
+        isActive: true
       },
       {
         name: 'Green Tea',
         slug: 'green-tea',
-        description: 'Delicate and refreshing, our green tea collection celebrates the art of minimal oxidation, preserving the natural essence of the leaf.',
-        image: '/images/categories/green-tea.jpg',
+        description: 'Fresh, delicate, and naturally vibrant. Experience the nuanced flavors of carefully steamed and pan-fired green teas from Japan and China.',
+        image: '',
         featured: true,
-        sortOrder: 2
+        sortOrder: 2,
+        isActive: true
       },
       {
         name: 'Oolong Tea',
         slug: 'oolong-tea',
-        description: 'Complex and aromatic, our oolong teas are masterfully crafted through a precise semi-oxidization process that yields extraordinary depth.',
-        image: '/images/categories/oolong-tea.jpg',
+        description: 'A perfect balance between black and green, offering complex flavor profiles that evolve with every sip. Crafted through traditional oxidation techniques.',
+        image: '',
         featured: true,
-        sortOrder: 3
+        sortOrder: 3,
+        isActive: true
       },
       {
         name: 'White Tea',
         slug: 'white-tea',
-        description: 'The most delicate of all teas, our white tea collection showcases the purest expression of the tea plant with minimal processing.',
-        image: '/images/categories/white-tea.jpg',
+        description: 'The most delicate and minimally processed of all teas. Silver needle and white peony varieties that offer subtle, ethereal flavors.',
+        image: '',
         featured: false,
-        sortOrder: 4
+        sortOrder: 4,
+        isActive: true
       },
       {
         name: 'Pu-erh Tea',
         slug: 'pu-erh-tea',
-        description: 'Rich and earthy, our pu-erh teas are aged to perfection, developing complex flavors that deepen and evolve over time.',
-        image: '/images/categories/puerh-tea.jpg',
+        description: 'Aged and fermented teas from Yunnan province, offering deep, earthy flavors that improve with time. A true connoisseur\'s choice.',
+        image: '',
         featured: false,
-        sortOrder: 5
+        sortOrder: 5,
+        isActive: true
       },
       {
         name: 'Matcha',
         slug: 'matcha',
-        description: 'Vibrant and ceremonial, our matcha collection features stone-ground tencha leaves from Japan\'s most revered tea gardens.',
-        image: '/images/categories/matcha.jpg',
+        description: 'Stone-ground ceremonial and culinary grade matcha. Vibrant green powder crafted from shade-grown tencha leaves for an immersive tea experience.',
+        image: '',
         featured: true,
-        sortOrder: 6
+        sortOrder: 6,
+        isActive: true
       }
-    ];
+    ]);
 
-    const createdCategories = await Category.insertMany(categories);
-
-    const categoryMap = {};
-    createdCategories.forEach(cat => {
-      categoryMap[cat.name] = cat._id;
-    });
-
-    const products = [
+    // ============ SEED PRODUCTS ============
+    const products = await Product.insertMany([
       {
-        name: 'Imperial Dragon Well',
-        slug: 'imperial-dragon-well',
-        description: 'Sourced from the legendary West Lake region of Hangzhou, our Imperial Dragon Well represents the pinnacle of Chinese green tea craftsmanship. Each leaf is hand-picked during the brief spring harvest and meticulously pan-fired by master tea artisans using traditional techniques passed down through generations. The result is a tea of extraordinary clarity and depth, with a sweet, nutty character that lingers on the palate long after the last sip.',
-        shortDescription: 'Hand-picked from West Lake, this legendary Chinese green tea offers sweet chestnut notes with a silky smooth finish.',
-        price: 68,
-        comparePrice: 85,
-        images: ['/images/products/dragon-well-1.jpg', '/images/products/dragon-well-2.jpg'],
-        category: 'Green Tea',
-        origin: 'Hangzhou, China',
-        fermentation: 'none',
+        name: 'Royal Darjeeling',
+        slug: 'royal-darjeeling',
+        description: 'Sourced from the misty heights of Darjeeling\'s first flush, this tea embodies the champagne of teas with its delicate muscatel character and floral undertones. Each leaf is hand-picked at dawn to preserve its exquisite flavor profile.',
+        shortDescription: 'First flush Darjeeling with muscatel character',
+        price: 2499,
+        comparePrice: 2999,
+        images: [],
+        category: 'Black Tea',
+        categoryId: categories[0]._id,
+        origin: 'Darjeeling, India',
+        fermentation: 'full',
         season: 'spring',
-        tastingNotes: ['Sweet chestnut', 'Orchid', 'Toasted rice', 'Fresh greens'],
+        tastingNotes: ['Muscatel', 'Floral', 'Light Astringency'],
         brewingGuide: {
-          temperature: '75-80°C',
-          steepTime: '2-3 minutes',
-          amount: '3g per 200ml',
-          instructions: 'Use a glass or porcelain vessel. Pour water over leaves and watch them dance.'
+          temperature: '90°C',
+          steepTime: '3-4 min',
+          amount: '2g per 200ml',
+          instructions: 'Use freshly boiled water cooled to 90°C. Steep for 3-4 minutes. Can be re-steeped once.'
         },
         weight: '100g',
         caffeine: 'medium',
@@ -179,390 +176,641 @@ app.get('/api/seed', async (req, res) => {
         bestSeller: true,
         isNew: false,
         rating: 4.8,
-        reviewCount: 24,
-        categoryId: categoryMap['Green Tea']
+        reviewCount: 124,
+        gradientColor: 'from-amber-800 to-amber-600',
+        isActive: true
       },
       {
-        name: 'Royal Darjeeling First Flush',
-        slug: 'royal-darjeeling-first-flush',
-        description: 'From the misty heights of Darjeeling\'s most esteemed estates, our Royal First Flush captures the ephemeral magic of spring\'s earliest harvest.',
-        shortDescription: 'The Champagne of Teas — spring\'s first harvest from Himalayan estates with exquisite muscatel character.',
-        price: 75,
-        comparePrice: 92,
-        images: ['/images/products/darjeeling-1.jpg', '/images/products/darjeeling-2.jpg'],
-        category: 'Black Tea',
-        origin: 'Darjeeling, India',
-        fermentation: 'light',
+        name: 'Dragon Well Longjing',
+        slug: 'dragon-well-longjing',
+        description: 'The legendary Dragon Well green tea from Hangzhou, pan-fired by master artisans to create its signature chestnut-like sweetness and flat, smooth leaves. A tea revered for centuries by Chinese emperors and scholars alike.',
+        shortDescription: 'Pan-fired Chinese green tea with chestnut notes',
+        price: 3299,
+        comparePrice: 3999,
+        images: [],
+        category: 'Green Tea',
+        categoryId: categories[1]._id,
+        origin: 'Hangzhou, China',
+        fermentation: 'none',
         season: 'spring',
-        tastingNotes: ['Muscatel grape', 'Spring flowers', 'Citrus zest', 'Honey'],
+        tastingNotes: ['Chestnut', 'Sweet', 'Vegetal'],
         brewingGuide: {
-          temperature: '85-90°C',
-          steepTime: '3-4 minutes',
-          amount: '2.5g per 200ml',
-          instructions: 'Warm your teapot first. Use freshly drawn water heated to 85°C.'
+          temperature: '80°C',
+          steepTime: '2-3 min',
+          amount: '3g per 200ml',
+          instructions: 'Use water at 80°C. Steep for 2-3 minutes. Best enjoyed in a glass teapot to watch the leaves dance.'
         },
         weight: '100g',
-        caffeine: 'medium',
+        caffeine: 'low',
         inStock: true,
-        stockQuantity: 35,
+        stockQuantity: 30,
         featured: true,
         bestSeller: true,
         isNew: false,
         rating: 4.9,
-        reviewCount: 31,
-        categoryId: categoryMap['Black Tea']
+        reviewCount: 89,
+        gradientColor: 'from-emerald-700 to-emerald-500',
+        isActive: true
       },
       {
-        name: 'Golden Yunnan Tips',
-        slug: 'golden-yunnan-tips',
-        description: 'A treasure from the ancient tea forests of Yunnan province, our Golden Tips are crafted exclusively from the downy buds of century-old tea trees.',
-        shortDescription: 'Exquisite golden buds from ancient Yunnan tea trees, yielding a rich malty cup with natural honey sweetness.',
-        price: 82,
-        comparePrice: 99,
-        images: ['/images/products/yunnan-1.jpg', '/images/products/yunnan-2.jpg'],
-        category: 'Black Tea',
-        origin: 'Yunnan, China',
-        fermentation: 'full',
-        season: 'spring',
-        tastingNotes: ['Malty cocoa', 'Honey', 'Dried apricot', 'Vanilla'],
+        name: 'Iron Goddess Oolong',
+        slug: 'iron-goddess-oolong',
+        description: 'Ti Kuan Yin, the Iron Goddess of Mercy, is a legendary oolong tea from Fujian province. Its complex layers of orchid, roasted chestnut, and honey create a meditative drinking experience that unfolds with each infusion.',
+        shortDescription: 'Traditional Tieguanyin with orchid aroma',
+        price: 2899,
+        comparePrice: 3499,
+        images: [],
+        category: 'Oolong Tea',
+        categoryId: categories[2]._id,
+        origin: 'Fujian, China',
+        fermentation: 'medium',
+        season: 'autumn',
+        tastingNotes: ['Orchid', 'Honey', 'Roasted Chestnut'],
         brewingGuide: {
-          temperature: '90-95°C',
-          steepTime: '3-5 minutes',
-          amount: '3g per 200ml',
-          instructions: 'This tea rewards a slightly hotter water temperature.'
+          temperature: '95°C',
+          steepTime: '3-5 min',
+          amount: '5g per 200ml',
+          instructions: 'Use boiling water cooled slightly. Steep for 3-5 minutes. Can be re-steeped 5-7 times.'
         },
         weight: '100g',
-        caffeine: 'high',
-        inStock: true,
-        stockQuantity: 40,
-        featured: false,
-        bestSeller: false,
-        isNew: true,
-        rating: 4.7,
-        reviewCount: 18,
-        categoryId: categoryMap['Black Tea']
-      },
-      {
-        name: 'Jade Oolong Supreme',
-        slug: 'jade-oolong-supreme',
-        description: 'From the misty mountains of Nantou County in Taiwan, our Jade Oolong Supreme represents the art of Taiwanese tea-making at its finest.',
-        shortDescription: 'A masterfully crafted Taiwanese oolong with intoxicating lilac and orchid notes and a buttery smooth finish.',
-        price: 95,
-        comparePrice: 115,
-        images: ['/images/products/jade-oolong-1.jpg', '/images/products/jade-oolong-2.jpg'],
-        category: 'Oolong Tea',
-        origin: 'Nantou, Taiwan',
-        fermentation: 'light',
-        season: 'autumn',
-        tastingNotes: ['Lilac', 'Orchid', 'Fresh cream', 'Butter'],
-        brewingGuide: {
-          temperature: '80-85°C',
-          steepTime: '1-2 minutes',
-          amount: '5g per 150ml',
-          instructions: 'Best prepared Gongfu style with a small teapot or gaiwan.'
-        },
-        weight: '75g',
         caffeine: 'medium',
         inStock: true,
         stockQuantity: 25,
         featured: true,
-        bestSeller: false,
-        isNew: true,
-        rating: 4.9,
-        reviewCount: 15,
-        categoryId: categoryMap['Oolong Tea']
+        bestSeller: true,
+        isNew: false,
+        rating: 4.7,
+        reviewCount: 156,
+        gradientColor: 'from-amber-700 to-yellow-600',
+        isActive: true
       },
       {
-        name: 'Silver Needle Reserve',
-        slug: 'silver-needle-reserve',
-        description: 'The rarest and most revered of all white teas, our Silver Needle Reserve is crafted entirely from the tender, silvery buds of the Da Bai tea bush in Fujian\'s Fuding county.',
-        shortDescription: 'The rarest white tea — pure silver buds from Fujian with ethereal notes of white peach and spring blossoms.',
-        price: 110,
-        comparePrice: 135,
-        images: ['/images/products/silver-needle-1.jpg', '/images/products/silver-needle-2.jpg'],
+        name: 'Silver Needle',
+        slug: 'silver-needle',
+        description: 'The rarest white tea, made exclusively from young buds covered in silvery-white down. Its ethereal sweetness and delicate floral notes create a transcendent tea experience reserved for the most discerning palates.',
+        shortDescription: 'Premium white tea with silver buds',
+        price: 4499,
+        comparePrice: 5299,
+        images: [],
         category: 'White Tea',
+        categoryId: categories[3]._id,
         origin: 'Fujian, China',
         fermentation: 'none',
         season: 'spring',
-        tastingNotes: ['White peach', 'Honeydew', 'Cucumber', 'Jasmine'],
+        tastingNotes: ['Honey', 'Melon', 'Floral'],
         brewingGuide: {
-          temperature: '70-75°C',
-          steepTime: '4-5 minutes',
-          amount: '4g per 200ml',
-          instructions: 'Treat this delicate tea with gentle warmth — never boiling water.'
+          temperature: '75°C',
+          steepTime: '4-5 min',
+          amount: '3g per 200ml',
+          instructions: 'Use water at 75°C. Steep for 4-5 minutes. Handle the delicate buds with care.'
         },
-        weight: '50g',
+        weight: '75g',
         caffeine: 'low',
+        inStock: true,
+        stockQuantity: 15,
+        featured: true,
+        bestSeller: false,
+        isNew: true,
+        rating: 4.9,
+        reviewCount: 67,
+        gradientColor: 'from-gray-300 to-gray-100',
+        isActive: true
+      },
+      {
+        name: 'Aged Pu-erh 2005',
+        slug: 'aged-pu-erh-2005',
+        description: 'A rare vintage pu-erh aged for nearly two decades, developing extraordinary depth and complexity. The earthy, woody character with hints of dark chocolate and dried fruit makes this a collector\'s treasure.',
+        shortDescription: 'Vintage 2005 fermented tea with deep complexity',
+        price: 5999,
+        comparePrice: 7499,
+        images: [],
+        category: 'Pu-erh Tea',
+        categoryId: categories[4]._id,
+        origin: 'Yunnan, China',
+        fermentation: 'post-fermented',
+        season: 'spring',
+        tastingNotes: ['Earthy', 'Woody', 'Dark Chocolate'],
+        brewingGuide: {
+          temperature: '100°C',
+          steepTime: '4-6 min',
+          amount: '7g per 200ml',
+          instructions: 'Use fully boiling water. Rinse the leaves once before steeping. Can be re-steeped 8-10 times.'
+        },
+        weight: '200g',
+        caffeine: 'medium',
+        inStock: true,
+        stockQuantity: 10,
+        featured: true,
+        bestSeller: false,
+        isNew: false,
+        rating: 4.8,
+        reviewCount: 45,
+        gradientColor: 'from-red-900 to-red-700',
+        isActive: true
+      },
+      {
+        name: 'Ceremonial Matcha',
+        slug: 'ceremonial-matcha',
+        description: 'Our highest grade matcha, stone-ground from shade-grown tencha leaves in Uji, Japan. The vibrant emerald powder whisked into a smooth, frothy bowl offers umami richness and a naturally sweet, vegetal finish.',
+        shortDescription: 'Premium stone-ground Japanese matcha',
+        price: 3799,
+        comparePrice: 4499,
+        images: [],
+        category: 'Matcha',
+        categoryId: categories[5]._id,
+        origin: 'Uji, Japan',
+        fermentation: 'none',
+        season: 'spring',
+        tastingNotes: ['Umami', 'Sweet', 'Vegetal'],
+        brewingGuide: {
+          temperature: '70°C',
+          steepTime: 'Whisk 15-20 sec',
+          amount: '2g per 70ml',
+          instructions: 'Sift matcha into a warm bowl. Add water at 70°C. Whisk vigorously in a W-motion until frothy.'
+        },
+        weight: '30g',
+        caffeine: 'high',
         inStock: true,
         stockQuantity: 20,
         featured: true,
         bestSeller: true,
         isNew: false,
-        rating: 5.0,
-        reviewCount: 12,
-        categoryId: categoryMap['White Tea']
+        rating: 4.9,
+        reviewCount: 203,
+        gradientColor: 'from-green-600 to-green-400',
+        isActive: true
       },
       {
-        name: 'Royal Earl Grey',
-        slug: 'royal-earl-grey',
-        description: 'Our Royal Earl Grey elevates the beloved classic to new heights of sophistication with a superlative base of Assam and Ceylon teas.',
-        shortDescription: 'A refined blend of Assam and Ceylon with Calabrian bergamot — the classic Earl Grey, elevated.',
-        price: 55,
-        comparePrice: 68,
-        images: ['/images/products/earl-grey-1.jpg', '/images/products/earl-grey-2.jpg'],
+        name: 'Assam Golden Tips',
+        slug: 'assam-golden-tips',
+        description: 'A premium second-flush Assam tea distinguished by its abundance of golden tips. This full-bodied tea delivers bold malty flavors with a rich, honeyed sweetness that lingers on the palate.',
+        shortDescription: 'Second flush Assam with golden tips',
+        price: 1999,
+        comparePrice: 2499,
+        images: [],
         category: 'Black Tea',
-        origin: 'Assam & Ceylon',
+        categoryId: categories[0]._id,
+        origin: 'Assam, India',
         fermentation: 'full',
-        season: 'year-round',
-        tastingNotes: ['Bergamot citrus', 'Malty Assam', 'Bright Ceylon', 'Floral'],
+        season: 'summer',
+        tastingNotes: ['Malty', 'Honey', 'Rich'],
         brewingGuide: {
-          temperature: '95-100°C',
-          steepTime: '3-4 minutes',
+          temperature: '95°C',
+          steepTime: '3-4 min',
           amount: '2.5g per 200ml',
-          instructions: 'Use freshly boiled water cooled slightly to 95°C.'
+          instructions: 'Use freshly boiled water. Steep for 3-4 minutes. Excellent with a splash of milk.'
         },
-        weight: '100g',
+        weight: '125g',
         caffeine: 'high',
         inStock: true,
-        stockQuantity: 60,
+        stockQuantity: 40,
         featured: false,
         bestSeller: true,
         isNew: false,
         rating: 4.6,
-        reviewCount: 42,
-        categoryId: categoryMap['Black Tea']
+        reviewCount: 178,
+        gradientColor: 'from-amber-900 to-amber-700',
+        isActive: true
       },
       {
-        name: 'Jasmine Pearl Imperial',
-        slug: 'jasmine-pearl-imperial',
-        description: 'Our Jasmine Pearl Imperial is a tea of extraordinary artistry and patience. Each pearl is hand-rolled from the finest spring-picked green tea leaves.',
-        shortDescription: 'Hand-rolled jasmine pearls, layered with fresh blossoms through six scentings for perfect floral harmony.',
-        price: 78,
-        comparePrice: 95,
-        images: ['/images/products/jasmine-pearl-1.jpg', '/images/products/jasmine-pearl-2.jpg'],
+        name: 'Sencha Supreme',
+        slug: 'sencha-supreme',
+        description: 'Japan\'s most beloved everyday tea elevated to an art form. Our Sencha Supreme offers a perfect balance of sweetness, astringency, and umami that captures the essence of Japanese tea culture in every cup.',
+        shortDescription: 'Premium Japanese steamed green tea',
+        price: 1899,
+        comparePrice: 2299,
+        images: [],
         category: 'Green Tea',
-        origin: 'Fujian, China',
+        categoryId: categories[1]._id,
+        origin: 'Shizuoka, Japan',
         fermentation: 'none',
         season: 'spring',
-        tastingNotes: ['Jasmine blossom', 'Honey', 'Fresh grass', 'Lily'],
+        tastingNotes: ['Grassy', 'Umami', 'Sweet'],
         brewingGuide: {
-          temperature: '80-85°C',
-          steepTime: '2-3 minutes',
-          amount: '3-4 pearls per 200ml',
-          instructions: 'Place 8-10 pearls in a glass teapot and watch them slowly unfurl.'
-        },
-        weight: '80g',
-        caffeine: 'medium',
-        inStock: true,
-        stockQuantity: 30,
-        featured: true,
-        bestSeller: false,
-        isNew: false,
-        rating: 4.7,
-        reviewCount: 28,
-        categoryId: categoryMap['Green Tea']
-      },
-      {
-        name: 'Aged Pu-erh 2005',
-        slug: 'aged-puerh-2005',
-        description: 'Aged for nearly two decades in the traditional manner, our 2005 Pu-erh is a testament to the transformative power of time.',
-        shortDescription: 'Nearly two decades of careful aging yield profound depth — dark chocolate, leather, and ancient forest notes.',
-        price: 125,
-        comparePrice: 155,
-        images: ['/images/products/puerh-1.jpg', '/images/products/puerh-2.jpg'],
-        category: 'Pu-erh Tea',
-        origin: 'Yunnan, China',
-        fermentation: 'post-fermented',
-        season: 'spring',
-        tastingNotes: ['Dark chocolate', 'Leather', 'Dried plum', 'Forest floor'],
-        brewingGuide: {
-          temperature: '95-100°C',
-          steepTime: '30 seconds - 1 minute',
-          amount: '7g per 150ml',
-          instructions: 'Rinse the tea first with boiling water and discard.'
+          temperature: '75°C',
+          steepTime: '1-2 min',
+          amount: '3g per 200ml',
+          instructions: 'Use water at 75°C. Steep briefly for 1-2 minutes. Re-steep multiple times, reducing steep time.'
         },
         weight: '100g',
         caffeine: 'medium',
         inStock: true,
-        stockQuantity: 15,
-        featured: true,
-        bestSeller: false,
-        isNew: false,
-        rating: 4.8,
-        reviewCount: 9,
-        categoryId: categoryMap['Pu-erh Tea']
-      },
-      {
-        name: 'Kyoto Matcha Ceremonial',
-        slug: 'kyoto-matcha-ceremonial',
-        description: 'Our Kyoto Matcha Ceremonial is the highest grade of matcha available, crafted from shade-grown tencha leaves harvested in the legendary Uji district of Kyoto.',
-        shortDescription: 'Stone-ground shade-grown tencha from Uji — the highest ceremonial grade with intense umami and creamy sweetness.',
-        price: 89,
-        comparePrice: 110,
-        images: ['/images/products/matcha-1.jpg', '/images/products/matcha-2.jpg'],
-        category: 'Matcha',
-        origin: 'Uji, Kyoto, Japan',
-        fermentation: 'none',
-        season: 'spring',
-        tastingNotes: ['Umami', 'Sweet cream', 'Seaweed', 'Fresh grass'],
-        brewingGuide: {
-          temperature: '70-75°C',
-          steepTime: 'Whisk for 15-20 seconds',
-          amount: '2g per 70ml',
-          instructions: 'Sift the matcha into a warm chawan. Whisk vigorously in a W-motion.'
-        },
-        weight: '30g',
-        caffeine: 'high',
-        inStock: true,
         stockQuantity: 35,
-        featured: true,
+        featured: false,
         bestSeller: true,
         isNew: false,
-        rating: 4.9,
-        reviewCount: 33,
-        categoryId: categoryMap['Matcha']
+        rating: 4.5,
+        reviewCount: 245,
+        gradientColor: 'from-green-700 to-green-500',
+        isActive: true
       },
       {
-        name: 'Himalayan White Peony',
-        slug: 'himalayan-white-peony',
-        description: 'A remarkable white tea from the foothills of the Himalayas, our White Peony is produced in Darjeeling using techniques inspired by Fujian\'s Bai Mu Dan tradition.',
-        shortDescription: 'A unique Indian white tea with full-bodied white grape and peony notes from the Himalayan foothills.',
-        price: 92,
-        comparePrice: 112,
-        images: ['/images/products/white-peony-1.jpg', '/images/products/white-peony-2.jpg'],
-        category: 'White Tea',
-        origin: 'Darjeeling, India',
-        fermentation: 'none',
-        season: 'spring',
-        tastingNotes: ['White grape', 'Peony', 'Mountain air', 'Raw honey'],
+        name: 'Oriental Beauty',
+        slug: 'oriental-beauty',
+        description: 'Also known as Dong Fang Mei Ren, this rare oolong is bitten by leafhoppers before harvest, triggering a natural oxidation that creates extraordinary honey and muscatel flavors. A true gift from nature.',
+        shortDescription: 'Bug-bitten oolong with natural honey sweetness',
+        price: 4299,
+        comparePrice: 5199,
+        images: [],
+        category: 'Oolong Tea',
+        categoryId: categories[2]._id,
+        origin: 'Hsinchu, Taiwan',
+        fermentation: 'medium',
+        season: 'summer',
+        tastingNotes: ['Honey', 'Muscatel', 'Peach'],
         brewingGuide: {
-          temperature: '75-80°C',
-          steepTime: '3-4 minutes',
-          amount: '3g per 200ml',
-          instructions: 'Use slightly warmer water than for Silver Needle.'
+          temperature: '90°C',
+          steepTime: '2-3 min',
+          amount: '4g per 200ml',
+          instructions: 'Use water at 90°C. Steep for 2-3 minutes. Can be re-steeped 4-5 times.'
         },
         weight: '75g',
         caffeine: 'low',
         inStock: true,
-        stockQuantity: 22,
-        featured: false,
+        stockQuantity: 12,
+        featured: true,
         bestSeller: false,
         isNew: true,
-        rating: 4.6,
-        reviewCount: 7,
-        categoryId: categoryMap['White Tea']
+        rating: 4.8,
+        reviewCount: 34,
+        gradientColor: 'from-orange-600 to-amber-400',
+        isActive: true
       },
       {
-        name: 'Ceylon OP Supreme',
-        slug: 'ceylon-op-supreme',
-        description: 'From the sun-drenched slopes of Sri Lanka\'s finest tea gardens, our Ceylon Orange Pekoe Supreme is a celebration of what makes Ceylon tea legendary.',
-        shortDescription: 'Bright coppery liquor from Sri Lanka\'s finest gardens — crisp citrus character with toasted hazelnut notes.',
-        price: 62,
-        comparePrice: 75,
-        images: ['/images/products/ceylon-1.jpg', '/images/products/ceylon-2.jpg'],
-        category: 'Black Tea',
-        origin: 'Sri Lanka',
-        fermentation: 'full',
-        season: 'year-round',
-        tastingNotes: ['Citrus', 'Toasted hazelnut', 'Cinnamon spice', 'Caramel'],
+        name: 'White Peony',
+        slug: 'white-peony',
+        description: 'Bai Mudan, or White Peony, is a graceful white tea comprising both buds and young leaves. Its gentle floral aroma and refreshing sweetness make it an ideal introduction to the world of white teas.',
+        shortDescription: 'Gentle floral white tea with buds and leaves',
+        price: 2299,
+        comparePrice: 2799,
+        images: [],
+        category: 'White Tea',
+        categoryId: categories[3]._id,
+        origin: 'Fujian, China',
+        fermentation: 'none',
+        season: 'spring',
+        tastingNotes: ['Floral', 'Sweet', 'Fresh'],
         brewingGuide: {
-          temperature: '95-100°C',
-          steepTime: '3-5 minutes',
-          amount: '2.5g per 200ml',
-          instructions: 'Use freshly boiled water.'
+          temperature: '80°C',
+          steepTime: '3-4 min',
+          amount: '3g per 200ml',
+          instructions: 'Use water at 80°C. Steep for 3-4 minutes. Can be re-steeped 2-3 times.'
+        },
+        weight: '100g',
+        caffeine: 'low',
+        inStock: true,
+        stockQuantity: 28,
+        featured: false,
+        bestSeller: false,
+        isNew: false,
+        rating: 4.4,
+        reviewCount: 92,
+        gradientColor: 'from-pink-100 to-white',
+        isActive: true
+      },
+      {
+        name: 'Raw Pu-erh Cake 2018',
+        slug: 'raw-pu-erh-cake-2018',
+        description: 'A young sheng pu-erh pressed into a traditional cake, showing vibrant energy and a lingering sweet aftertaste. This tea has excellent aging potential and will develop greater complexity over the decades.',
+        shortDescription: 'Young raw pu-erh with aging potential',
+        price: 3499,
+        comparePrice: 3999,
+        images: [],
+        category: 'Pu-erh Tea',
+        categoryId: categories[4]._id,
+        origin: 'Yunnan, China',
+        fermentation: 'post-fermented',
+        season: 'spring',
+        tastingNotes: ['Astringent', 'Sweet Aftertaste', 'Floral'],
+        brewingGuide: {
+          temperature: '95°C',
+          steepTime: '3-5 min',
+          amount: '7g per 200ml',
+          instructions: 'Use near-boiling water. Rinse the leaves once. Steep for 3-5 minutes, re-steep 6-8 times.'
+        },
+        weight: '357g',
+        caffeine: 'medium',
+        inStock: true,
+        stockQuantity: 8,
+        featured: false,
+        bestSeller: false,
+        isNew: false,
+        rating: 4.6,
+        reviewCount: 28,
+        gradientColor: 'from-green-800 to-green-600',
+        isActive: true
+      },
+      {
+        name: 'Latte Grade Matcha',
+        slug: 'latte-grade-matcha',
+        description: 'Specially crafted for culinary use, our latte grade matcha delivers bold, vibrant flavor that shines through milk and sweeteners. Perfect for matcha lattes, smoothies, and creative desserts.',
+        shortDescription: 'Culinary matcha perfect for lattes and desserts',
+        price: 1499,
+        comparePrice: 1899,
+        images: [],
+        category: 'Matcha',
+        categoryId: categories[5]._id,
+        origin: 'Kyoto, Japan',
+        fermentation: 'none',
+        season: 'year-round',
+        tastingNotes: ['Bold', 'Vegetal', 'Slightly Astringent'],
+        brewingGuide: {
+          temperature: '80°C',
+          steepTime: 'Whisk 10-15 sec',
+          amount: '3g per 150ml milk',
+          instructions: 'Sift matcha into a cup. Add a splash of warm water and whisk. Top with steamed milk of your choice.'
         },
         weight: '100g',
         caffeine: 'high',
         inStock: true,
-        stockQuantity: 55,
+        stockQuantity: 45,
         featured: false,
-        bestSeller: false,
+        bestSeller: true,
         isNew: false,
-        rating: 4.5,
-        reviewCount: 19,
-        categoryId: categoryMap['Black Tea']
+        rating: 4.3,
+        reviewCount: 312,
+        gradientColor: 'from-green-500 to-green-300',
+        isActive: true
+      }
+    ]);
+
+    // ============ SEED COLLECTIONS ============
+    const collections = await Collection.insertMany([
+      {
+        name: 'By Origin',
+        slug: 'by-origin',
+        description: 'Explore teas from the world\'s most renowned growing regions, from the misty Himalayan slopes of Darjeeling to the ancient tea gardens of Fujian. Each origin imparts unique characteristics shaped by terroir, altitude, and centuries of cultivation expertise.',
+        gradientColor: 'from-emerald-800 to-emerald-600',
+        image: '',
+        itemCount: 8,
+        featured: true,
+        sortOrder: 1,
+        isActive: true
       },
       {
-        name: 'Oriental Beauty Oolong',
-        slug: 'oriental-beauty-oolong',
-        description: 'Oriental Beauty is one of the world\'s most extraordinary teas — a creation made possible by the tiny green leafhopper insect.',
-        shortDescription: 'A legendary bug-bitten oolong from Hsinchu — luscious honey, ripe peach, and muscatel in a syrupy amber cup.',
-        price: 105,
-        comparePrice: 128,
-        images: ['/images/products/oriental-beauty-1.jpg', '/images/products/oriental-beauty-2.jpg'],
-        category: 'Oolong Tea',
-        origin: 'Hsinchu, Taiwan',
-        fermentation: 'medium',
-        season: 'summer',
-        tastingNotes: ['Honey', 'Ripe peach', 'Muscatel grape', 'Amber sugar'],
-        brewingGuide: {
-          temperature: '85-90°C',
-          steepTime: '1-2 minutes',
-          amount: '5g per 150ml',
-          instructions: 'Best prepared Gongfu style.'
-        },
-        weight: '50g',
-        caffeine: 'medium',
-        inStock: true,
-        stockQuantity: 18,
+        name: 'By Fermentation',
+        slug: 'by-fermentation',
+        description: 'Discover teas categorized by their level of oxidation, from the delicate freshness of unfermented green teas to the deep complexity of fully oxidized black teas. Understanding fermentation unlocks a deeper appreciation of tea\'s incredible diversity.',
+        gradientColor: 'from-amber-800 to-amber-600',
+        image: '',
+        itemCount: 6,
         featured: true,
-        bestSeller: false,
-        isNew: false,
-        rating: 4.8,
-        reviewCount: 11,
-        categoryId: categoryMap['Oolong Tea']
+        sortOrder: 2,
+        isActive: true
+      },
+      {
+        name: 'By Season',
+        slug: 'by-season',
+        description: 'Just as wine varies by vintage, tea is profoundly influenced by the season of harvest. Spring teas offer delicate vibrancy, summer brings robust intensity, and autumn yields nuanced complexity that rewards the patient connoisseur.',
+        gradientColor: 'from-teal-800 to-teal-600',
+        image: '',
+        itemCount: 4,
+        featured: true,
+        sortOrder: 3,
+        isActive: true
       }
-    ];
+    ]);
 
-    const createdProducts = await Product.insertMany(products);
+    // ============ SEED TESTIMONIALS ============
+    const testimonials = await Testimonial.insertMany([
+      {
+        name: 'Priya Sharma',
+        location: 'Mumbai, India',
+        quote: 'The Royal Darjeeling from King\'s Tea is unlike anything I\'ve ever tasted. Each sip transports me to the misty hills of the Himalayas. This is truly the finest tea I\'ve found outside of the estates themselves.',
+        rating: 5,
+        avatar: '',
+        featured: true,
+        sortOrder: 1,
+        isActive: true
+      },
+      {
+        name: 'James Chen',
+        location: 'San Francisco, USA',
+        quote: 'As a lifelong tea enthusiast, I was skeptical about ordering online. But the Ceremonial Matcha exceeded all expectations — vibrant color, smooth umami, and impeccable freshness. King\'s Tea has earned a customer for life.',
+        rating: 5,
+        avatar: '',
+        featured: true,
+        sortOrder: 2,
+        isActive: true
+      },
+      {
+        name: 'Amara Okafor',
+        location: 'London, UK',
+        quote: 'The subscription service is brilliant — every month brings a new discovery. Last month\'s Iron Goddess Oolong was a revelation. The quality and presentation make this a truly royal experience.',
+        rating: 5,
+        avatar: '',
+        featured: true,
+        sortOrder: 3,
+        isActive: true
+      },
+      {
+        name: 'Yuki Tanaka',
+        location: 'Tokyo, Japan',
+        quote: 'Even in Japan, where matcha is part of daily life, King\'s Tea ceremonial grade stands out. The depth of flavor and the care in sourcing is evident in every bowl. A beautiful tribute to the art of tea.',
+        rating: 4,
+        avatar: '',
+        featured: false,
+        sortOrder: 4,
+        isActive: true
+      },
+      {
+        name: 'Sofia Rossi',
+        location: 'Milan, Italy',
+        quote: 'I gifted the Silver Needle to my mother and she was moved to tears by its delicacy. King\'s Tea understands that tea is not just a beverage — it\'s an experience, a memory, a moment of peace.',
+        rating: 5,
+        avatar: '',
+        featured: true,
+        sortOrder: 5,
+        isActive: true
+      },
+      {
+        name: 'Raj Patel',
+        location: 'Ahmedabad, India',
+        quote: 'The Aged Pu-erh is extraordinary — complex, earthy, and endlessly fascinating. Each steeping reveals new layers of flavor. This is tea for those who truly appreciate the craft and patience behind great tea-making.',
+        rating: 5,
+        avatar: '',
+        featured: false,
+        sortOrder: 6,
+        isActive: true
+      }
+    ]);
 
-    // FIX: Pass plain password — let the UserModel pre-save hook hash it
-    const adminExists = await User.findOne({ role: 'super_admin' });
-    if (!adminExists) {
-      await User.create({
-        email: 'admin@kingstea.com',
-        name: 'Super Admin',
-        password: 'admin123',
-        role: 'super_admin',
-        emailVerified: true
-      });
-    }
+    // ============ SEED BLOG POSTS ============
+    const blogPosts = await BlogPost.insertMany([
+      {
+        title: 'The Art of Gongfu Cha: A Beginner\'s Journey',
+        slug: 'art-of-gongfu-cha-beginners-journey',
+        excerpt: 'Discover the ancient Chinese tea ceremony that transforms simple tea drinking into a meditative practice. Learn the fundamental techniques, essential tools, and philosophy behind Gongfu Cha that has been perfected over centuries of tradition.',
+        content: 'Gongfu Cha, which translates to "tea with skill," is more than just a method of preparing tea — it is a philosophy, a meditation, and an art form that has been practiced for centuries in China. This ancient tradition emphasizes the harmonious relationship between the tea master, the tea, and the guests, creating an experience that engages all the senses. The practice begins with selecting the right teaware, typically a Yixing clay teapot or a gaiwan, and understanding how each piece contributes to the overall experience. The water temperature, the ratio of tea to water, and the timing of each infusion are all critical elements that require careful attention and practice to master.',
+        category: 'Tea Culture',
+        tags: ['gongfu', 'ceremony', 'beginner'],
+        author: 'King\'s Tea',
+        date: new Date('2025-01-15'),
+        readTime: '8 min read',
+        gradientColor: 'from-amber-700 to-amber-500',
+        image: '',
+        featured: true,
+        isActive: true
+      },
+      {
+        title: 'Understanding Tea Terroir: Why Origin Matters',
+        slug: 'understanding-tea-terroir-why-origin-matters',
+        excerpt: 'Just as wine reflects its terroir, tea is profoundly shaped by the soil, altitude, and climate of its growing region. Explore how Darjeeling\'s misty heights create flavors entirely different from the bold plains of Assam.',
+        content: 'The concept of terroir — the unique combination of soil, climate, altitude, and geography that gives a product its distinctive character — is as crucial to tea as it is to wine. The same tea plant (Camellia sinensis) grown in different regions will produce dramatically different flavors, aromas, and characteristics. Darjeeling tea, grown at elevations between 600 and 2,000 meters in the Indian Himalayas, develops its famous muscatel character due to the cool mountain air, frequent mist, and well-drained soil. In contrast, Assam tea, grown near sea level in the humid Brahmaputra valley, produces the bold, malty flavors that make it the backbone of breakfast blends worldwide.',
+        category: 'Education',
+        tags: ['terroir', 'origin', 'darjeeling', 'assam'],
+        author: 'King\'s Tea',
+        date: new Date('2025-01-10'),
+        readTime: '6 min read',
+        gradientColor: 'from-emerald-700 to-emerald-500',
+        image: '',
+        featured: true,
+        isActive: true
+      },
+      {
+        title: 'The Health Benefits of Matcha: Science Meets Tradition',
+        slug: 'health-benefits-of-matcha-science-meets-tradition',
+        excerpt: 'Modern science is confirming what Zen monks have known for centuries — matcha offers remarkable health benefits. From potent antioxidants to sustained energy, discover why this vibrant green tea powder is a nutritional powerhouse.',
+        content: 'Matcha has been a cornerstone of Japanese tea culture for over 800 years, originally used by Zen Buddhist monks to maintain alertness during long meditation sessions. Today, modern scientific research is validating what these monks experienced intuitively. Matcha is uniquely nutritious because, unlike other teas where the leaves are steeped and discarded, with matcha you consume the entire leaf in powdered form. This means you receive the full spectrum of the tea\'s nutritional benefits, including an exceptionally high concentration of catechins — particularly EGCG (epigallocatechin gallate), which is one of the most powerful antioxidants found in nature.',
+        category: 'Health & Wellness',
+        tags: ['matcha', 'health', 'antioxidants', 'wellness'],
+        author: 'King\'s Tea',
+        date: new Date('2025-01-05'),
+        readTime: '7 min read',
+        gradientColor: 'from-green-700 to-green-500',
+        image: '',
+        featured: true,
+        isActive: true
+      },
+      {
+        title: 'Pairing Tea with Food: A Royal Guide',
+        slug: 'pairing-tea-with-food-royal-guide',
+        excerpt: 'Elevate your dining experience by learning the art of tea and food pairing. From delicate white teas with fresh seafood to robust pu-erh with rich desserts, discover combinations that transform ordinary meals into royal feasts.',
+        content: 'The art of pairing tea with food is a nuanced practice that can elevate both the tea and the meal to extraordinary heights. Just as sommeliers pair wines with cuisine, tea pairing considers the weight, flavor intensity, and aromatic qualities of both the tea and the food. Delicate white teas like Silver Needle pair beautifully with light seafood, salads, and mild cheeses, as their subtle sweetness and floral notes complement without overwhelming. Light oolongs such as Tieguanyin find harmony with roasted poultry, grilled vegetables, and lightly spiced dishes, the tea\'s orchid aromatics bridging the gap between savory and sweet.',
+        category: 'Lifestyle',
+        tags: ['pairing', 'food', 'dining', 'entertaining'],
+        author: 'King\'s Tea',
+        date: new Date('2024-12-28'),
+        readTime: '5 min read',
+        gradientColor: 'from-red-800 to-red-600',
+        image: '',
+        featured: false,
+        isActive: true
+      }
+    ]);
 
-    return successResponse(res, {
-      categories: createdCategories.length,
-      products: createdProducts.length,
-      adminCreated: !adminExists
-    }, 'Database seeded successfully', 201);
-  } catch (error) {
-    return errorResponse(res, error.message || 'Seeding failed', 500);
-  }
-});
+    // ============ SEED SUBSCRIPTION PLANS (AFTER admin is created) ============
+    const subscriptionPlans = await Subscription.insertMany([
+      {
+        name: 'Royal Monthly',
+        slug: 'royal-monthly',
+        price: 1999,
+        comparePrice: 2499,
+        period: 'month',
+        description: 'Discover a new premium tea every month, hand-selected by our tea masters. Perfect for those beginning their journey into the world of fine teas and wanting to explore different varieties and origins.',
+        features: [
+          '1 premium tea selection (50g)',
+          'Tasting notes card',
+          'Brewing guide included',
+          'Free shipping',
+          '10% off additional purchases'
+        ],
+        popular: false,
+        gradientColor: 'from-amber-700 to-amber-500',
+        isActive: true,
+        sortOrder: 1,
+        userId: admin._id,
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      },
+      {
+        name: 'Imperial Quarterly',
+        slug: 'imperial-quarterly',
+        price: 5499,
+        comparePrice: 7497,
+        period: 'quarter',
+        description: 'Our most popular plan delivers three exceptional teas each quarter, including rare and limited-edition selections not available elsewhere. Experience the full spectrum of flavors from the world\'s finest tea gardens.',
+        features: [
+          '3 premium tea selections (75g each)',
+          'Detailed tasting notes & origin story',
+          'Brewing accessories included',
+          'Free express shipping',
+          '15% off additional purchases',
+          'Exclusive access to limited editions'
+        ],
+        popular: true,
+        gradientColor: 'from-emerald-700 to-emerald-500',
+        isActive: true,
+        sortOrder: 2,
+        userId: admin._id,
+        nextBillingDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+      },
+      {
+        name: 'Sovereign Annual',
+        slug: 'sovereign-annual',
+        price: 19999,
+        comparePrice: 29988,
+        period: 'year',
+        description: 'The ultimate tea experience for the true connoisseur. Receive twelve carefully curated teas throughout the year, including our rarest and most exclusive offerings. This is the pinnacle of tea subscription luxury.',
+        features: [
+          '12 premium tea selections (100g each)',
+          'Collector\'s tasting journal',
+          'Premium brewing accessories',
+          'Free express shipping worldwide',
+          '20% off additional purchases',
+          'Exclusive access to limited editions',
+          'Personal tea consultation',
+          'Invitation to virtual tea events'
+        ],
+        popular: false,
+        gradientColor: 'from-red-800 to-red-600',
+        isActive: true,
+        sortOrder: 3,
+        userId: admin._id,
+        nextBillingDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+      }
+    ]);
 
-app.use((req, res) => {
-  return errorResponse(res, 'Route not found', 404);
-});
-
-app.use((err, req, res, next) => {
-  console.error('Server Error:', err.message);
-  return errorResponse(res, err.message || 'Internal Server Error', err.statusCode || 500);
-});
-
-const PORT = process.env.PORT || 5000;
-
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`KING'S TEA Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    res.json({
+      success: true,
+      message: 'Database seeded successfully!',
+      data: {
+        categories: categories.length,
+        products: products.length,
+        collections: collections.length,
+        testimonials: testimonials.length,
+        blogPosts: blogPosts.length,
+        subscriptionPlans: subscriptionPlans.length,
+        admin: admin.email
+      }
     });
   } catch (error) {
-    console.error('Failed to start server:', error.message);
-    process.exit(1);
+    console.error('Seed error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error seeding database',
+      error: error.message
+    });
   }
-};
+});
 
-if (require.main === module) {
-  startServer();
-}
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'King\'s Tea API is running' });
+});
 
-module.exports = app;
+// Connect to MongoDB and start server
+const PORT = process.env.PORT || 5000;
+
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI)
+  .then(() => {
+    console.log('✅ Connected to MongoDB Atlas');
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`📍 API: http://localhost:${PORT}/api`);
+      console.log(`🌱 Seed: http://localhost:${PORT}/api/seed`);
+    });
+  })
+  .catch((error) => {
+    console.error('❌ MongoDB connection error:', error.message);
+    process.exit(1);
+  });

@@ -1,31 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
-const { listSubscriptions, createSubscription, getSubscription, updateSubscription, cancelSubscription } = require('../controllers/SubscriptionController');
 const { protect } = require('../middleware/AuthenticationMiddleware');
-const { authorize } = require('../middleware/AuthorizationMiddleware');
+const {
+  getSubscriptionPlans,
+  getSubscriptionPlanById,
+  listSubscriptions,
+  createSubscription,
+  getSubscription,
+  updateSubscription,
+  cancelSubscription
+} = require('../controllers/SubscriptionController');
 
+// ============================================================
+// PUBLIC routes — anyone can browse subscription plans
+// ============================================================
+router.get('/plans', getSubscriptionPlans);
+router.get('/plans/:id', getSubscriptionPlanById);
+
+// ============================================================
+// PROTECTED routes — require authentication
+// ============================================================
 router.get('/', protect, listSubscriptions);
-
-router.post(
-  '/',
-  protect,
-  [
-    body('plan').isIn(['monthly', 'quarterly', 'yearly']).withMessage('Plan must be monthly, quarterly, or yearly'),
-    body('price').isNumeric().withMessage('Price must be a number')
-  ],
-  createSubscription
-);
-
 router.get('/:id', protect, getSubscription);
-
-router.patch(
-  '/:id',
-  protect,
-  authorize('super_admin', 'admin', 'manager'),
-  updateSubscription
-);
-
-router.delete('/:id', protect, cancelSubscription);
+router.post('/', protect, createSubscription);
+router.put('/:id', protect, updateSubscription);
+router.put('/:id/cancel', protect, cancelSubscription);
 
 module.exports = router;

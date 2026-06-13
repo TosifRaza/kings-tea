@@ -16,6 +16,39 @@ const getNextBillingDate = (plan) => {
   }
 };
 
+// ============================================================
+// PUBLIC — Get all subscription plans (no auth required)
+// Used by Frontend subscription page to display plans
+// ============================================================
+const getSubscriptionPlans = async (req, res) => {
+  try {
+    const plans = await Subscription.find({ isActive: { $ne: false } })
+      .sort({ sortOrder: 1 });
+
+    return successResponse(res, { plans }, 'Subscription plans fetched successfully');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Failed to fetch subscription plans', 500);
+  }
+};
+
+// ============================================================
+// PUBLIC — Get single subscription plan by ID (no auth required)
+// ============================================================
+const getSubscriptionPlanById = async (req, res) => {
+  try {
+    const plan = await Subscription.findById(req.params.id);
+    if (!plan) {
+      return errorResponse(res, 'Subscription plan not found', 404);
+    }
+    return successResponse(res, { plan }, 'Subscription plan fetched successfully');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Failed to fetch subscription plan', 500);
+  }
+};
+
+// ============================================================
+// PROTECTED — List user subscriptions (requires auth)
+// ============================================================
 const listSubscriptions = async (req, res) => {
   try {
     const { page = 1, limit = 10, status } = req.query;
@@ -155,6 +188,8 @@ const cancelSubscription = async (req, res) => {
 };
 
 module.exports = {
+  getSubscriptionPlans,
+  getSubscriptionPlanById,
   listSubscriptions,
   createSubscription,
   getSubscription,

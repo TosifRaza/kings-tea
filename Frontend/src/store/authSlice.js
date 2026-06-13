@@ -13,7 +13,6 @@ export const register = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
-      // return response.data;
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -28,7 +27,6 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await authAPI.login(credentials);
-      // return response.data;
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -54,7 +52,6 @@ export const getMe = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authAPI.getMe();
-      // return response.data;
       return response.data.data;
     } catch (error) {
       return rejectWithValue('Failed to get user');
@@ -75,6 +72,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // REGISTER
       .addCase(register.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -84,11 +82,20 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.error = null;
+        // CRITICAL: Save token to localStorage so the api interceptor can use it
+        if (action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
+        if (action.payload.user) {
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+
+      // LOGIN
       .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -98,23 +105,39 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.error = null;
+        // CRITICAL: Save token to localStorage so the api interceptor can use it
+        if (action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
+        if (action.payload.user) {
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+
+      // LOGOUT
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
         state.isLoading = false;
         state.error = null;
+        // Clear token from localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       })
+
+      // GET ME (check auth status on page load)
       .addCase(getMe.fulfilled, (state, action) => {
         state.isAuthenticated = true;
-        state.user = action.payload.user;
+        state.user = action.payload.user || action.payload;
         state.isLoading = false;
       })
       .addCase(getMe.rejected, (state) => {
+        // User is simply not authenticated — do NOT redirect
+        // Just clear auth state silently
         state.isAuthenticated = false;
         state.user = null;
         state.isLoading = false;

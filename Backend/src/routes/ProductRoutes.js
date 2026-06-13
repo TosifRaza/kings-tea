@@ -5,6 +5,7 @@ const path = require('path');
 const {
   getProducts,
   getProductById,
+  getProductBySlug,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -42,11 +43,18 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-// Public routes
+// ============================================================
+// PUBLIC routes
+// ============================================================
+// ⚠️ /slug/:slug MUST come before /:id — otherwise Express
+// treats "silver-needle" as an :id parameter
 router.get('/', getProducts);
+router.get('/slug/:slug', getProductBySlug);
 router.get('/:id', getProductById);
 
-// Protected admin routes
+// ============================================================
+// PROTECTED admin routes
+// ============================================================
 router.post(
   '/',
   protect,

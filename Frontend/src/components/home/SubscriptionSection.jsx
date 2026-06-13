@@ -1,156 +1,152 @@
-import { motion, useInView } from 'framer-motion';
-import { useRef, useState } from 'react';
-import { Check, Crown } from 'lucide-react';
-import { subscriptionPlans } from '../../assets/data';
+// ============================================================
+// Frontend/src/components/home/SubscriptionSection.jsx
+// UPDATED: Replaced static import with Redux API fetch
+// ============================================================
+// INSTRUCTIONS: Replace your existing SubscriptionSection.jsx with this file.
+// Changes: Uses Redux state (state.subscriptions) instead of static data.js
+// ============================================================
 
-export default function SubscriptionSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-  const [selectedPlan, setSelectedPlan] = useState('quarterly');
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchSubscriptionPlans } from '../../store/subscriptionSlice';
+import { Link } from 'react-router-dom';
+
+const SubscriptionSection = () => {
+  const dispatch = useDispatch();
+  const { plans, loading, error } = useSelector((state) => state.subscriptions);
+
+  useEffect(() => {
+    dispatch(fetchSubscriptionPlans());
+  }, [dispatch]);
+
+  const plansList = plans || [];
+
+  if (loading) {
+    return (
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
+            <p className="text-[#3A281C]/70 mt-3">Loading subscription plans...</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-96 rounded-2xl bg-[#1F4D3A]/10 animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || plansList.length === 0) {
+    return null;
+  }
 
   return (
-    <section ref={ref} className="py-20 lg:py-28 bg-tea-green relative overflow-hidden">
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(201,168,106,0.3) 1px, transparent 0)`,
-            backgroundSize: '40px 40px',
-          }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">
-            Exclusive Membership
-          </span>
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-warm-ivory mt-3">
-            KING&apos;S TEA Society
-          </h2>
-          <p className="text-warm-ivory/60 font-[family-name:var(--font-inter)] text-sm mt-3 max-w-xl mx-auto">
-            Join our exclusive tea subscription and receive curated selections of
-            the world&apos;s finest teas, delivered to your door with tasting
-            notes and brewing guides.
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
+          <p className="text-[#3A281C]/70 mt-3 max-w-2xl mx-auto">
+            Join our exclusive tea club and receive hand-selected premium teas delivered to your door. Each box is curated by our tea masters for a truly royal experience.
           </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {subscriptionPlans.map((plan, i) => (
-            <motion.div
-              key={plan.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
-              className={`relative rounded-sm overflow-hidden ${
-                plan.popular
-                  ? 'bg-warm-ivory ring-2 ring-imperial-gold md:-mt-4 md:mb-[-16px]'
-                  : 'bg-warm-ivory/10 backdrop-blur-sm border border-warm-ivory/10'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute top-0 left-0 right-0 bg-imperial-gold text-deep-walnut text-center text-[10px] font-bold uppercase tracking-widest py-1.5 flex items-center justify-center gap-1">
-                  <Crown className="h-3 w-3" />
-                  Most Popular
-                </div>
-              )}
-
-              <div className={`p-6 ${plan.popular ? 'pt-10' : ''}`}>
-                <h3
-                  className={`font-[family-name:var(--font-playfair)] font-semibold text-lg mb-1 ${
-                    plan.popular ? 'text-deep-walnut' : 'text-warm-ivory'
-                  }`}
-                >
-                  {plan.name}
-                </h3>
-                <p
-                  className={`text-xs mb-4 font-[family-name:var(--font-inter)] ${
-                    plan.popular ? 'text-deep-walnut/60' : 'text-warm-ivory/50'
-                  }`}
-                >
-                  {plan.description}
-                </p>
-
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span
-                    className={`font-[family-name:var(--font-playfair)] text-3xl font-bold ${
-                      plan.popular ? 'text-tea-green' : 'text-imperial-gold'
-                    }`}
-                  >
-                    ${plan.price}
-                  </span>
-                  <span
-                    className={`text-xs font-[family-name:var(--font-inter)] ${
-                      plan.popular ? 'text-deep-walnut/50' : 'text-warm-ivory/50'
-                    }`}
-                  >
-                    /{plan.period}
-                  </span>
-                </div>
-
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <Check
-                        className={`h-4 w-4 flex-shrink-0 mt-0.5 ${
-                          plan.popular ? 'text-tea-green' : 'text-imperial-gold'
-                        }`}
-                      />
-                      <span
-                        className={`text-xs font-[family-name:var(--font-inter)] leading-relaxed ${
-                          plan.popular ? 'text-deep-walnut/70' : 'text-warm-ivory/70'
-                        }`}
-                      >
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => setSelectedPlan(plan.id)}
-                  className={`w-full py-4 text-xs font-semibold uppercase tracking-widest rounded-none transition-colors ${
-                    plan.popular
-                      ? 'bg-tea-green hover:bg-tea-green-dark text-warm-ivory'
-                      : 'bg-imperial-gold/20 hover:bg-imperial-gold/30 text-imperial-gold border border-imperial-gold/30'
-                  }`}
-                >
-                  Subscribe Now
-                </button>
-              </div>
-            </motion.div>
-          ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="flex justify-center mt-12"
-        >
-          <div className="flex items-center gap-8">
-            <img
-              src="/images/subscription-box.png"
-              alt="KING'S TEA subscription box"
-              className="h-32 object-contain opacity-80"
-            />
-            <div className="text-warm-ivory/60 text-sm font-[family-name:var(--font-inter)]">
-              <p className="font-semibold text-warm-ivory mb-1">
-                What&apos;s in the box?
-              </p>
-              <p>
-                Premium tea samples • Tasting notes • Brewing guide • Exclusive
-                gifts
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        {/* Plans Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {plansList.map((plan) => {
+            const gradientMap = {
+              'from-amber-700 to-amber-500': 'bg-gradient-to-br from-amber-700 to-amber-500',
+              'from-emerald-700 to-emerald-500': 'bg-gradient-to-br from-emerald-700 to-emerald-500',
+              'from-red-800 to-red-600': 'bg-gradient-to-br from-red-800 to-red-600',
+            };
+
+            const gradientClass = plan.gradientColor
+              ? gradientMap[plan.gradientColor] || 'bg-gradient-to-br from-amber-700 to-amber-500'
+              : 'bg-gradient-to-br from-amber-700 to-amber-500';
+
+            const periodLabel = {
+              month: 'Monthly',
+              quarter: 'Quarterly',
+              year: 'Annually',
+            };
+
+            return (
+              <div
+                key={plan._id || plan.id}
+                className={`relative rounded-2xl overflow-hidden ${
+                  plan.popular ? 'ring-2 ring-[#C9A86A] shadow-xl scale-105' : 'shadow-lg'
+                }`}
+              >
+                {/* Popular badge */}
+                {plan.popular && (
+                  <div className="absolute top-4 right-4 bg-[#C9A86A] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
+                    Most Popular
+                  </div>
+                )}
+
+                {/* Header with gradient */}
+                <div className={`${gradientClass} p-6 text-white`}>
+                  <h3 className="text-xl font-bold">{plan.name}</h3>
+                  <p className="text-white/80 text-sm mt-1">{periodLabel[plan.period] || plan.period}</p>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">
+                      ₹{plan.price?.toLocaleString()}
+                    </span>
+                    {plan.comparePrice && (
+                      <span className="text-white/60 line-through text-sm">
+                        ₹{plan.comparePrice?.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div className="bg-white p-6">
+                  <p className="text-[#3A281C]/70 text-sm mb-6">{plan.description}</p>
+
+                  {/* Features */}
+                  <ul className="space-y-3 mb-6">
+                    {(plan.features || []).map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm text-[#3A281C]">
+                        <svg className="w-5 h-5 text-[#1F4D3A] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <Link
+                    to="/subscription"
+                    className={`block w-full text-center py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      plan.popular
+                        ? 'bg-[#1F4D3A] text-white hover:bg-[#1F4D3A]/90'
+                        : 'bg-[#F8F3E9] text-[#1F4D3A] border-2 border-[#1F4D3A] hover:bg-[#1F4D3A] hover:text-white'
+                    }`}
+                  >
+                    Choose Plan
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom note */}
+        <div className="text-center mt-8">
+          <p className="text-[#3A281C]/50 text-sm">
+            All subscriptions include free shipping. Cancel or modify anytime.
+          </p>
+        </div>
       </div>
     </section>
   );
-}
+};
+
+export default SubscriptionSection;

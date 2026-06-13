@@ -20,7 +20,7 @@ export const changeOrderStatus = createAsyncThunk(
   'orders/changeStatus',
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      const response = await updateOrderStatus(id, status);
+            const response = await updateOrderStatus(id, { status });
       // return response.data;
       return response.data.data;
     } catch (error) {

@@ -70,7 +70,7 @@ const login = async (req, res) => {
 
     const userResponse = await User.findById(user._id).select('-password');
 
-    return successResponse(res, userResponse, 'Login successful');
+    return successResponse(res, { token, user: userResponse }, 'Login successful');
   } catch (error) {
     return errorResponse(res, error.message || 'Login failed', 500);
   }

@@ -1,109 +1,17 @@
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// import { productAPI } from '../services/api';
-// import { products as staticProducts } from '../assets/data';
-
-// const initialState = {
-//   products: staticProducts,
-//   totalCount: staticProducts.length,
-//   page: 1,
-//   limit: 9,
-//   filters: {
-//     category: '',
-//     search: '',
-//     sort: 'rating',
-//     minPrice: 0,
-//     maxPrice: 200,
-//     origin: '',
-//     fermentation: '',
-//   },
-//   isLoading: false,
-//   error: null,
-// };
-
-// export const fetchProducts = createAsyncThunk(
-//   'product/fetchProducts',
-//   async (params, { rejectWithValue }) => {
-//     try {
-//       const response = await productAPI.getProducts(params);
-//       // return response.data;
-//       return response.data.data;
-//     } catch (error) {
-//       return rejectWithValue('Failed to fetch products');
-//     }
-//   }
-// );
-
-// export const fetchProduct = createAsyncThunk(
-//   'product/fetchProduct',
-//   async (id, { rejectWithValue }) => {
-//     try {
-//       const response = await productAPI.getProduct(id);
-//       // return response.data;
-//       return response.data.data;
-//     } catch (error) {
-//       return rejectWithValue('Failed to fetch product');
-//     }
-//   }
-// );
-
-// const productSlice = createSlice({
-//   name: 'product',
-//   initialState,
-//   reducers: {
-//     setFilters: (state, action) => {
-//       state.filters = { ...state.filters, ...action.payload };
-//       state.page = 1;
-//     },
-//     setPage: (state, action) => {
-//       state.page = action.payload;
-//     },
-//     clearFilters: (state) => {
-//       state.filters = initialState.filters;
-//       state.page = 1;
-//     },
-//   },
-//   extraReducers: (builder) => {
-//     builder
-//       .addCase(fetchProducts.pending, (state) => {
-//         state.isLoading = true;
-//       })
-//       .addCase(fetchProducts.fulfilled, (state, action) => {
-//         state.isLoading = false;
-//         if (action.payload?.products) {
-//           state.products = action.payload.products;
-//           state.totalCount = action.payload.totalCount || action.payload.products.length;
-//         }
-//       })
-//       .addCase(fetchProducts.rejected, (state, action) => {
-//         state.isLoading = false;
-//         state.error = action.payload;
-//       });
-//   },
-// });
-
-// export const { setFilters, setPage, clearFilters } = productSlice.actions;
-// export default productSlice.reducer;
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../services/api';
+import { productAPI } from '../services/api';
 
-// Fetch all products (public)
+// Async thunks
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async (params = {}, { rejectWithValue }) => {
     try {
-      const queryString = new URLSearchParams(params).toString();
-      const url = queryString ? `/products?${queryString}` : '/products';
-      const response = await api.get(url);
-      // Backend wraps responses in { success, message, data: { products } } or { success, message, data: [...] }
-      const payload = response.data.data;
-      if (Array.isArray(payload)) {
-        return payload;
-      } else if (payload && payload.products) {
-        return payload.products;
-      } else if (payload && payload.data) {
-        return Array.isArray(payload.data) ? payload.data : [];
-      }
-      return [];
+      const response = await productAPI.getProducts(params);
+      const data = response.data.data;
+      return {
+        products: data.products || data || [],
+        totalProducts: data.totalProducts || 0,
+      };
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch products'
@@ -112,17 +20,12 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
-// Fetch single product (public)
 export const fetchProductById = createAsyncThunk(
   'products/fetchProductById',
   async (id, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/products/${id}`);
-      const payload = response.data.data;
-      if (payload && payload.product) {
-        return payload.product;
-      }
-      return payload;
+      const response = await productAPI.getProductById(id);
+      return response.data.data.product || response.data.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch product'
@@ -131,27 +34,36 @@ export const fetchProductById = createAsyncThunk(
   }
 );
 
-// Fetch products by category
-export const fetchProductsByCategory = createAsyncThunk(
-  'products/fetchProductsByCategory',
-  async (categorySlug, { rejectWithValue }) => {
+export const fetchProductBySlug = createAsyncThunk(
+  'products/fetchProductBySlug',
+  async (slug, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/products?category=${categorySlug}`);
-      const payload = response.data.data;
-      if (Array.isArray(payload)) {
-        return payload;
-      } else if (payload && payload.products) {
-        return payload.products;
-      }
-      return [];
+      const response = await productAPI.getProductBySlug(slug);
+      return response.data.data.product || response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || 'Failed to fetch products by category'
+        error.response?.data?.message || 'Failed to fetch product'
       );
     }
   }
 );
 
+export const fetchProductsByCategory = createAsyncThunk(
+  'products/fetchProductsByCategory',
+  async (category, { rejectWithValue }) => {
+    try {
+      const response = await productAPI.getProducts({ category });
+      const data = response.data.data;
+      return data.products || data || [];
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch products'
+      );
+    }
+  }
+);
+
+// Slice
 const productSlice = createSlice({
   name: 'products',
   initialState: {
@@ -178,18 +90,18 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
-        state.totalProducts = action.payload.length;
+        state.products = action.payload.products;
+        state.totalProducts = action.payload.totalProducts;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch products';
-        state.products = [];
+        state.error = action.payload;
       })
       // Fetch Product By ID
       .addCase(fetchProductById.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.currentProduct = null;
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.loading = false;
@@ -197,7 +109,22 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch product';
+        state.error = action.payload;
+      })
+      // Fetch Product By Slug
+      .addCase(fetchProductBySlug.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.currentProduct = null;
+      })
+      .addCase(fetchProductBySlug.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentProduct = action.payload;
+      })
+      .addCase(fetchProductBySlug.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.currentProduct = null;
       })
       // Fetch Products By Category
       .addCase(fetchProductsByCategory.pending, (state) => {
@@ -210,7 +137,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch products by category';
+        state.error = action.payload;
       });
   },
 });

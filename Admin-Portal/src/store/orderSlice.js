@@ -58,7 +58,8 @@ const orderSlice = createSlice({
           state.items = data;
           state.totalCount = data.length;
         } else {
-          state.items = data.orders || data.items || [];
+          // state.items = data.orders || data.items || [];
+          state.items = data.docs || data.orders || data.items || [];
           state.totalCount = data.totalCount || data.total || state.items.length;
         }
       })

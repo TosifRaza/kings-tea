@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { selectIsAuthenticated, selectUser, logout as logoutAction } from '../../store/authSlice';
 import { selectWishlistItems } from '../../store/wishlistSlice';
+import { fetchMyOrders, selectOrders, selectOrdersLoading } from '../../store/orderSlice';
 import { products } from '../../assets/data';
 
 export default function UserDashboard() {
@@ -13,6 +14,8 @@ export default function UserDashboard() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const wishlistItems = useSelector(selectWishlistItems);
+  const orders = useSelector(selectOrders);
+  const ordersLoading = useSelector(selectOrdersLoading);
   const [activeTab, setActiveTab] = useState('profile');
   const [profile, setProfile] = useState({
     name: user?.name || '',
@@ -34,6 +37,12 @@ export default function UserDashboard() {
       }));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      dispatch(fetchMyOrders());
+    }
+  }, [activeTab, dispatch]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -64,6 +73,14 @@ export default function UserDashboard() {
   const handleLogout = async () => {
     await dispatch(logoutAction());
     navigate('/');
+  };
+
+  const statusColors = {
+    pending: 'bg-imperial-gold/10 text-imperial-gold',
+    processing: 'bg-blue-50 text-blue-600',
+    shipped: 'bg-purple-50 text-purple-600',
+    delivered: 'bg-emerald-50 text-emerald-600',
+    cancelled: 'bg-red-50 text-red-600',
   };
 
   return (
@@ -162,10 +179,72 @@ export default function UserDashboard() {
             {activeTab === 'orders' && (
               <div className="space-y-4">
                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">Order History</h2>
-                <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
-                  <Package className="h-10 w-10 text-deep-walnut/20 mx-auto mb-3" />
-                  <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">No orders yet.</p>
-                </div>
+
+                {ordersLoading ? (
+                  <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+                    <Loader2 className="h-8 w-8 text-tea-green mx-auto mb-3 animate-spin" />
+                    <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Loading orders...</p>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+                    <Package className="h-10 w-10 text-deep-walnut/20 mx-auto mb-3" />
+                    <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">No orders yet.</p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-deep-walnut/50 text-xs font-[family-name:var(--font-inter)]">{orders.length} order{orders.length !== 1 ? 's' : ''} placed</p>
+                    {orders.map((order) => (
+                      <div key={order._id} className="bg-white rounded-sm border border-imperial-gold/10 overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 bg-warm-ivory-dark/30 border-b border-imperial-gold/5">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <p className="text-[10px] text-deep-walnut/40 uppercase tracking-wider font-[family-name:var(--font-inter)]">Order</p>
+                              <p className="text-xs font-semibold text-deep-walnut font-[family-name:var(--font-inter)]">
+                                #{order.orderNumber || order._id?.slice(-8).toUpperCase()}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] text-deep-walnut/40 uppercase tracking-wider font-[family-name:var(--font-inter)]">Date</p>
+                              <p className="text-xs text-deep-walnut font-[family-name:var(--font-inter)]">
+                                {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${statusColors[order.status] || statusColors.pending} font-[family-name:var(--font-inter)] capitalize`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        <div className="px-5 py-3 space-y-2">
+                          {order.items?.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded bg-tea-green/5 flex items-center justify-center">
+                                  <Package className="h-3.5 w-3.5 text-tea-green/40" />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium text-deep-walnut font-[family-name:var(--font-inter)]">{item.name}</p>
+                                  <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">Qty: {item.quantity}</p>
+                                </div>
+                              </div>
+                              <p className="text-xs font-semibold text-deep-walnut font-[family-name:var(--font-inter)]">
+                                Rs. {(item.price * item.quantity).toLocaleString('en-IN')}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between px-5 py-3 border-t border-imperial-gold/5 bg-warm-ivory-dark/20">
+                          <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">
+                            {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
+                            {order.shippingCity && <> · {order.shippingCity}, {order.shippingState}</>}
+                          </p>
+                          <p className="text-sm font-bold text-tea-green font-[family-name:var(--font-inter)]">
+                            Total: Rs. {Number(order.total).toLocaleString('en-IN')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
 

@@ -15,6 +15,7 @@ import subscriptionReducer from './subscriptionSlice';    // NEW
 import authReducer from './authSlice';
 import cartReducer from './cartSlice';
 import wishlistReducer from './wishlistSlice';
+import orderReducer from './orderSlice'
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     subscriptions: subscriptionReducer,    // NEW
     auth: authReducer,
     cart: cartReducer,
+    orders: orderReducer,         
     wishlist: wishlistReducer
   }
 });

@@ -1,27 +1,71 @@
 import { motion } from 'framer-motion';
-import { Heart, Leaf, Award, Globe } from 'lucide-react';
+// import { Heart, Leaf, Award, Globe } from 'lucide-react';
+import {
+  Heart,
+  Leaf,
+  Award,
+  Globe,
+  Shield,
+  Sparkles
+} from "lucide-react";
 
 const values = [
-  { icon: Heart, title: 'Heritage & Tradition', description: 'We honor centuries of tea tradition while making it accessible for the modern connoisseur. Every selection respects the craft.' },
-  { icon: Leaf, title: 'Sustainability', description: "From biodynamic farming to carbon-neutral shipping, we're committed to protecting the planet that gives us these extraordinary teas." },
-  { icon: Award, title: 'Uncompromising Quality', description: "We taste hundreds of teas each season and select only the top 2%. If it doesn't meet our standard, it doesn't bear our name." },
-  { icon: Globe, title: 'Direct Sourcing', description: 'We work directly with tea gardens, ensuring fair prices for growers and authentic provenance for our customers.' },
+  {
+    icon: Leaf,
+    title: 'Premium Tea Selection',
+    description: 'Every tea is carefully selected from renowned tea gardens to ensure exceptional flavor, aroma, and freshness in every cup.'
+  },
+  {
+    icon: Globe,
+    title: 'Direct Garden Partnerships',
+    description: 'We work closely with trusted tea estates and growers, ensuring authenticity, transparency, and fair value throughout the sourcing process.'
+  },
+  {
+    icon: Award,
+    title: 'Exceptional Quality Standards',
+    description: 'Only the finest teas that meet our rigorous quality standards become part of the KING\'S TEA collection.'
+  },
+  {
+    icon: Heart,
+    title: 'Customer Experience',
+    description: 'From sourcing to delivery, we are committed to providing an outstanding tea experience and building lasting relationships with tea lovers.'
+  },
+  {
+    icon: Shield,
+    title: 'Purity & Trust',
+    description: 'Our teas are sourced and processed with care, ensuring natural ingredients, freshness, and complete customer confidence.'
+  },
+  {
+    icon: Sparkles,
+    title: 'Tea Culture & Education',
+    description: 'We strive to share the rich heritage, traditions, and knowledge of fine teas with tea enthusiasts around the world.'
+  }
 ];
 
 const team = [
-  { name: 'William Ashford', role: 'Founder & Master Tea Buyer', initials: 'WA' },
-  { name: 'Dr. Mei Lin Chen', role: 'Director of Tea Education', initials: 'MC' },
-  { name: 'Raj Patel', role: 'Head of Sourcing, Asia', initials: 'RP' },
-  { name: 'Sophia Blackwell', role: 'Chief Experience Officer', initials: 'SB' },
+  { name: 'Tosif Raza', role: 'Founder & Master Tea Buyer', initials: 'TR' },
+  { name: 'Tosif Raza', role: 'Director of Tea Education', initials: 'TR' },
+  { name: 'Tosif Raza', role: 'Head of Sourcing, Asia', initials: 'TR' },
+  { name: 'Tosif Raza', role: 'Chief Experience Officer', initials: 'TR' },
 ];
 
 const milestones = [
-  { year: '1872', event: "Ashford family begins trading fine teas from London's East End." },
-  { year: '1920', event: 'First direct sourcing expedition to Darjeeling tea gardens.' },
-  { year: '1965', event: "Introduction of the KING'S TEA brand and first luxury collection." },
-  { year: '1998', event: "Launch of the KING'S TEA Society subscription program." },
-  { year: '2015', event: 'Certification as a fully organic and carbon-neutral tea company.' },
-  { year: '2024', event: "Celebrating over 150 years of tea excellence with 12 garden partnerships." },
+  {
+    year: '2026',
+    event: "KING'S TEA brand concept was created."
+  },
+  {
+    year: '2026',
+    event: 'Website and online store launched.'
+  },
+  {
+    year: '2026',
+    event: 'Partnerships established with premium tea suppliers.'
+  },
+  {
+    year: '2027',
+    event: 'First 1,000 customers served.'
+  }
 ];
 
 export default function AboutPage() {
@@ -33,7 +77,7 @@ export default function AboutPage() {
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
           <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">Our Story</span>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl sm:text-5xl font-bold text-white mt-3 mb-4">About KING&apos;S TEA</h1>
-          <p className="text-warm-ivory/70 font-[family-name:var(--font-cormorant)] text-lg max-w-xl">Over 150 years of passion, heritage, and uncompromising dedication to the world&apos;s finest teas.</p>
+          <p className="text-warm-ivory/70 font-[family-name:var(--font-cormorant)] text-lg max-w-xl">Dedicated to sourcing and delivering premium teas with exceptional quality, authenticity, and craftsmanship.</p>
         </div>
       </div>
 
@@ -45,9 +89,22 @@ export default function AboutPage() {
               <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">Our Heritage</span>
               <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-deep-walnut mt-3 mb-6">A Legacy of Excellence</h2>
               <div className="space-y-4 text-deep-walnut/70 font-[family-name:var(--font-inter)] text-sm leading-relaxed">
-                <p>KING&apos;S TEA was born from a simple belief: that the world&apos;s finest teas deserve a brand that honors their origin, craftsmanship, and cultural significance. Founded in 1872, our family has spent over 150 years cultivating relationships with the most esteemed tea gardens across Asia and beyond.</p>
-                <p>Today, we continue that tradition with the same passion and integrity that has defined us from the beginning. Every tea in our collection is personally selected by our master tea buyers, who travel to the gardens each harvest season to taste and evaluate hundreds of lots — selecting only the top 2% for our discerning clientele.</p>
-              </div>
+                <p>
+    At KING&apos;S TEA, excellence is more than a standard—it is the foundation of everything we do. Our journey began with a passion for discovering exceptional teas and sharing their unique stories with tea lovers around the world.
+  </p>
+
+  <p>
+    Inspired by the rich heritage of tea cultivation and craftsmanship, we carefully source premium teas from renowned tea-growing regions. Every tea in our collection is selected for its quality, character, and authentic flavor, ensuring a remarkable experience in every cup.
+  </p>
+
+  <p>
+    We believe that great tea is created through dedication, expertise, and respect for tradition. From the gardens where the leaves are grown to the moment they reach your table, we are committed to maintaining the highest standards of freshness, purity, and excellence.
+  </p>
+
+  <p>
+    Today, KING&apos;S TEA continues to serve a growing community of tea enthusiasts who value quality, authenticity, and the timeless pleasure of fine tea. Our mission is simple: to bring the world&apos;s finest teas closer to those who appreciate the art of tea.
+  </p>
+  </div>
             </div>
             <div className="relative">
               <div className="aspect-[4/5] rounded-sm overflow-hidden">

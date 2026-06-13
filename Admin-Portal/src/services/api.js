@@ -172,7 +172,8 @@ export const getTopProducts = () => api.get('/stats', { params: { type: 'topProd
 // --- Orders (orderSlice) ---
 export const getOrders = (params) => api.get('/orders', { params });
 export const getOrderById = (id) => api.get(`/orders/${id}`);
-export const updateOrderStatus = (id, data) => api.put(`/orders/${id}`, data);
+// export const updateOrderStatus = (id, data) => api.put(`/orders/${id}`, data);
+export const updateOrderStatus = (id, data) => api.patch(`/orders/${id}`, data);
 export const deleteOrder = (id) => api.delete(`/orders/${id}`);
 
 // --- Customers / Users (customerSlice) ---

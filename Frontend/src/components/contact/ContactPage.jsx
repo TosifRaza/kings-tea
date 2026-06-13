@@ -4,18 +4,53 @@ import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
 import { contactAPI } from '../../services/api';
 
 const contactInfo = [
-  { icon: Mail, title: 'Email', detail: 'concierge@kingstea.com', sub: 'We respond within 24 hours' },
-  { icon: Phone, title: 'Phone', detail: '+1 (888) 546-7890', sub: 'Mon–Fri, 9am–6pm GMT' },
-  { icon: MapPin, title: 'Flagship Store', detail: '12 Heritage Lane, Mayfair', sub: 'London W1K 3QP, United Kingdom' },
-  { icon: Clock, title: 'Store Hours', detail: 'Mon–Sat: 10am–7pm', sub: 'Sun: 11am–5pm' },
+  {
+    icon: Mail,
+    title: 'Email',
+    detail: 'razatosif206@gmail.com',
+    sub: 'We respond within 24 hours'
+  },
+  {
+    icon: Phone,
+    title: 'Phone',
+    detail: '+91 70474389630',
+    sub: 'Mon–Sat, 9am–6pm IST'
+  },
+  {
+    icon: MapPin,
+    title: 'Location',
+    detail: 'Siliguri, Darjeeling',
+    sub: 'West Bengal, India'
+  },
+  {
+    icon: Clock,
+    title: 'Business Hours',
+    detail: 'Mon–Sat: 9am–7pm',
+    sub: 'Sunday: Closed'
+  },
 ];
 
 const faqs = [
-  { question: 'How should I store my tea?', answer: 'Store tea in an airtight container away from light, heat, and moisture. Our tins are designed for optimal storage.' },
-  { question: 'What is your return policy?', answer: "We offer a 30-day satisfaction guarantee. If you're not completely satisfied, contact our concierge team for a full refund or exchange." },
-  { question: 'Do you ship internationally?', answer: 'Yes, we ship to over 50 countries worldwide. Annual Connoisseur subscribers receive free express shipping.' },
-  { question: 'How can I track my order?', answer: "Once your order ships, you'll receive an email with tracking information. You can also check order status in your account dashboard." },
-  { question: 'Are your teas certified organic?', answer: "Yes, all KING'S TEA products are certified organic. Our certifications include USDA Organic, EU Organic, and JAS Organic." },
+  {
+    question: 'How should I store my tea?',
+    answer: 'Store tea in an airtight container away from moisture, sunlight, and strong odors.'
+  },
+  {
+    question: 'Do you deliver across India?',
+    answer: 'Yes, we deliver our tea products across India through trusted courier partners.'
+  },
+  {
+    question: 'How long does shipping take?',
+    answer: 'Most orders are delivered within 3–7 business days depending on your location.'
+  },
+  {
+    question: 'Are your teas freshly packed?',
+    answer: 'Yes, all teas are packed carefully to preserve freshness, aroma, and flavor.'
+  },
+  {
+    question: 'How can I contact customer support?',
+    answer: 'You can reach us through email, phone, or the contact form on this page.'
+  },
 ];
 
 export default function ContactPage() {
@@ -48,7 +83,7 @@ export default function ContactPage() {
         <div className="text-center mb-14">
           <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">Get In Touch</span>
           <h1 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-deep-walnut mt-3">Contact Us</h1>
-          <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mt-3 max-w-lg mx-auto">Our concierge team is here to assist with any inquiries about our teas, subscriptions, or orders.</p>
+          <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mt-3 max-w-lg mx-auto">Have questions about our premium teas? We are here to help with product inquiries, orders, and customer support.</p>
           <div className="section-divider mt-6" />
         </div>
 
@@ -111,8 +146,8 @@ export default function ContactPage() {
             <div className="bg-warm-ivory-dark rounded-sm h-48 flex items-center justify-center mb-8 border border-imperial-gold/10">
               <div className="text-center">
                 <MapPin className="h-8 w-8 text-imperial-gold mx-auto mb-2" />
-                <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">12 Heritage Lane, Mayfair, London</p>
-                <p className="text-deep-walnut/30 text-xs font-[family-name:var(--font-inter)]">Interactive map coming soon</p>
+                <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Siliguri, Darjeeling, West Bengal, India</p>
+                <p className="text-deep-walnut/30 text-xs font-[family-name:var(--font-inter)]">Serving tea lovers across India</p>
               </div>
             </div>
 

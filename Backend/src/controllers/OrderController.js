@@ -42,6 +42,7 @@ const listOrders = async (req, res) => {
     };
 
     return successResponse(res, result, 'Orders fetched successfully');
+    // return successResponse(res, 'Orders fetched successfully', result);
   } catch (error) {
     return errorResponse(res, error.message || 'Failed to fetch orders', 500);
   }
@@ -122,6 +123,7 @@ const createOrder = async (req, res) => {
     }
 
     return successResponse(res, order, 'Order created successfully', 201);
+    // return successResponse(res, 'Order created successfully', order, 201);
   } catch (error) {
     return errorResponse(res, error.message || 'Failed to create order', 500);
   }
@@ -139,6 +141,7 @@ const getOrder = async (req, res) => {
     }
 
     return successResponse(res, order, 'Order fetched successfully');
+    // return successResponse(res, 'Order fetched successfully', order);
   } catch (error) {
     return errorResponse(res, error.message || 'Failed to fetch order', 500);
   }
@@ -164,6 +167,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     return successResponse(res, order, 'Order updated successfully');
+    // return successResponse(res, 'Order updated successfully', order);
   } catch (error) {
     return errorResponse(res, error.message || 'Failed to update order', 500);
   }

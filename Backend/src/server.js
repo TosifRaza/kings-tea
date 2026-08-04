@@ -46,8 +46,10 @@ if (!fs.existsSync(uploadsDir)) {
 // }));
 app.use(cors({
   origin: [
+    
     process.env.CLIENT_URL,
     process.env.ADMIN_URL,
+    "https://kings-tea-frontend.onrender.com",
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:5173",

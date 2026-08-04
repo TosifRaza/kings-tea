@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { IMAGE_URL } from "../../utils/image";
 import {
   selectCartOpen,
   closeCart,
@@ -141,8 +142,13 @@ export default function CartDrawer() {
                       }}
                     >
                       {item.product.images && item.product.images.length > 0 ? (
+                        // <img
+                        //   src={`http://localhost:5000${item.product.images[0]}`}
+                        //   alt={item.product.name}
+                        //   className="w-full h-full object-cover rounded-sm"
+                        // />
                         <img
-                          src={`http://localhost:5000${item.product.images[0]}`}
+                          src={`${IMAGE_URL}${item.product.images[0]}`}
                           alt={item.product.name}
                           className="w-full h-full object-cover rounded-sm"
                         />

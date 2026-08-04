@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlistLocal, selectIsWishlisted } from '../../store/wishlistSlice';
 import { fetchProducts } from '../../store/productSlice';
+import { IMAGE_URL } from "../../utils/image";
 
 function ProductCard({ product }) {
   const dispatch = useDispatch();
@@ -29,8 +30,9 @@ function ProductCard({ product }) {
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0]?.startsWith('/uploads/')
-              ? `http://localhost:5000${product.images[0]}`
+              ? `${IMAGE_URL}${product.images[0]}`
               : product.images[0]}
+            // src={`${IMAGE_URL}${item.product.images[0]}`}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {

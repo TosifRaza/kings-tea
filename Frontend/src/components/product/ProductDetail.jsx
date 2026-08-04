@@ -472,6 +472,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductBySlug, fetchProducts } from '../../store/productSlice';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlistLocal, selectIsWishlisted } from '../../store/wishlistSlice';
+import { IMAGE_URL } from "../../utils/image";
 
 const mockReviews = [
   { id: 1, name: 'Eleanor V.', rating: 5, date: 'Oct 15, 2024', comment: 'Absolutely exquisite. The complexity of flavors unfolds with each sip. This is tea at its finest.' },
@@ -510,6 +511,7 @@ export default function ProductDetail() {
   const [zoomStyle, setZoomStyle] = useState({});
   const [isHovering, setIsHovering] = useState(false);
   const mainImageRef = useRef(null);
+//  import { IMAGE_URL } from "../../utils/image";
 
   // ===== ALL HOOKS AT THE TOP — BEFORE ANY CONDITIONAL RETURNS =====
   const { currentProduct: product, products: allProducts, loading, error } = useSelector((state) => state.products);
@@ -708,7 +710,8 @@ export default function ProductDetail() {
                       `}
                     >
                       <img
-                        src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                        src={img.startsWith('http') ? img : `${IMAGE_URL}${img}`}
+                        // src={`${IMAGE_URL}${item.product.images[0]}`}
                         alt={`${product.name} thumbnail ${idx + 1}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
@@ -737,7 +740,7 @@ export default function ProductDetail() {
                   <div className="w-full h-full flex items-center justify-center">
                     {hasRealImages ? (
                       <img
-                        src={activeImage.startsWith('http') ? activeImage : `http://localhost:5000${activeImage}`}
+                        src={activeImage.startsWith('http') ? activeImage : `${IMAGE_URL}${activeImage}`}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-200 ease-out"
                         style={isHovering ? zoomStyle : {}}
@@ -1039,7 +1042,7 @@ export default function ProductDetail() {
                   >
                     <div className={`aspect-[4/5] ${relGradient} group-hover:scale-105 transition-transform duration-700 flex items-center justify-center`}>
                       {p.images && p.images.length > 0 ? (
-                        <img src={`http://localhost:5000${p.images[0]}`} alt={p.name} className="w-full h-full object-cover" />
+                        <img src={`${IMAGE_URL}${p.images[0]}`} alt={p.name} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-white/20 text-3xl font-bold">{p.name.charAt(0)}</span>
                       )}
@@ -1105,7 +1108,7 @@ export default function ProductDetail() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              src={activeImage.startsWith('http') ? activeImage : `http://localhost:5000${activeImage}`}
+              src={activeImage.startsWith('http') ? activeImage : `${IMAGE_URL}${activeImage}`}
               alt={`${product.name} full view`}
               className="max-w-[90vw] max-h-[85vh] object-contain"
               onClick={(e) => e.stopPropagation()}
@@ -1142,7 +1145,7 @@ export default function ProductDetail() {
                     }`}
                   >
                     <img
-                      src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                      src={img.startsWith('http') ? img : `${IMAGE_URL}${img}`}
                       alt=""
                       className="w-full h-full object-cover"
                     />

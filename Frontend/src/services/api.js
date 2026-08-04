@@ -3,6 +3,7 @@
 // Fixes: /auth/profile → /auth/me, getProfile → getMe,
 //        401 interceptor logic, added logout endpoint
 // ============================================================
+//GIT TEST
 
 import axios from 'axios';
 

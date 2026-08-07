@@ -4,7 +4,7 @@ import { Heart, Star, ShoppingBag } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { addToCart } from '../../store/cartSlice';
-import { toggleWishlistLocal, selectIsWishlisted } from '../../store/wishlistSlice';
+import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { fetchProducts } from '../../store/productSlice';
 import { IMAGE_URL } from "../../utils/image";
 
@@ -32,7 +32,6 @@ function ProductCard({ product }) {
             src={product.images[0]?.startsWith('/uploads/')
               ? `${IMAGE_URL}${product.images[0]}`
               : product.images[0]}
-            // src={`${IMAGE_URL}${item.product.images[0]}`}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
@@ -64,7 +63,8 @@ function ProductCard({ product }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(toggleWishlistLocal(productId));
+            // dispatch(toggleWishlistLocal(productId));
+            dispatch(toggleWishlist(productId));
           }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors"
         >

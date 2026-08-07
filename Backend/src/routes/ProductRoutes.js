@@ -2,6 +2,8 @@ const express = require('express');
 const { body } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
 const {
   getProducts,
   getProductById,
@@ -15,13 +17,26 @@ const { protect } = require('../middleware/AuthenticationMiddleware');
 const router = express.Router();
 
 // Multer configuration for image uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, 'uploads/');
+//   },
+//   filename: function (req, file, cb) {
+//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+//   },
+// });
+
+// Configure Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'kings-tea/products', // All product images go into this folder
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+    transformation: [
+      { width: 1200, height: 1200, crop: 'limit' }, // Auto-resize, no upscaling
+      { quality: 'auto' }, // Auto-compress
+    ],
   },
 });
 

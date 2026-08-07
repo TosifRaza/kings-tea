@@ -20,7 +20,7 @@ import {
   closeCart,
   selectCartCount,
 } from '../store/cartSlice';
-import { selectWishlistItems } from '../store/wishlistSlice';
+import { selectWishlistItems ,loadWishlist} from '../store/wishlistSlice';
 import {
   selectIsAuthenticated,
   selectUser,
@@ -82,9 +82,13 @@ function Header() {
   const wishlistCount = wishlistItems.length;
   const isHome = location.pathname === '/';
 
+  // useEffect(() => {
+  //   dispatch(getMe());
+  // }, [dispatch]);
   useEffect(() => {
-    dispatch(getMe());
-  }, [dispatch]);
+  dispatch(getMe());
+  dispatch(loadWishlist());
+}, [dispatch]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -223,7 +227,7 @@ function Header() {
 
               {/* Wishlist */}
               <Link
-                to="/shop"
+                to="/dashboard?tab=wishlist"
                 className={`p-2 rounded-full transition-colors relative ${
                   !scrolled && isHome
                     ? 'text-white/80 hover:text-white hover:bg-white/10'

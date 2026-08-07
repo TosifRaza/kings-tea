@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { cartAPI } from '../services/api';
-import { products as staticProducts } from '../assets/data';
+// import { products as staticProducts } from '../assets/data';
 
 const initialState = {
   items: [],
@@ -100,10 +100,17 @@ export const selectCartItems = (state) => state.cart.items;
 export const selectCartOpen = (state) => state.cart.cartOpen;
 export const selectCartCount = (state) =>
   state.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+// export const selectCartTotal = (state) => {
+//   return state.cart.items.reduce((sum, item) => {
+//     const product = staticProducts.find((p) => p.id === item.productId);
+//     return sum + (product ? product.price * item.quantity : 0);
+//   }, 0);
+// };
 export const selectCartTotal = (state) => {
+  const products = state.products?.products || [];
   return state.cart.items.reduce((sum, item) => {
-    const product = staticProducts.find((p) => p.id === item.productId);
-    return sum + (product ? product.price * item.quantity : 0);
+    const product = products.find((p) => (p._id || p.id) === item.productId);
+    return sum + (product ? (product.price || 0) * item.quantity : 0);
   }, 0);
 };
 

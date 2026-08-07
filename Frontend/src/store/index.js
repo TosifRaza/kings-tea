@@ -16,7 +16,7 @@ import authReducer from './authSlice';
 import cartReducer from './cartSlice';
 import wishlistReducer from './wishlistSlice';
 import orderReducer from './orderSlice'
-
+import reviewReducer from './reviewSlice';
 const store = configureStore({
   reducer: {
     products: productReducer,
@@ -28,7 +28,8 @@ const store = configureStore({
     auth: authReducer,
     cart: cartReducer,
     orders: orderReducer,         
-    wishlist: wishlistReducer
+    wishlist: wishlistReducer,
+    reviews: reviewReducer,
   }
 });
 

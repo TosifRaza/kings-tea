@@ -1,22 +1,348 @@
+// import { useState, useEffect } from 'react';
+// import { motion } from 'framer-motion';
+// import { User, Package, Heart, MapPin, Crown, LogOut, Loader2 } from 'lucide-react';
+// import { useSelector, useDispatch } from 'react-redux';
+// import { useNavigate } from 'react-router-dom';
+// import { selectIsAuthenticated, selectUser, logout as logoutAction } from '../../store/authSlice';
+// import { selectWishlistItems } from '../../store/wishlistSlice';
+// import { fetchMyOrders, selectOrders, selectOrdersLoading } from '../../store/orderSlice';
+// import { products } from '../../assets/data';
+
+// export default function UserDashboard() {
+//   const dispatch = useDispatch();
+//   const navigate = useNavigate();
+//   const isAuthenticated = useSelector(selectIsAuthenticated);
+//   const user = useSelector(selectUser);
+//   const wishlistItems = useSelector(selectWishlistItems);
+//   const orders = useSelector(selectOrders);
+//   const ordersLoading = useSelector(selectOrdersLoading);
+//   const [activeTab, setActiveTab] = useState('profile');
+//   const [profile, setProfile] = useState({
+//     name: user?.name || '',
+//     email: user?.email || '',
+//     phone: '',
+//     address: '',
+//     city: '',
+//     state: '',
+//     zip: '',
+//     country: '',
+//   });
+
+//   useEffect(() => {
+//     if (user) {
+//       setProfile((prev) => ({
+//         ...prev,
+//         name: user.name || '',
+//         email: user.email || '',
+//       }));
+//     }
+//   }, [user]);
+
+//   useEffect(() => {
+//     if (activeTab === 'orders') {
+//       dispatch(fetchMyOrders());
+//     }
+//   }, [activeTab, dispatch]);
+
+//   if (!isAuthenticated || !user) {
+//     return (
+//       <div className="pt-24 pb-16 min-h-screen flex flex-col items-center justify-center">
+//         <User className="h-16 w-16 text-deep-walnut/20 mb-4" />
+//         <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-deep-walnut mb-2">Sign In Required</h2>
+//         <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)] mb-6">Please sign in to access your dashboard.</p>
+//         <button
+//           onClick={() => navigate('/')}
+//           className="bg-tea-green hover:bg-tea-green-light text-warm-ivory text-xs uppercase tracking-wider rounded-none px-6 py-3 transition-colors"
+//         >
+//           Go to Home
+//         </button>
+//       </div>
+//     );
+//   }
+
+//   const wishlistProducts = products.filter((p) => wishlistItems.includes(p.id));
+
+//   const sidebarItems = [
+//     { id: 'profile', label: 'Profile', icon: User },
+//     { id: 'orders', label: 'Orders', icon: Package },
+//     { id: 'wishlist', label: 'Wishlist', icon: Heart },
+//     { id: 'addresses', label: 'Addresses', icon: MapPin },
+//     { id: 'subscriptions', label: 'Subscriptions', icon: Crown },
+//   ];
+
+//   const handleLogout = async () => {
+//     await dispatch(logoutAction());
+//     navigate('/');
+//   };
+
+//   const statusColors = {
+//     pending: 'bg-imperial-gold/10 text-imperial-gold',
+//     processing: 'bg-blue-50 text-blue-600',
+//     shipped: 'bg-purple-50 text-purple-600',
+//     delivered: 'bg-emerald-50 text-emerald-600',
+//     cancelled: 'bg-red-50 text-red-600',
+//   };
+
+//   return (
+//     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="pt-24 pb-16 min-h-screen">
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//         <div className="mb-8">
+//           <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-deep-walnut">My Account</h1>
+//           <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)] mt-1">Welcome back, {user.name}</p>
+//         </div>
+
+//         <div className="flex flex-col lg:flex-row gap-8">
+//           <div className="lg:w-56 flex-shrink-0">
+//             <div className="bg-white rounded-sm border border-imperial-gold/10 overflow-hidden">
+//               <div className="p-4 bg-tea-green text-center">
+//                 <div className="w-14 h-14 rounded-full bg-imperial-gold/20 flex items-center justify-center mx-auto mb-2">
+//                   <span className="text-warm-ivory font-[family-name:var(--font-playfair)] font-bold text-lg">
+//                     {user.name?.charAt(0).toUpperCase()}
+//                   </span>
+//                 </div>
+//                 <p className="text-warm-ivory font-[family-name:var(--font-playfair)] font-semibold text-sm">{user.name}</p>
+//                 <p className="text-warm-ivory/60 text-[10px] font-[family-name:var(--font-inter)]">{user.email}</p>
+//               </div>
+//               <nav className="p-2">
+//                 {sidebarItems.map((item) => (
+//                   <button
+//                     key={item.id}
+//                     onClick={() => setActiveTab(item.id)}
+//                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-xs font-[family-name:var(--font-inter)] transition-colors ${
+//                       activeTab === item.id ? 'bg-tea-green/10 text-tea-green font-medium' : 'text-deep-walnut/60 hover:text-deep-walnut hover:bg-warm-ivory-dark'
+//                     }`}
+//                   >
+//                     <item.icon className="h-4 w-4" />
+//                     {item.label}
+//                   </button>
+//                 ))}
+//                 <button
+//                   onClick={handleLogout}
+//                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-xs font-[family-name:var(--font-inter)] text-royal-terracotta/70 hover:text-royal-terracotta hover:bg-royal-terracotta/5 transition-colors mt-2"
+//                 >
+//                   <LogOut className="h-4 w-4" />
+//                   Sign Out
+//                 </button>
+//               </nav>
+//             </div>
+//           </div>
+
+//           <div className="flex-1">
+//             {activeTab === 'profile' && (
+//               <div className="bg-white rounded-sm border border-imperial-gold/10 p-6">
+//                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-6">Profile Information</h2>
+//                 <div className="space-y-4 max-w-md">
+//                   <div>
+//                     <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Name</label>
+//                     <input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" />
+//                   </div>
+//                   <div>
+//                     <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Email</label>
+//                     <input value={profile.email} disabled className="h-10 border border-imperial-gold/20 text-sm w-full px-3 bg-warm-ivory-dark/50 cursor-not-allowed" />
+//                     <p className="text-deep-walnut/30 text-[10px] font-[family-name:var(--font-inter)] mt-1">Email cannot be changed</p>
+//                   </div>
+//                   <div>
+//                     <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Phone</label>
+//                     <input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="+1 (555) 000-0000" />
+//                   </div>
+//                   <div>
+//                     <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Address</label>
+//                     <input value={profile.address} onChange={(e) => setProfile({ ...profile, address: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="Street address" />
+//                   </div>
+//                   <div className="grid grid-cols-2 gap-4">
+//                     <div>
+//                       <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">City</label>
+//                       <input value={profile.city} onChange={(e) => setProfile({ ...profile, city: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" />
+//                     </div>
+//                     <div>
+//                       <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">State</label>
+//                       <input value={profile.state} onChange={(e) => setProfile({ ...profile, state: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" />
+//                     </div>
+//                   </div>
+//                   <div className="grid grid-cols-2 gap-4">
+//                     <div>
+//                       <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">ZIP</label>
+//                       <input value={profile.zip} onChange={(e) => setProfile({ ...profile, zip: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" />
+//                     </div>
+//                     <div>
+//                       <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Country</label>
+//                       <input value={profile.country} onChange={(e) => setProfile({ ...profile, country: e.target.value })} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" />
+//                     </div>
+//                   </div>
+//                   <button className="bg-tea-green hover:bg-tea-green-light text-warm-ivory text-xs uppercase tracking-wider rounded-none px-6 py-3 transition-colors">
+//                     Save Changes
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+
+//             {activeTab === 'orders' && (
+//               <div className="space-y-4">
+//                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">Order History</h2>
+
+//                 {ordersLoading ? (
+//                   <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+//                     <Loader2 className="h-8 w-8 text-tea-green mx-auto mb-3 animate-spin" />
+//                     <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Loading orders...</p>
+//                   </div>
+//                 ) : orders.length === 0 ? (
+//                   <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+//                     <Package className="h-10 w-10 text-deep-walnut/20 mx-auto mb-3" />
+//                     <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">No orders yet.</p>
+//                   </div>
+//                 ) : (
+//                   <>
+//                     <p className="text-deep-walnut/50 text-xs font-[family-name:var(--font-inter)]">{orders.length} order{orders.length !== 1 ? 's' : ''} placed</p>
+//                     {orders.map((order) => (
+//                       <div key={order._id} className="bg-white rounded-sm border border-imperial-gold/10 overflow-hidden">
+//                         <div className="flex items-center justify-between px-5 py-3 bg-warm-ivory-dark/30 border-b border-imperial-gold/5">
+//                           <div className="flex items-center gap-4">
+//                             <div>
+//                               <p className="text-[10px] text-deep-walnut/40 uppercase tracking-wider font-[family-name:var(--font-inter)]">Order</p>
+//                               <p className="text-xs font-semibold text-deep-walnut font-[family-name:var(--font-inter)]">
+//                                 #{order.orderNumber || order._id?.slice(-8).toUpperCase()}
+//                               </p>
+//                             </div>
+//                             <div>
+//                               <p className="text-[10px] text-deep-walnut/40 uppercase tracking-wider font-[family-name:var(--font-inter)]">Date</p>
+//                               <p className="text-xs text-deep-walnut font-[family-name:var(--font-inter)]">
+//                                 {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+//                               </p>
+//                             </div>
+//                           </div>
+//                           <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${statusColors[order.status] || statusColors.pending} font-[family-name:var(--font-inter)] capitalize`}>
+//                             {order.status}
+//                           </span>
+//                         </div>
+//                         <div className="px-5 py-3 space-y-2">
+//                           {order.items?.map((item, idx) => (
+//                             <div key={idx} className="flex items-center justify-between">
+//                               <div className="flex items-center gap-3">
+//                                 <div className="w-8 h-8 rounded bg-tea-green/5 flex items-center justify-center">
+//                                   <Package className="h-3.5 w-3.5 text-tea-green/40" />
+//                                 </div>
+//                                 <div>
+//                                   <p className="text-xs font-medium text-deep-walnut font-[family-name:var(--font-inter)]">{item.name}</p>
+//                                   <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">Qty: {item.quantity}</p>
+//                                 </div>
+//                               </div>
+//                               <p className="text-xs font-semibold text-deep-walnut font-[family-name:var(--font-inter)]">
+//                                 Rs. {(item.price * item.quantity).toLocaleString('en-IN')}
+//                               </p>
+//                             </div>
+//                           ))}
+//                         </div>
+//                         <div className="flex items-center justify-between px-5 py-3 border-t border-imperial-gold/5 bg-warm-ivory-dark/20">
+//                           <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">
+//                             {order.items?.length} item{order.items?.length !== 1 ? 's' : ''}
+//                             {order.shippingCity && <> · {order.shippingCity}, {order.shippingState}</>}
+//                           </p>
+//                           <p className="text-sm font-bold text-tea-green font-[family-name:var(--font-inter)]">
+//                             Total: Rs. {Number(order.total).toLocaleString('en-IN')}
+//                           </p>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </>
+//                 )}
+//               </div>
+//             )}
+
+//             {activeTab === 'wishlist' && (
+//               <div>
+//                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">My Wishlist ({wishlistProducts.length})</h2>
+//                 {wishlistProducts.length === 0 ? (
+//                   <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+//                     <Heart className="h-10 w-10 text-deep-walnut/20 mx-auto mb-3" />
+//                     <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Your wishlist is empty.</p>
+//                   </div>
+//                 ) : (
+//                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+//                     {wishlistProducts.map((p) => (
+//                       <div
+//                         key={p.id}
+//                         onClick={() => navigate(`/product/${p.slug}`)}
+//                         className="cursor-pointer group luxury-card bg-white rounded-sm overflow-hidden border border-imperial-gold/10"
+//                       >
+//                         <div className={`aspect-[4/5] bg-gradient-to-br ${p.gradient} group-hover:scale-105 transition-transform duration-700`} />
+//                         <div className="p-3">
+//                           <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-xs mb-1 group-hover:text-tea-green transition-colors">{p.name}</h3>
+//                           <span className="font-semibold text-deep-walnut text-sm">${p.price}</span>
+//                         </div>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 )}
+//               </div>
+//             )}
+
+//             {activeTab === 'addresses' && (
+//               <div>
+//                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">Saved Addresses</h2>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                   <div className="bg-white rounded-sm border border-imperial-gold/10 p-5">
+//                     <p className="text-deep-walnut/40 text-xs font-[family-name:var(--font-inter)]">No address saved yet. Update your profile to add an address.</p>
+//                   </div>
+//                   <button
+//                     onClick={() => setActiveTab('profile')}
+//                     className="border-2 border-dashed border-imperial-gold/20 rounded-sm p-5 flex flex-col items-center justify-center text-deep-walnut/30 hover:text-deep-walnut/50 hover:border-imperial-gold/40 transition-colors"
+//                   >
+//                     <MapPin className="h-6 w-6 mb-2" />
+//                     <span className="text-xs font-[family-name:var(--font-inter)]">Edit Address in Profile</span>
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+
+//             {activeTab === 'subscriptions' && (
+//               <div>
+//                 <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">My Subscriptions</h2>
+//                 <div className="bg-white rounded-sm border border-imperial-gold/10 p-5">
+//                   <div className="flex items-center gap-3 mb-3">
+//                     <Crown className="h-5 w-5 text-imperial-gold" />
+//                     <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut">No Active Subscription</h3>
+//                   </div>
+//                   <p className="text-deep-walnut/60 text-xs font-[family-name:var(--font-inter)] mb-4">Subscribe to our tea box and receive curated selections delivered to your door.</p>
+//                   <button
+//                     onClick={() => navigate('/subscription')}
+//                     className="bg-tea-green hover:bg-tea-green-light text-warm-ivory text-xs uppercase tracking-wider rounded-none px-4 py-2 transition-colors"
+//                   >
+//                     View Plans
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </motion.div>
+//   );
+// }
+
+
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Package, Heart, MapPin, Crown, LogOut, Loader2 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { selectIsAuthenticated, selectUser, logout as logoutAction } from '../../store/authSlice';
 import { selectWishlistItems } from '../../store/wishlistSlice';
 import { fetchMyOrders, selectOrders, selectOrdersLoading } from '../../store/orderSlice';
-import { products } from '../../assets/data';
+import { productAPI } from '../../services/api';
+import { getProductImage } from '../../utils/image';
 
 export default function UserDashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectUser);
   const wishlistItems = useSelector(selectWishlistItems);
   const orders = useSelector(selectOrders);
   const ordersLoading = useSelector(selectOrdersLoading);
   const [activeTab, setActiveTab] = useState('profile');
+  const [wishlistProducts, setWishlistProducts] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const [profile, setProfile] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -27,6 +353,14 @@ export default function UserDashboard() {
     zip: '',
     country: '',
   });
+
+  // Auto-open tab from URL query (?tab=wishlist) — used by the heart icon in MainLayout
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'orders', 'wishlist', 'addresses', 'subscriptions'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (user) {
@@ -44,6 +378,74 @@ export default function UserDashboard() {
     }
   }, [activeTab, dispatch]);
 
+  // Fetch REAL product data from backend for wishlisted items
+  // useEffect(() => {
+  //   if (wishlistItems.length === 0) {
+  //     setWishlistProducts([]);
+  //     return;
+  //   }
+  //   let cancelled = false;
+  //   setWishlistLoading(true);
+  //   Promise.all(
+  //     wishlistItems.map((id) =>
+  //       productAPI
+  //         .getProductById(id)
+  //         .then((res) => res.data?.data || res.data)
+  //         .catch(() => null)
+  //     )
+  //   ).then((products) => {
+  //     if (!cancelled) {
+  //       setWishlistProducts(products.filter(Boolean));
+  //       setWishlistLoading(false);
+  //     }
+  //   });
+  //   return () => {
+  //     cancelled = true;
+  //   };
+  // }, [wishlistItems]);
+
+
+    // Fetch REAL product data from backend for wishlisted items
+  useEffect(() => {
+    if (wishlistItems.length === 0) {
+      setWishlistProducts([]);
+      return;
+    }
+    let cancelled = false;
+    setWishlistLoading(true);
+    Promise.all(
+      wishlistItems.map((id) =>
+        productAPI
+          .getProductById(id)
+          .then((res) => {
+            const d = res.data;
+            // Handle all common API response shapes:
+            // 1. { data: product }              → use d.data
+            // 2. { success, product }           → use d.product
+            // 3. { success, data: product }     → use d.data
+            // 4. product directly               → use d
+            if (d?.data?.product && (d.data.product._id || d.data.product.id)) return d.data.product;
+            if (d?.data && (d.data._id || d.data.id || d.data.slug)) return d.data;
+            if (d?.product && (d.product._id || d.product.id)) return d.product;
+            if (d?._id || d?.id || d?.slug) return d;
+            console.warn('Wishlist product unexpected response shape for id:', id, d);
+            return null;
+          })
+          .catch((err) => {
+            console.error('Failed to fetch wishlist product:', id, err);
+            return null;
+          })
+      )
+    ).then((products) => {
+      if (!cancelled) {
+        setWishlistProducts(products.filter(Boolean));
+        setWishlistLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [wishlistItems]);
   if (!isAuthenticated || !user) {
     return (
       <div className="pt-24 pb-16 min-h-screen flex flex-col items-center justify-center">
@@ -59,8 +461,6 @@ export default function UserDashboard() {
       </div>
     );
   }
-
-  const wishlistProducts = products.filter((p) => wishlistItems.includes(p.id));
 
   const sidebarItems = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -250,27 +650,54 @@ export default function UserDashboard() {
 
             {activeTab === 'wishlist' && (
               <div>
-                <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">My Wishlist ({wishlistProducts.length})</h2>
-                {wishlistProducts.length === 0 ? (
+                <h2 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-lg mb-4">My Wishlist ({wishlistItems.length})</h2>
+                {wishlistLoading ? (
+                  <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
+                    <Loader2 className="h-8 w-8 text-tea-green mx-auto mb-3 animate-spin" />
+                    <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Loading wishlist...</p>
+                  </div>
+                ) : wishlistItems.length === 0 ? (
                   <div className="text-center py-12 bg-white rounded-sm border border-imperial-gold/10">
                     <Heart className="h-10 w-10 text-deep-walnut/20 mx-auto mb-3" />
                     <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Your wishlist is empty.</p>
+                    <button
+                      onClick={() => navigate('/shop')}
+                      className="mt-4 bg-tea-green hover:bg-tea-green-light text-warm-ivory text-xs uppercase tracking-wider rounded-none px-6 py-3 transition-colors"
+                    >
+                      Browse Teas
+                    </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {wishlistProducts.map((p) => (
-                      <div
-                        key={p.id}
-                        onClick={() => navigate(`/product/${p.slug}`)}
-                        className="cursor-pointer group luxury-card bg-white rounded-sm overflow-hidden border border-imperial-gold/10"
-                      >
-                        <div className={`aspect-[4/5] bg-gradient-to-br ${p.gradient} group-hover:scale-105 transition-transform duration-700`} />
-                        <div className="p-3">
-                          <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-xs mb-1 group-hover:text-tea-green transition-colors">{p.name}</h3>
-                          <span className="font-semibold text-deep-walnut text-sm">${p.price}</span>
+                    {wishlistProducts.map((p) => {
+                      const img = getProductImage(p.images?.[0] || p.image);
+                      return (
+                        <div
+                          key={p._id || p.id}
+                          // onClick={() => navigate(`/product/${p.slug}`)}
+                          onClick={() => navigate(`/product/${p.slug || p._id || p.id}`)}
+                          className="cursor-pointer group luxury-card bg-white rounded-sm overflow-hidden border border-imperial-gold/10"
+                        >
+                          <div className="aspect-[4/5] overflow-hidden bg-warm-ivory-dark/30">
+                            {img ? (
+                              <img
+                                src={img}
+                                alt={p.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Package className="h-8 w-8 text-deep-walnut/20" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-xs mb-1 group-hover:text-tea-green transition-colors line-clamp-1">{p.name}</h3>
+                            <span className="font-semibold text-deep-walnut text-sm">Rs. {Number(p.price).toLocaleString('en-IN')}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

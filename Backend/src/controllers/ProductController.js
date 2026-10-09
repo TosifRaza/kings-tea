@@ -1,7 +1,38 @@
 const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
+const Review = require('../models/ReviewModel');
 const Category = require('../models/CategoryModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
+
+const withLiveReviewStats = async (products) => {
+  const list = (Array.isArray(products) ? products : [products]).filter(Boolean);
+  if (list.length === 0) return [];
+
+  const productIds = list.map((product) => product._id).filter(Boolean);
+  const stats = productIds.length > 0
+    ? await Review.aggregate([
+      { $match: { productId: { $in: productIds } } },
+      {
+        $group: {
+          _id: '$productId',
+          averageRating: { $avg: '$rating' },
+          reviewCount: { $sum: 1 },
+        },
+      },
+    ])
+    : [];
+  const statsByProductId = new Map(stats.map((entry) => [String(entry._id), entry]));
+
+  return list.map((product) => {
+    const record = typeof product.toObject === 'function' ? product.toObject() : { ...product };
+    const reviewStats = statsByProductId.get(String(record._id));
+    return {
+      ...record,
+      rating: reviewStats ? Math.round(reviewStats.averageRating * 10) / 10 : 0,
+      reviewCount: reviewStats?.reviewCount || 0,
+    };
+  });
+};
 
 const getGalleryPaths = (value) => {
   if (value === undefined) return undefined;
@@ -73,8 +104,10 @@ const getProducts = async (req, res) => {
 
     const count = await Product.countDocuments(query);
 
+    const productsWithReviewStats = await withLiveReviewStats(products);
+
     return successResponse(res, {
-      products,
+      products: productsWithReviewStats,
       totalProducts: count,
       currentPage: Number(page),
       totalPages: Math.ceil(count / Number(limit)),
@@ -94,7 +127,10 @@ const getProductById = async (req, res) => {
       return errorResponse(res, 'Product not found', 404);
     }
 
-    return successResponse(res, { product }, 'Product fetched successfully');
+    const [productWithReviewStats] = await withLiveReviewStats(product);
+    productWithReviewStats.relatedProducts = await withLiveReviewStats(productWithReviewStats.relatedProducts || []);
+
+    return successResponse(res, { product: productWithReviewStats }, 'Product fetched successfully');
   } catch (error) {
     return errorResponse(res, error.message);
   }
@@ -111,7 +147,10 @@ const getProductBySlug = async (req, res) => {
       return errorResponse(res, 'Product not found', 404);
     }
 
-    return successResponse(res, { product }, 'Product fetched successfully');
+    const [productWithReviewStats] = await withLiveReviewStats(product);
+    productWithReviewStats.relatedProducts = await withLiveReviewStats(productWithReviewStats.relatedProducts || []);
+
+    return successResponse(res, { product: productWithReviewStats }, 'Product fetched successfully');
   } catch (error) {
     return errorResponse(res, error.message);
   }

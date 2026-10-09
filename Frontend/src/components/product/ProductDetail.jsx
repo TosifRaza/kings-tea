@@ -1198,7 +1198,7 @@
 
 
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -1221,7 +1221,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductBySlug, fetchProducts } from '../../store/productSlice';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
-import { IMAGE_URL,getProductImage } from "../../utils/image";
+import { getProductImage } from "../../utils/image";
 // Add to existing imports
 import { fetchProductReviews, submitReview, clearReviewState } from '../../store/reviewSlice';
 
@@ -1254,9 +1254,6 @@ export default function ProductDetail() {
   // ===== IMAGE GALLERY STATE (NEW) =====
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [zoomStyle, setZoomStyle] = useState({});
-  const [isHovering, setIsHovering] = useState(false);
-  const mainImageRef = useRef(null);
 //  import { IMAGE_URL } from "../../utils/image";
 
   // ===== ALL HOOKS AT THE TOP — BEFORE ANY CONDITIONAL RETURNS =====
@@ -1323,29 +1320,6 @@ export default function ProductDetail() {
   const images = buildImageList();
   const hasRealImages = images.length > 0;
   const activeImage = hasRealImages ? images[activeImageIndex] || images[0] : '';
-
-  // ===== HOVER ZOOM HANDLER (NEW) =====
-  const handleMouseMove = (e) => {
-    if (!mainImageRef.current || !activeImage) return;
-    const rect = mainImageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomStyle({
-      transformOrigin: `${x}% ${y}%`,
-      transform: 'scale(2)',
-    });
-  };
-
-  const handleMouseEnter = () => {
-    if (window.matchMedia('(min-width: 768px)').matches && hasRealImages) {
-      setIsHovering(true);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-    setZoomStyle({});
-  };
 
   // ===== THUMBNAIL NAVIGATION (NEW) =====
   const goToImage = (index) => {
@@ -1502,7 +1476,7 @@ export default function ProductDetail() {
                       `}
                     >
                       <img
-                        src={img.startsWith('http') ? img : `${IMAGE_URL}${img}`}
+                        src={getProductImage(img)}
                         // src={`${IMAGE_URL}${item.product.images[0]}`}
                         alt={`${product.name} thumbnail ${idx + 1}`}
                         className="w-full h-full object-cover"
@@ -1520,21 +1494,14 @@ export default function ProductDetail() {
                   initial={{ opacity: 0.3 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  ref={mainImageRef}
-                  onMouseMove={handleMouseMove}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                  className={`relative aspect-[4/5] overflow-hidden bg-[#F8F3E9] cursor-zoom-in ${
-                    isHovering ? 'cursor-zoom-in' : ''
-                  }`}
+                  className="relative aspect-[4/5] overflow-hidden bg-[#F8F3E9] cursor-zoom-in"
                   onClick={() => setIsLightboxOpen(true)}
                 >
                   {hasRealImages ? (
                     <img
-                      src={activeImage.startsWith('http') ? activeImage : `${IMAGE_URL}${activeImage}`}
+                      src={getProductImage(activeImage)}
                       alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-300"
-                      style={isHovering ? zoomStyle : {}}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className={`w-full h-full ${gradient} flex items-center justify-center`}>
@@ -1945,7 +1912,7 @@ export default function ProductDetail() {
                     }}
                     className="cursor-pointer group bg-white rounded-sm overflow-hidden border border-[#C9A86A]/10 hover:shadow-lg transition-shadow"
                   >
-                    <div className={`aspect-[4/5] ${relGradient} group-hover:scale-105 transition-transform duration-700 flex items-center justify-center`}>
+                    <div className={`aspect-[4/5] ${relGradient} flex items-center justify-center`}>
                       {p.images && p.images.length > 0 ? (
                         <img
                           // src={p.images[0].startsWith('http') ? p.images[0] : `${IMAGE_URL}${p.images[0]}`}
@@ -2018,7 +1985,7 @@ export default function ProductDetail() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              src={activeImage.startsWith('http') ? activeImage : `${IMAGE_URL}${activeImage}`}
+              src={getProductImage(activeImage)}
               alt={`${product.name} full view`}
               className="max-w-[90vw] max-h-[85vh] object-contain"
               onClick={(e) => e.stopPropagation()}
@@ -2055,7 +2022,7 @@ export default function ProductDetail() {
                     }`}
                   >
                     <img
-                      src={img.startsWith('http') ? img : `${IMAGE_URL}${img}`}
+                      src={getProductImage(img)}
                       alt=""
                       className="w-full h-full object-cover"
                     />

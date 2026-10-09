@@ -25,11 +25,24 @@ const statsRoutes = require('./routes/StatsRoutes');
 // Import models for seeding
 const Category = require('./models/CategoryModel');
 const Product = require('./models/ProductModel');
-const Collection = require('./models/CollectionModel');
-const Testimonial = require('./models/TestimonialModel');
-const BlogPost = require('./models/BlogPostModel');
-const Subscription = require('./models/SubscriptionModel');
-const User = require('./models/UserModel');
+
+const TEA_CATEGORY_IMAGES = {
+  'Black Tea': '/images/tea-products/black-tea.jpg',
+  'Green Tea': '/images/tea-products/green-tea.jpg',
+  'Oolong Tea': '/images/tea-products/oolong-tea.jpg',
+  'White Tea': '/images/tea-products/white-tea.jpg',
+  'Pu-erh Tea': '/images/tea-products/pu-erh-tea.png',
+  Matcha: '/images/tea-products/matcha.jpg',
+};
+
+const TEA_CATEGORY_GALLERIES = {
+  'Black Tea': [TEA_CATEGORY_IMAGES['Black Tea'], '/images/tea-products/black-tea-2.jpg', '/images/tea-products/black-tea-3.jpg', '/images/tea-products/black-tea-4.jpg'],
+  'Green Tea': [TEA_CATEGORY_IMAGES['Green Tea'], '/images/tea-products/green-tea-2.jpg', '/images/tea-products/green-tea-3.jpg', '/images/tea-products/green-tea-4.jpg'],
+  'Oolong Tea': [TEA_CATEGORY_IMAGES['Oolong Tea'], '/images/tea-products/oolong-tea-2.jpg', '/images/tea-products/oolong-tea-3.jpg', '/images/tea-products/oolong-tea-4.jpg'],
+  'White Tea': [TEA_CATEGORY_IMAGES['White Tea'], '/images/tea-products/white-tea-2.jpg', '/images/tea-products/white-tea-3.jpg', '/images/tea-products/white-tea-4.jpg'],
+  'Pu-erh Tea': [TEA_CATEGORY_IMAGES['Pu-erh Tea'], '/images/tea-products/pu-erh-tea-2.jpg', '/images/tea-products/pu-erh-tea-3.jpg', '/images/tea-products/pu-erh-tea-4.jpg'],
+  Matcha: [TEA_CATEGORY_IMAGES.Matcha, '/images/tea-products/matcha-2.jpg', '/images/tea-products/matcha-3.jpg', '/images/tea-products/matcha-4.jpg'],
+};
 
 const app = express();
 
@@ -83,31 +96,15 @@ app.use('/api/stats', statsRoutes);
 // Seed route
 app.get('/api/seed', async (req, res) => {
   try {
-    // Clear existing data
-    await Category.deleteMany({});
-    await Product.deleteMany({});
-    await Collection.deleteMany({});
-    await Testimonial.deleteMany({});
-    await BlogPost.deleteMany({});
-    await Subscription.deleteMany({});
-    await User.deleteMany({});
-
-    // ============ SEED ADMIN USER (MUST BE FIRST - needed for subscriptions) ============
-    const admin = await User.create({
-      name: 'Admin',
-      email: 'admin@kingstea.com',
-      password: 'admin123',
-      role: 'admin',
-      isActive: true
-    });
-
+    // This endpoint only adds missing tea catalog records. It must never clear
+    // collections because the MongoDB cluster may be shared with other apps.
     // ============ SEED CATEGORIES ============
-    const categories = await Category.insertMany([
+    const categorySeeds = [
       {
         name: 'Black Tea',
         slug: 'black-tea',
         description: 'Bold, robust, and full-bodied teas with rich flavors. Our black tea collection features the finest leaves from renowned estates across India, Sri Lanka, and China.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES['Black Tea'],
         featured: true,
         sortOrder: 1,
         isActive: true
@@ -116,7 +113,7 @@ app.get('/api/seed', async (req, res) => {
         name: 'Green Tea',
         slug: 'green-tea',
         description: 'Fresh, delicate, and naturally vibrant. Experience the nuanced flavors of carefully steamed and pan-fired green teas from Japan and China.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES['Green Tea'],
         featured: true,
         sortOrder: 2,
         isActive: true
@@ -125,7 +122,7 @@ app.get('/api/seed', async (req, res) => {
         name: 'Oolong Tea',
         slug: 'oolong-tea',
         description: 'A perfect balance between black and green, offering complex flavor profiles that evolve with every sip. Crafted through traditional oxidation techniques.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES['Oolong Tea'],
         featured: true,
         sortOrder: 3,
         isActive: true
@@ -134,7 +131,7 @@ app.get('/api/seed', async (req, res) => {
         name: 'White Tea',
         slug: 'white-tea',
         description: 'The most delicate and minimally processed of all teas. Silver needle and white peony varieties that offer subtle, ethereal flavors.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES['White Tea'],
         featured: false,
         sortOrder: 4,
         isActive: true
@@ -143,7 +140,7 @@ app.get('/api/seed', async (req, res) => {
         name: 'Pu-erh Tea',
         slug: 'pu-erh-tea',
         description: 'Aged and fermented teas from Yunnan province, offering deep, earthy flavors that improve with time. A true connoisseur\'s choice.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES['Pu-erh Tea'],
         featured: false,
         sortOrder: 5,
         isActive: true
@@ -152,15 +149,22 @@ app.get('/api/seed', async (req, res) => {
         name: 'Matcha',
         slug: 'matcha',
         description: 'Stone-ground ceremonial and culinary grade matcha. Vibrant green powder crafted from shade-grown tencha leaves for an immersive tea experience.',
-        image: '',
+        image: TEA_CATEGORY_IMAGES.Matcha,
         featured: true,
         sortOrder: 6,
         isActive: true
       }
-    ]);
+    ];
+    const categories = await Promise.all(categorySeeds.map((category) =>
+      Category.findOneAndUpdate(
+        { slug: category.slug },
+        { $setOnInsert: category },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      )
+    ));
 
     // ============ SEED PRODUCTS ============
-    const products = await Product.insertMany([
+    const productSeeds = [
       {
         name: 'Royal Darjeeling',
         slug: 'royal-darjeeling',
@@ -168,7 +172,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'First flush Darjeeling with muscatel character',
         price: 2499,
         comparePrice: 2999,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Black Tea'],
         category: 'Black Tea',
         categoryId: categories[0]._id,
         origin: 'Darjeeling, India',
@@ -200,7 +204,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Pan-fired Chinese green tea with chestnut notes',
         price: 3299,
         comparePrice: 3999,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Green Tea'],
         category: 'Green Tea',
         categoryId: categories[1]._id,
         origin: 'Hangzhou, China',
@@ -232,7 +236,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Traditional Tieguanyin with orchid aroma',
         price: 2899,
         comparePrice: 3499,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Oolong Tea'],
         category: 'Oolong Tea',
         categoryId: categories[2]._id,
         origin: 'Fujian, China',
@@ -264,7 +268,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Premium white tea with silver buds',
         price: 4499,
         comparePrice: 5299,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['White Tea'],
         category: 'White Tea',
         categoryId: categories[3]._id,
         origin: 'Fujian, China',
@@ -296,7 +300,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Vintage 2005 fermented tea with deep complexity',
         price: 5999,
         comparePrice: 7499,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Pu-erh Tea'],
         category: 'Pu-erh Tea',
         categoryId: categories[4]._id,
         origin: 'Yunnan, China',
@@ -328,7 +332,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Premium stone-ground Japanese matcha',
         price: 3799,
         comparePrice: 4499,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES.Matcha,
         category: 'Matcha',
         categoryId: categories[5]._id,
         origin: 'Uji, Japan',
@@ -360,7 +364,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Second flush Assam with golden tips',
         price: 1999,
         comparePrice: 2499,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Black Tea'],
         category: 'Black Tea',
         categoryId: categories[0]._id,
         origin: 'Assam, India',
@@ -392,7 +396,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Premium Japanese steamed green tea',
         price: 1899,
         comparePrice: 2299,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Green Tea'],
         category: 'Green Tea',
         categoryId: categories[1]._id,
         origin: 'Shizuoka, Japan',
@@ -424,7 +428,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Bug-bitten oolong with natural honey sweetness',
         price: 4299,
         comparePrice: 5199,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Oolong Tea'],
         category: 'Oolong Tea',
         categoryId: categories[2]._id,
         origin: 'Hsinchu, Taiwan',
@@ -456,7 +460,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Gentle floral white tea with buds and leaves',
         price: 2299,
         comparePrice: 2799,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['White Tea'],
         category: 'White Tea',
         categoryId: categories[3]._id,
         origin: 'Fujian, China',
@@ -488,7 +492,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Young raw pu-erh with aging potential',
         price: 3499,
         comparePrice: 3999,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES['Pu-erh Tea'],
         category: 'Pu-erh Tea',
         categoryId: categories[4]._id,
         origin: 'Yunnan, China',
@@ -520,7 +524,7 @@ app.get('/api/seed', async (req, res) => {
         shortDescription: 'Culinary matcha perfect for lattes and desserts',
         price: 1499,
         comparePrice: 1899,
-        images: [],
+        images: TEA_CATEGORY_GALLERIES.Matcha,
         category: 'Matcha',
         categoryId: categories[5]._id,
         origin: 'Kyoto, Japan',
@@ -545,257 +549,32 @@ app.get('/api/seed', async (req, res) => {
         gradientColor: 'from-green-500 to-green-300',
         isActive: true
       }
-    ]);
+    ];
+    const products = await Promise.all(productSeeds.map(async (productSeed) => {
+      const product = await Product.findOneAndUpdate(
+        { slug: productSeed.slug },
+        { $setOnInsert: productSeed },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
 
-    // ============ SEED COLLECTIONS ============
-    const collections = await Collection.insertMany([
-      {
-        name: 'By Origin',
-        slug: 'by-origin',
-        description: 'Explore teas from the world\'s most renowned growing regions, from the misty Himalayan slopes of Darjeeling to the ancient tea gardens of Fujian. Each origin imparts unique characteristics shaped by terroir, altitude, and centuries of cultivation expertise.',
-        gradientColor: 'from-emerald-800 to-emerald-600',
-        image: '',
-        itemCount: 8,
-        featured: true,
-        sortOrder: 1,
-        isActive: true
-      },
-      {
-        name: 'By Fermentation',
-        slug: 'by-fermentation',
-        description: 'Discover teas categorized by their level of oxidation, from the delicate freshness of unfermented green teas to the deep complexity of fully oxidized black teas. Understanding fermentation unlocks a deeper appreciation of tea\'s incredible diversity.',
-        gradientColor: 'from-amber-800 to-amber-600',
-        image: '',
-        itemCount: 6,
-        featured: true,
-        sortOrder: 2,
-        isActive: true
-      },
-      {
-        name: 'By Season',
-        slug: 'by-season',
-        description: 'Just as wine varies by vintage, tea is profoundly influenced by the season of harvest. Spring teas offer delicate vibrancy, summer brings robust intensity, and autumn yields nuanced complexity that rewards the patient connoisseur.',
-        gradientColor: 'from-teal-800 to-teal-600',
-        image: '',
-        itemCount: 4,
-        featured: true,
-        sortOrder: 3,
-        isActive: true
+      const currentImages = Array.isArray(product.images) ? product.images : [];
+      if (currentImages.length < 4) {
+        product.images = [...new Set([
+          ...currentImages,
+          ...productSeed.images.filter((image) => !currentImages.includes(image)),
+        ])].slice(0, 4);
+        await product.save();
       }
-    ]);
 
-    // ============ SEED TESTIMONIALS ============
-    const testimonials = await Testimonial.insertMany([
-      {
-        name: 'Priya Sharma',
-        location: 'Mumbai, India',
-        quote: 'The Royal Darjeeling from King\'s Tea is unlike anything I\'ve ever tasted. Each sip transports me to the misty hills of the Himalayas. This is truly the finest tea I\'ve found outside of the estates themselves.',
-        rating: 5,
-        avatar: '',
-        featured: true,
-        sortOrder: 1,
-        isActive: true
-      },
-      {
-        name: 'James Chen',
-        location: 'San Francisco, USA',
-        quote: 'As a lifelong tea enthusiast, I was skeptical about ordering online. But the Ceremonial Matcha exceeded all expectations — vibrant color, smooth umami, and impeccable freshness. King\'s Tea has earned a customer for life.',
-        rating: 5,
-        avatar: '',
-        featured: true,
-        sortOrder: 2,
-        isActive: true
-      },
-      {
-        name: 'Amara Okafor',
-        location: 'London, UK',
-        quote: 'The subscription service is brilliant — every month brings a new discovery. Last month\'s Iron Goddess Oolong was a revelation. The quality and presentation make this a truly royal experience.',
-        rating: 5,
-        avatar: '',
-        featured: true,
-        sortOrder: 3,
-        isActive: true
-      },
-      {
-        name: 'Yuki Tanaka',
-        location: 'Tokyo, Japan',
-        quote: 'Even in Japan, where matcha is part of daily life, King\'s Tea ceremonial grade stands out. The depth of flavor and the care in sourcing is evident in every bowl. A beautiful tribute to the art of tea.',
-        rating: 4,
-        avatar: '',
-        featured: false,
-        sortOrder: 4,
-        isActive: true
-      },
-      {
-        name: 'Sofia Rossi',
-        location: 'Milan, Italy',
-        quote: 'I gifted the Silver Needle to my mother and she was moved to tears by its delicacy. King\'s Tea understands that tea is not just a beverage — it\'s an experience, a memory, a moment of peace.',
-        rating: 5,
-        avatar: '',
-        featured: true,
-        sortOrder: 5,
-        isActive: true
-      },
-      {
-        name: 'Raj Patel',
-        location: 'Ahmedabad, India',
-        quote: 'The Aged Pu-erh is extraordinary — complex, earthy, and endlessly fascinating. Each steeping reveals new layers of flavor. This is tea for those who truly appreciate the craft and patience behind great tea-making.',
-        rating: 5,
-        avatar: '',
-        featured: false,
-        sortOrder: 6,
-        isActive: true
-      }
-    ]);
+      return product;
+    }));
 
-    // ============ SEED BLOG POSTS ============
-    const blogPosts = await BlogPost.insertMany([
-      {
-        title: 'The Art of Gongfu Cha: A Beginner\'s Journey',
-        slug: 'art-of-gongfu-cha-beginners-journey',
-        excerpt: 'Discover the ancient Chinese tea ceremony that transforms simple tea drinking into a meditative practice. Learn the fundamental techniques, essential tools, and philosophy behind Gongfu Cha that has been perfected over centuries of tradition.',
-        content: 'Gongfu Cha, which translates to "tea with skill," is more than just a method of preparing tea — it is a philosophy, a meditation, and an art form that has been practiced for centuries in China. This ancient tradition emphasizes the harmonious relationship between the tea master, the tea, and the guests, creating an experience that engages all the senses. The practice begins with selecting the right teaware, typically a Yixing clay teapot or a gaiwan, and understanding how each piece contributes to the overall experience. The water temperature, the ratio of tea to water, and the timing of each infusion are all critical elements that require careful attention and practice to master.',
-        category: 'Tea Culture',
-        tags: ['gongfu', 'ceremony', 'beginner'],
-        author: 'King\'s Tea',
-        date: new Date('2025-01-15'),
-        readTime: '8 min read',
-        gradientColor: 'from-amber-700 to-amber-500',
-        image: '',
-        featured: true,
-        isActive: true
-      },
-      {
-        title: 'Understanding Tea Terroir: Why Origin Matters',
-        slug: 'understanding-tea-terroir-why-origin-matters',
-        excerpt: 'Just as wine reflects its terroir, tea is profoundly shaped by the soil, altitude, and climate of its growing region. Explore how Darjeeling\'s misty heights create flavors entirely different from the bold plains of Assam.',
-        content: 'The concept of terroir — the unique combination of soil, climate, altitude, and geography that gives a product its distinctive character — is as crucial to tea as it is to wine. The same tea plant (Camellia sinensis) grown in different regions will produce dramatically different flavors, aromas, and characteristics. Darjeeling tea, grown at elevations between 600 and 2,000 meters in the Indian Himalayas, develops its famous muscatel character due to the cool mountain air, frequent mist, and well-drained soil. In contrast, Assam tea, grown near sea level in the humid Brahmaputra valley, produces the bold, malty flavors that make it the backbone of breakfast blends worldwide.',
-        category: 'Education',
-        tags: ['terroir', 'origin', 'darjeeling', 'assam'],
-        author: 'King\'s Tea',
-        date: new Date('2025-01-10'),
-        readTime: '6 min read',
-        gradientColor: 'from-emerald-700 to-emerald-500',
-        image: '',
-        featured: true,
-        isActive: true
-      },
-      {
-        title: 'The Health Benefits of Matcha: Science Meets Tradition',
-        slug: 'health-benefits-of-matcha-science-meets-tradition',
-        excerpt: 'Modern science is confirming what Zen monks have known for centuries — matcha offers remarkable health benefits. From potent antioxidants to sustained energy, discover why this vibrant green tea powder is a nutritional powerhouse.',
-        content: 'Matcha has been a cornerstone of Japanese tea culture for over 800 years, originally used by Zen Buddhist monks to maintain alertness during long meditation sessions. Today, modern scientific research is validating what these monks experienced intuitively. Matcha is uniquely nutritious because, unlike other teas where the leaves are steeped and discarded, with matcha you consume the entire leaf in powdered form. This means you receive the full spectrum of the tea\'s nutritional benefits, including an exceptionally high concentration of catechins — particularly EGCG (epigallocatechin gallate), which is one of the most powerful antioxidants found in nature.',
-        category: 'Health & Wellness',
-        tags: ['matcha', 'health', 'antioxidants', 'wellness'],
-        author: 'King\'s Tea',
-        date: new Date('2025-01-05'),
-        readTime: '7 min read',
-        gradientColor: 'from-green-700 to-green-500',
-        image: '',
-        featured: true,
-        isActive: true
-      },
-      {
-        title: 'Pairing Tea with Food: A Royal Guide',
-        slug: 'pairing-tea-with-food-royal-guide',
-        excerpt: 'Elevate your dining experience by learning the art of tea and food pairing. From delicate white teas with fresh seafood to robust pu-erh with rich desserts, discover combinations that transform ordinary meals into royal feasts.',
-        content: 'The art of pairing tea with food is a nuanced practice that can elevate both the tea and the meal to extraordinary heights. Just as sommeliers pair wines with cuisine, tea pairing considers the weight, flavor intensity, and aromatic qualities of both the tea and the food. Delicate white teas like Silver Needle pair beautifully with light seafood, salads, and mild cheeses, as their subtle sweetness and floral notes complement without overwhelming. Light oolongs such as Tieguanyin find harmony with roasted poultry, grilled vegetables, and lightly spiced dishes, the tea\'s orchid aromatics bridging the gap between savory and sweet.',
-        category: 'Lifestyle',
-        tags: ['pairing', 'food', 'dining', 'entertaining'],
-        author: 'King\'s Tea',
-        date: new Date('2024-12-28'),
-        readTime: '5 min read',
-        gradientColor: 'from-red-800 to-red-600',
-        image: '',
-        featured: false,
-        isActive: true
-      }
-    ]);
-
-    // ============ SEED SUBSCRIPTION PLANS (AFTER admin is created) ============
-    const subscriptionPlans = await Subscription.insertMany([
-      {
-        name: 'Royal Monthly',
-        slug: 'royal-monthly',
-        price: 1999,
-        comparePrice: 2499,
-        period: 'month',
-        description: 'Discover a new premium tea every month, hand-selected by our tea masters. Perfect for those beginning their journey into the world of fine teas and wanting to explore different varieties and origins.',
-        features: [
-          '1 premium tea selection (50g)',
-          'Tasting notes card',
-          'Brewing guide included',
-          'Free shipping',
-          '10% off additional purchases'
-        ],
-        popular: false,
-        gradientColor: 'from-amber-700 to-amber-500',
-        isActive: true,
-        sortOrder: 1,
-        userId: admin._id,
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      },
-      {
-        name: 'Imperial Quarterly',
-        slug: 'imperial-quarterly',
-        price: 5499,
-        comparePrice: 7497,
-        period: 'quarter',
-        description: 'Our most popular plan delivers three exceptional teas each quarter, including rare and limited-edition selections not available elsewhere. Experience the full spectrum of flavors from the world\'s finest tea gardens.',
-        features: [
-          '3 premium tea selections (75g each)',
-          'Detailed tasting notes & origin story',
-          'Brewing accessories included',
-          'Free express shipping',
-          '15% off additional purchases',
-          'Exclusive access to limited editions'
-        ],
-        popular: true,
-        gradientColor: 'from-emerald-700 to-emerald-500',
-        isActive: true,
-        sortOrder: 2,
-        userId: admin._id,
-        nextBillingDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-      },
-      {
-        name: 'Sovereign Annual',
-        slug: 'sovereign-annual',
-        price: 19999,
-        comparePrice: 29988,
-        period: 'year',
-        description: 'The ultimate tea experience for the true connoisseur. Receive twelve carefully curated teas throughout the year, including our rarest and most exclusive offerings. This is the pinnacle of tea subscription luxury.',
-        features: [
-          '12 premium tea selections (100g each)',
-          'Collector\'s tasting journal',
-          'Premium brewing accessories',
-          'Free express shipping worldwide',
-          '20% off additional purchases',
-          'Exclusive access to limited editions',
-          'Personal tea consultation',
-          'Invitation to virtual tea events'
-        ],
-        popular: false,
-        gradientColor: 'from-red-800 to-red-600',
-        isActive: true,
-        sortOrder: 3,
-        userId: admin._id,
-        nextBillingDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-      }
-    ]);
-
-    res.json({
+    return res.json({
       success: true,
-      message: 'Database seeded successfully!',
-      data: {
-        categories: categories.length,
-        products: products.length,
-        collections: collections.length,
-        testimonials: testimonials.length,
-        blogPosts: blogPosts.length,
-        subscriptionPlans: subscriptionPlans.length,
-        admin: admin.email
-      }
+      message: 'Tea catalog is ready. Existing records were preserved.',
+      data: { categories: categories.length, products: products.length }
     });
+
   } catch (error) {
     console.error('Seed error:', error);
     res.status(500).json({
@@ -812,9 +591,11 @@ app.get('/api/health', (req, res) => {
 });
 
 // Connect to MongoDB and start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI)
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI, {
+  dbName: process.env.MONGODB_DATABASE || 'kings-tea'
+})
   .then(() => {
     console.log('✅ Connected to MongoDB Atlas');
     app.listen(PORT, () => {

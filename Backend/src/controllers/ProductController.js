@@ -1,6 +1,16 @@
 const Product = require('../models/ProductModel');
 const Category = require('../models/CategoryModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
+
+const getGalleryPaths = (value) => {
+  if (value === undefined) return undefined;
+  try {
+    const paths = JSON.parse(value);
+    return Array.isArray(paths) ? paths.filter((path) => typeof path === 'string' && path.trim()) : [];
+  } catch {
+    return [];
+  }
+};
 console.log('🎯 ProductController.js LOADED at', new Date().toISOString());
 // Get all products
 const getProducts = async (req, res) => {
@@ -158,10 +168,12 @@ const createProduct = async (req, res) => {
     console.log('========================================');
     // 🔍 END DEBUG BLOCK
 
-    // ✅ Single, clean image mapping
-    if (req.files && req.files.length > 0) {
-      productData.images = req.files.map((file) => file.path);
+    const galleryPaths = getGalleryPaths(req.body.galleryImages);
+    const uploadedPaths = (req.files || []).map((file) => file.path);
+    if (galleryPaths !== undefined || uploadedPaths.length > 0) {
+      productData.images = [...(galleryPaths || []), ...uploadedPaths].slice(0, 4);
     }
+    delete productData.galleryImages;
 
     if (productData.category && !productData.categoryId) {
       if (productData.category.match(/^[0-9a-fA-F]{24}$/)) {
@@ -204,9 +216,12 @@ const updateProduct = async (req, res) => {
     //   productData.images = req.files.map((file) => `/uploads/${file.filename}`);
     // }
 
-    if (req.files && req.files.length > 0) {
-      productData.images = req.files.map((file) => file.path);  // ✅
+    const galleryPaths = getGalleryPaths(req.body.galleryImages);
+    const uploadedPaths = (req.files || []).map((file) => file.path);
+    if (galleryPaths !== undefined || uploadedPaths.length > 0) {
+      productData.images = [...(galleryPaths || []), ...uploadedPaths].slice(0, 4);
     }
+    delete productData.galleryImages;
 
     if (productData.category && !productData.categoryId) {
       if (productData.category.match(/^[0-9a-fA-F]{24}$/)) {

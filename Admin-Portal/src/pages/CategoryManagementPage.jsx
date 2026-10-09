@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, ImagePlus } from 'lucide-react';
 import DataTable from '../components/DataTable';
+import { getAdminImageUrl, getTeaCategoryImage } from '../utils/teaImages';
 import {
   getCategories,
   createCategory,
@@ -16,6 +17,8 @@ const CategoryManagementPage = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({ name: '', description: '', image: '' });
+  const [fillingImages, setFillingImages] = useState(false);
+  const [imageStatus, setImageStatus] = useState('');
 
   useEffect(() => {
     loadCategories();
@@ -25,7 +28,7 @@ const CategoryManagementPage = () => {
     setLoading(true);
     try {
       const res = await getCategories();
-      const data = res.data;
+      const data = res.data?.data || res.data;
       setCategories(Array.isArray(data) ? data : data.categories || []);
     } catch {
       setCategories([]);
@@ -75,7 +78,41 @@ const CategoryManagementPage = () => {
     }
   };
 
+  const handleFillTeaCategoryImages = async () => {
+    const missingImages = categories.filter((category) => !category.image && getTeaCategoryImage(category.name));
+    if (!missingImages.length || fillingImages) return;
+
+    setFillingImages(true);
+    setImageStatus(`Adding images to ${missingImages.length} tea categories...`);
+    let updated = 0;
+    let failed = 0;
+
+    for (const category of missingImages) {
+      try {
+        await updateCategory(category._id, { ...category, image: getTeaCategoryImage(category.name) });
+        updated += 1;
+      } catch {
+        failed += 1;
+      }
+    }
+
+    await loadCategories();
+    setImageStatus(failed
+      ? `Added images to ${updated} categories. ${failed} could not be updated; check your admin session and try again.`
+      : `Added images to all ${updated} tea categories.`);
+    setFillingImages(false);
+  };
+
   const columns = [
+    {
+      key: 'image',
+      label: 'Image',
+      render: (value, row) => value ? (
+        <img src={getAdminImageUrl(value)} alt={row.name} className="h-12 w-12 rounded-lg object-cover" />
+      ) : (
+        <span className="text-xs text-deep-walnut/35">No image</span>
+      ),
+    },
     {
       key: 'name',
       label: 'Category Name',
@@ -115,14 +152,28 @@ const CategoryManagementPage = () => {
             Manage product categories
           </p>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-tea-green text-warm-ivory text-sm font-semibold rounded-lg hover:bg-tea-green/90 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add Category
-        </button>
+        <div className="flex flex-wrap justify-end gap-2">
+          {categories.some((category) => !category.image && getTeaCategoryImage(category.name)) && (
+            <button
+              onClick={handleFillTeaCategoryImages}
+              disabled={fillingImages}
+              className="flex items-center gap-2 px-4 py-2.5 border border-tea-green/25 text-tea-green text-sm font-semibold rounded-lg hover:bg-tea-green/5 transition-colors disabled:opacity-60"
+            >
+              <ImagePlus className="w-4 h-4" />
+              {fillingImages ? 'Adding images...' : 'Fill tea category images'}
+            </button>
+          )}
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-tea-green text-warm-ivory text-sm font-semibold rounded-lg hover:bg-tea-green/90 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Category
+          </button>
+        </div>
       </div>
+
+      {imageStatus && <p role="status" className="text-sm text-tea-green">{imageStatus}</p>}
 
       {/* Table */}
       <DataTable

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../store/productSlice';
 import { getCategories } from '../services/api';
+import { getAdminImageUrl, getTeaCategoryGallery } from '../utils/teaImages';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 
 const ProductFormModal = ({ product, onClose }) => {
@@ -10,8 +11,9 @@ const ProductFormModal = ({ product, onClose }) => {
 
   const [categories, setCategories] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState(product?.images || []);
-  const [imageFiles, setImageFiles] = useState([]);
+  const [imageItems, setImageItems] = useState(
+    (product?.images || []).map((path) => ({ path, preview: path }))
+  );
   const [formData, setFormData] = useState({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -149,35 +151,26 @@ const ProductFormModal = ({ product, onClose }) => {
 
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files).slice(0, Math.max(0, 4 - imageItems.length));
+    e.target.value = '';
     if (files.length === 0) return;
 
     setUploading(true);
-    const newPreviews = [];
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result);
-        if (newPreviews.length === files.length) {
-          setImagePreviews((prev) => [...prev, ...newPreviews]);
-          setUploading(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // Store actual File objects for FormData upload
-    setImageFiles((prev) => [...prev, ...files]);
+    setImageItems((prev) => [
+      ...prev,
+      ...files.map((file) => ({ file, preview: URL.createObjectURL(file) })),
+    ]);
+    setUploading(false);
   };
 
   const removeImage = (index) => {
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+    setImageItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const useCategoryGallery = () => {
+    const gallery = getTeaCategoryGallery(formData.category);
+    if (gallery.length === 0) return;
+    setImageItems(gallery.map((path) => ({ path, preview: path })));
   };
 
   // Replace handleSubmit with this:
@@ -209,9 +202,13 @@ const ProductFormModal = ({ product, onClose }) => {
     data.append('bestSeller', formData.bestSeller);
     data.append('isNew', formData.isNew);
 
-    // Append actual image files
-    imageFiles.forEach((file) => {
-      data.append('images', file);
+    data.append('galleryImages', JSON.stringify(
+      imageItems.filter((item) => item.path).map((item) => item.path)
+    ));
+
+    // Append uploaded files alongside any selected existing image paths.
+    imageItems.filter((item) => item.file).forEach((item) => {
+      data.append('images', item.file);
     });
 
     if (isEdit) {
@@ -472,6 +469,7 @@ const ProductFormModal = ({ product, onClose }) => {
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 multiple
+                disabled={imageItems.length >= 4}
                 onChange={handleImageUpload}
                 className="hidden"
                 id="image-upload"
@@ -482,19 +480,29 @@ const ProductFormModal = ({ product, onClose }) => {
               >
                 <Upload className="w-8 h-8 text-imperial-gold/40 mb-2" />
                 <span className="text-sm font-medium text-deep-walnut/60">
-                  {uploading ? 'Uploading...' : 'Click to upload or drag and drop'}
+                  {uploading ? 'Uploading...' : imageItems.length >= 4 ? 'Four images selected' : 'Click to upload images'}
                 </span>
-                <span className="text-xs text-deep-walnut/40 mt-1">PNG, JPG, WebP up to 5MB</span>
+                <span className="text-xs text-deep-walnut/40 mt-1">Choose up to {4 - imageItems.length} more · PNG, JPG, WebP up to 5MB</span>
               </label>
             </div>
 
+            {getTeaCategoryGallery(formData.category).length === 4 && (
+              <button
+                type="button"
+                onClick={useCategoryGallery}
+                className="mt-3 text-xs font-medium text-tea-green hover:underline"
+              >
+                Use the downloaded {formData.category} photo set (4 images)
+              </button>
+            )}
+
             {/* Image Previews */}
-            {imagePreviews.length > 0 && (
+            {imageItems.length > 0 && (
               <div className="mt-3 grid grid-cols-4 gap-2">
-                {imagePreviews.map((src, index) => (
+                {imageItems.map((item, index) => (
                   <div key={index} className="relative group rounded-lg overflow-hidden border border-imperial-gold/10">
                     <img
-                      src={src}
+                      src={getAdminImageUrl(item.preview)}
                       alt={`Preview ${index + 1}`}
                       className="w-full h-20 object-cover"
                       onError={(e) => {

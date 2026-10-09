@@ -3,7 +3,7 @@
 // Base backend URL — strips "/api" from VITE_API_URL
 // Example: "http://localhost:5000/api" → "http://localhost:5000"
 export const IMAGE_URL =
-  (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace('/api', '');
+  (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace('/api', '');
 
 // ✅ NEW — Smart image URL helper
 // Handles both legacy /uploads/ paths AND new Cloudinary URLs

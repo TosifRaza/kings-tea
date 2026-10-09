@@ -33,7 +33,7 @@ function ProductCard({ product }) {
               ? `${IMAGE_URL}${product.images[0]}`
               : product.images[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover"
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'block';
@@ -41,7 +41,7 @@ function ProductCard({ product }) {
           />
         ) : null}
         <div
-          className={`w-full h-full bg-gradient-to-br ${product.gradient || 'from-tea-green to-tea-green-light'} transition-transform duration-700 group-hover:scale-105 ${product.images && product.images.length > 0 ? 'hidden' : ''}`}
+          className={`w-full h-full bg-gradient-to-br ${product.gradient || 'from-tea-green to-tea-green-light'} ${product.images && product.images.length > 0 ? 'hidden' : ''}`}
           style={{ minHeight: product.images && product.images.length > 0 ? 0 : '100%' }}
         />
 

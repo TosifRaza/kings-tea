@@ -55,7 +55,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024, files: 4 },
 });
 
 // ============================================================
@@ -73,7 +73,7 @@ router.get('/:id', getProductById);
 router.post(
   '/',
   protect,
-  upload.array('images', 5),
+  upload.array('images', 4),
   [
     body('name').trim().notEmpty().withMessage('Product name is required'),
     body('price').isNumeric().withMessage('Price must be a number'),
@@ -86,7 +86,7 @@ router.post(
 router.put(
   '/:id',
   protect,
-  upload.array('images', 5),
+  upload.array('images', 4),
   updateProduct
 );
 

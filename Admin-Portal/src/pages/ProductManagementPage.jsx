@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, removeProduct } from '../store/productSlice';
+import { productAPI } from '../services/api';
+import { getAdminImageUrl, getTeaCategoryImage } from '../utils/teaImages';
 import ProductFormModal from '../components/ProductFormModal';
-import { Plus, Search, Edit2, Trash2, Package, Star } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Star, ImagePlus } from 'lucide-react';
 
 const ProductManagementPage = () => {
   const dispatch = useDispatch();
@@ -10,6 +12,8 @@ const ProductManagementPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [fillingPhotos, setFillingPhotos] = useState(false);
+  const [photoStatus, setPhotoStatus] = useState('');
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -31,6 +35,32 @@ const ProductManagementPage = () => {
     }
   };
 
+  const handleFillMissingPhotos = async () => {
+    const missingPhotos = products.filter((product) => !product.images?.length && getTeaCategoryImage(product.category));
+    if (!missingPhotos.length || fillingPhotos) return;
+
+    setFillingPhotos(true);
+    setPhotoStatus(`Adding photos to ${missingPhotos.length} tea products...`);
+    let updated = 0;
+    let failed = 0;
+
+    for (const product of missingPhotos) {
+      try {
+        await productAPI.updateProduct(product._id, { images: [getTeaCategoryImage(product.category)] });
+        updated += 1;
+        setPhotoStatus(`Added photos to ${updated} of ${missingPhotos.length} products...`);
+      } catch {
+        failed += 1;
+      }
+    }
+
+    await dispatch(fetchProducts());
+    setPhotoStatus(failed
+      ? `Added photos to ${updated} products. ${failed} could not be updated; check your admin session and try again.`
+      : `Added photos to all ${updated} tea products.`);
+    setFillingPhotos(false);
+  };
+
   const handleClose = () => {
     setShowModal(false);
     setEditingProduct(null);
@@ -49,14 +79,28 @@ const ProductManagementPage = () => {
           <h1 className="text-2xl font-playfair font-bold text-deep-walnut">Products</h1>
           <p className="text-sm text-deep-walnut/50 mt-1">{totalCount} total products</p>
         </div>
-        <button
-          onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2.5 bg-tea-green text-warm-ivory text-sm font-medium rounded-lg hover:bg-tea-green/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Product
-        </button>
+        <div className="flex flex-wrap justify-end gap-2">
+          {products.some((product) => !product.images?.length && getTeaCategoryImage(product.category)) && (
+            <button
+              onClick={handleFillMissingPhotos}
+              disabled={fillingPhotos}
+              className="flex items-center gap-2 px-4 py-2.5 border border-tea-green/25 text-tea-green text-sm font-medium rounded-lg hover:bg-tea-green/5 transition-colors disabled:opacity-60"
+            >
+              <ImagePlus className="w-4 h-4" />
+              {fillingPhotos ? 'Adding photos...' : 'Fill missing tea photos'}
+            </button>
+          )}
+          <button
+            onClick={handleAdd}
+            className="flex items-center gap-2 px-4 py-2.5 bg-tea-green text-warm-ivory text-sm font-medium rounded-lg hover:bg-tea-green/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product
+          </button>
+        </div>
       </div>
+
+      {photoStatus && <p role="status" className="text-sm text-tea-green">{photoStatus}</p>}
 
       {/* Search */}
       <div className="relative max-w-md">
@@ -83,9 +127,18 @@ const ProductManagementPage = () => {
               key={product._id}
               className="bg-white rounded-xl border border-imperial-gold/10 overflow-hidden hover:shadow-md transition-shadow"
             >
-              {/* Product Image Placeholder */}
+              {/* Product Image */}
               <div className="h-40 bg-warm-ivory flex items-center justify-center">
-                <Package className="w-12 h-12 text-imperial-gold/30" />
+                {product.images?.[0] ? (
+                  <img
+                    src={getAdminImageUrl(product.images[0])}
+                    alt={product.name}
+                    className="h-full w-full object-cover"
+                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                  />
+                ) : (
+                  <Package className="w-12 h-12 text-imperial-gold/30" />
+                )}
               </div>
 
               {/* Product Info */}

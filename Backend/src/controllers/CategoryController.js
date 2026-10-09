@@ -212,7 +212,7 @@ const getCategoryById = async (req, res) => {
 // Create category
 const createCategory = async (req, res) => {
   try {
-    const { name, description, slug } = req.body;
+    const { name, description, slug, image } = req.body;
 
     const categorySlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -220,6 +220,7 @@ const createCategory = async (req, res) => {
       name,
       description,
       slug: categorySlug,
+      image,
     });
 
     return successResponse(res, { category }, 'Category created successfully', 201);
@@ -231,11 +232,12 @@ const createCategory = async (req, res) => {
 // Update category
 const updateCategory = async (req, res) => {
   try {
-    const { name, description, slug } = req.body;
+    const { name, description, slug, image } = req.body;
 
     const updateData = {};
     if (name) updateData.name = name;
     if (description) updateData.description = description;
+    if (image !== undefined) updateData.image = image;
     if (slug) {
       updateData.slug = slug;
     } else if (name) {

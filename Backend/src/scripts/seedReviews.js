@@ -19,8 +19,10 @@ const getSeedUserId = (productSlug, reviewerName) => {
 const seedReviews = async () => {
   const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!mongoUri) throw new Error('Set MONGODB_URI or MONGO_URI in Backend/.env before seeding reviews.');
-  const databaseHost = new URL(mongoUri).hostname;
-  const isLocalDatabase = ['localhost', '127.0.0.1', '::1'].includes(databaseHost);
+  const uriMatch = mongoUri.match(/^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?]+)/i);
+  if (!uriMatch) throw new Error('MONGODB_URI or MONGO_URI is not a valid MongoDB connection string.');
+  const databaseHosts = uriMatch[1].split(',').map((entry) => entry.replace(/:\d+$/, '').replace(/^\[|\]$/g, '').toLowerCase());
+  const isLocalDatabase = databaseHosts.every((host) => ['localhost', '127.0.0.1', '::1'].includes(host));
   if (!isLocalDatabase && process.env.ALLOW_REMOTE_REVIEW_SEED !== 'true') {
     throw new Error('This URI points to a remote database. Set ALLOW_REMOTE_REVIEW_SEED=true only when you intend to add sample reviews there.');
   }

@@ -1274,6 +1274,8 @@ export default function ProductDetail() {
     comment: '',
   });
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRatingFilter, setReviewRatingFilter] = useState('all');
+  const [reviewSort, setReviewSort] = useState('newest');
 
   useEffect(() => {
     if (slug) {
@@ -1288,6 +1290,8 @@ export default function ProductDetail() {
     setQuantity(1);
     setActiveTab('description');
     setActiveImageIndex(0); // NEW: reset image index on product change
+    setReviewRatingFilter('all');
+    setReviewSort('newest');
   }, [slug]);
 
   // ===== FETCH REVIEWS WHEN PRODUCT LOADS (NEW) =====
@@ -1433,6 +1437,18 @@ export default function ProductDetail() {
     .filter((p) => (p._id || p.id) !== productId)
     .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category));
   const related = (configuredRelated.length ? configuredRelated : automaticRelated).slice(0, 10);
+  const reviewItems = Array.isArray(reviews) ? reviews : [];
+  const reviewBreakdown = [5, 4, 3, 2, 1].map((rating) => ({
+    rating,
+    count: reviewItems.filter((review) => Number(review.rating) === rating).length,
+  }));
+  const visibleReviews = reviewItems
+    .filter((review) => reviewRatingFilter === 'all' || Number(review.rating) === Number(reviewRatingFilter))
+    .sort((a, b) => {
+      if (reviewSort === 'highest') return Number(b.rating) - Number(a.rating);
+      if (reviewSort === 'lowest') return Number(a.rating) - Number(b.rating);
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
 
   const gradient = product.gradientColor
     ? (gradientMap[product.gradientColor] || 'bg-gradient-to-br from-[#1F4D3A] to-[#1F4D3A]/70')
@@ -1731,7 +1747,7 @@ export default function ProductDetail() {
             <div className="mt-8 space-y-6 max-w-3xl">
 
               {/* ===== RATING SUMMARY (NEW) ===== */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-8 border-b border-[#C9A86A]/10">
+              <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-6 pb-6 border-b border-[#C9A86A]/10">
                 <div className="text-center md:text-left">
                   <div className="text-5xl font-bold text-[#3A281C] mb-2 font-[family-name:var(--font-playfair)]">
                     {product.rating?.toFixed(1) || '0.0'}
@@ -1753,18 +1769,41 @@ export default function ProductDetail() {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center md:justify-end">
+                <div className="space-y-2" aria-label="Review rating breakdown">
+                  {reviewBreakdown.map(({ rating, count }) => (
+                    <button
+                      key={rating}
+                      type="button"
+                      onClick={() => setReviewRatingFilter(reviewRatingFilter === String(rating) ? 'all' : String(rating))}
+                      aria-pressed={reviewRatingFilter === String(rating)}
+                      className={`grid w-full grid-cols-[42px_minmax(0,1fr)_32px] items-center gap-2 rounded px-1 py-0.5 text-left text-xs transition ${reviewRatingFilter === String(rating) ? 'bg-[#1F4D3A]/5' : 'hover:bg-[#3A281C]/[0.03]'}`}
+                    >
+                      <span className="inline-flex items-center gap-1 text-[#3A281C]/65">{rating}<Star className="h-3 w-3 fill-[#C9A86A] text-[#C9A86A]" /></span>
+                      <span className="h-1.5 overflow-hidden rounded-full bg-[#3A281C]/10"><span className="block h-full rounded-full bg-[#C9A86A]" style={{ width: `${reviewItems.length ? (count / reviewItems.length) * 100 : 0}%` }} /></span>
+                      <span className="text-right text-[#3A281C]/45">{count}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 md:col-span-2 md:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('customer-review-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    className="rounded-sm border border-[#1F4D3A]/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#1F4D3A] hover:bg-[#1F4D3A]/5"
+                  >
+                    View reviews ({reviewTotal})
+                  </button>
                   {isAuthenticated ? (
                     <button
                       onClick={() => setShowReviewForm(!showReviewForm)}
-                      className="border border-[#1F4D3A] text-[#1F4D3A] hover:bg-[#1F4D3A] hover:text-[#F8F3E9] px-6 py-3 text-xs font-semibold uppercase tracking-widest rounded-sm transition-colors"
+                      className="rounded-sm bg-[#1F4D3A] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#F8F3E9] transition-colors hover:bg-[#1F4D3A]/90"
                     >
                       {showReviewForm ? 'Cancel' : 'Write a Review'}
                     </button>
                   ) : (
                     <button
                       onClick={() => navigate('/login?redirect=' + encodeURIComponent(`/product/${slug}`))}
-                      className="border border-[#1F4D3A] text-[#1F4D3A] hover:bg-[#1F4D3A] hover:text-[#F8F3E9] px-6 py-3 text-xs font-semibold uppercase tracking-widest rounded-sm transition-colors"
+                      className="rounded-sm bg-[#1F4D3A] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#F8F3E9] transition-colors hover:bg-[#1F4D3A]/90"
                     >
                       Login to Write a Review
                     </button>
@@ -1839,19 +1878,41 @@ export default function ProductDetail() {
               )}
 
               {/* ===== REVIEWS LIST (DYNAMIC — replaces mockReviews) ===== */}
+              <div id="customer-review-list" className="scroll-mt-28 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#3A281C]">Customer reviews</h3>
+                  <p className="mt-0.5 text-xs text-[#3A281C]/50">Showing {visibleReviews.length} of {reviewTotal} reviews</p>
+                </div>
+                <div className="flex gap-2">
+                  <label className="sr-only" htmlFor="review-rating-filter">Filter reviews by rating</label>
+                  <select id="review-rating-filter" value={reviewRatingFilter} onChange={(event) => setReviewRatingFilter(event.target.value)} className="h-10 rounded-sm border border-[#C9A86A]/25 bg-white px-3 text-xs text-[#3A281C] focus:border-[#1F4D3A] focus:outline-none">
+                    <option value="all">All ratings</option>
+                    {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} stars</option>)}
+                  </select>
+                  <label className="sr-only" htmlFor="review-sort">Sort reviews</label>
+                  <select id="review-sort" value={reviewSort} onChange={(event) => setReviewSort(event.target.value)} className="h-10 rounded-sm border border-[#C9A86A]/25 bg-white px-3 text-xs text-[#3A281C] focus:border-[#1F4D3A] focus:outline-none">
+                    <option value="newest">Most recent</option>
+                    <option value="highest">Highest rated</option>
+                    <option value="lowest">Lowest rated</option>
+                  </select>
+                </div>
+              </div>
+
               {reviewsLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin h-8 w-8 border-2 border-[#1F4D3A] border-t-transparent rounded-full mx-auto" />
                   <p className="text-[#3A281C]/50 text-sm mt-3">Loading reviews...</p>
                 </div>
-              ) : reviews && reviews.length === 0 ? (
+              ) : reviewItems.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-[#3A281C]/50 text-sm">
                     No reviews yet. Be the first to share your experience!
                   </p>
                 </div>
               ) : (
-                (reviews || []).map((review) => (
+                visibleReviews.length === 0 ? (
+                  <p className="rounded-sm bg-[#F8F3E9] px-4 py-8 text-center text-sm text-[#3A281C]/55">No reviews match this rating. Choose another filter to see more.</p>
+                ) : visibleReviews.map((review) => (
                   <div key={review._id || review.id} className="border-b border-[#C9A86A]/10 pb-6 last:border-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">

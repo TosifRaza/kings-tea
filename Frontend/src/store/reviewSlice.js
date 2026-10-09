@@ -7,7 +7,16 @@ export const fetchProductReviews = createAsyncThunk(
   async (productId, { rejectWithValue }) => {
     try {
       const res = await api.get(`/reviews?productId=${productId}&limit=100`);
-      return res.data.data; // { docs, total, page, limit, totalPages }
+      const payload = res.data.data;
+      // ResponseHandler flattens paginated `docs` to data[] and exposes totals
+      // through `pagination`; accept the wrapped shape as well for compatibility.
+      if (Array.isArray(payload)) {
+        return { docs: payload, total: res.data.pagination?.total ?? payload.length };
+      }
+      return {
+        docs: payload?.docs || payload?.reviews || [],
+        total: payload?.total ?? res.data.pagination?.total ?? 0,
+      };
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }

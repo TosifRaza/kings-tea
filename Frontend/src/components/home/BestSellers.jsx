@@ -146,13 +146,13 @@ export default function BestSellers() {
   const bestSellers = products.filter((p) => p.bestSeller).slice(0, 4);
 
   return (
-    <section ref={ref} className="py-20 lg:py-28 bg-warm-ivory">
+    <section ref={ref} className="pt-4 pb-12 lg:pt-6 lg:pb-16 bg-warm-ivory">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-14"
+          className="text-center mb-8"
         >
           <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">
             Customer Favorites
@@ -180,11 +180,11 @@ export default function BestSellers() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="text-center mt-12"
+          className="text-center mt-8"
         >
           <Link
             to="/shop"
-            className="btn-luxury border border-tea-green text-tea-green hover:bg-tea-green hover:text-warm-ivory px-8 py-5 text-xs font-semibold uppercase tracking-widest rounded-none inline-block"
+            className="btn-luxury border border-tea-green text-tea-green hover:bg-tea-green hover:text-warm-ivory px-7 py-4 text-xs font-semibold uppercase tracking-widest rounded-none inline-block"
           >
             View All Teas
           </Link>

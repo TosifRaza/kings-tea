@@ -248,6 +248,10 @@ const productSchema = new mongoose.Schema(
     images: [{
       type: String,
     }],
+    relatedProducts: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+    }],
     category: {
       type: String,
       trim: true,

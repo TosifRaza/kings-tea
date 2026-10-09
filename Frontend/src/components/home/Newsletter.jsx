@@ -18,7 +18,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section ref={ref} className="py-16 lg:py-20 bg-warm-ivory-dark relative overflow-hidden">
+    <section ref={ref} className="py-10 lg:py-12 bg-warm-ivory-dark relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03]">
         <div
           className="absolute inset-0"
@@ -39,7 +39,7 @@ export default function Newsletter() {
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl sm:text-3xl font-bold text-deep-walnut mb-3">
             Join the Royal Tea Circle
           </h2>
-          <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mb-8 max-w-md mx-auto">
+          <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mb-6 max-w-md mx-auto">
             Receive exclusive offers, early access to new teas, brewing tips, and
             invitations to virtual tasting events.
           </p>

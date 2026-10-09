@@ -483,8 +483,8 @@ function Footer() {
 
   return (
     <footer className="bg-deep-walnut text-warm-ivory/90">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -497,7 +497,7 @@ function Footer() {
                 KING&apos;S TEA
               </span>
             </div>
-            <p className="text-warm-ivory/60 text-sm leading-relaxed mb-6">
+            <p className="text-warm-ivory/60 text-sm leading-relaxed mb-4">
               Experience centuries of tea heritage in every cup. Premium luxury
               teas sourced from the world&apos;s finest gardens, crafted for
               connoisseurs.

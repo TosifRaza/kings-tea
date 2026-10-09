@@ -49,7 +49,7 @@ const Testimonials = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#1F4D3A]">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#1F4D3A]">
         <div className="max-w-7xl mx-auto text-center">
           <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Testimonials</span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">What Our Royals Say</h2>
@@ -75,14 +75,14 @@ const Testimonials = () => {
   const visibleTestimonials = getVisibleTestimonials();
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#1F4D3A] relative overflow-hidden">
+    <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#1F4D3A] relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-[#C9A86A]/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#C9A86A]/5 rounded-full translate-x-1/3 translate-y-1/3"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Testimonials</span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">What Our Royals Say</h2>
           <p className="text-white/60 mt-3 max-w-2xl mx-auto">
@@ -91,7 +91,7 @@ const Testimonials = () => {
         </div>
 
         {/* Testimonial Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {visibleTestimonials.map((testimonial, idx) => (
             <div
               key={testimonial._id || idx}

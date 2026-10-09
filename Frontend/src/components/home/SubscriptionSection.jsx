@@ -23,7 +23,7 @@ const SubscriptionSection = () => {
 
   if (loading) {
     return (
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
@@ -45,10 +45,10 @@ const SubscriptionSection = () => {
   }
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
+    <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
           <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
           <p className="text-[#3A281C]/70 mt-3 max-w-2xl mx-auto">
@@ -57,7 +57,7 @@ const SubscriptionSection = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {plansList.map((plan) => {
             const gradientMap = {
               'from-amber-700 to-amber-500': 'bg-gradient-to-br from-amber-700 to-amber-500',

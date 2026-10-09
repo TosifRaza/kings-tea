@@ -370,10 +370,10 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         {/* ===== WHAT'S INCLUDED ===== */}
-        <section className="mb-20">
-          <div className="text-center mb-12">
+        <section className="mb-12">
+          <div className="text-center mb-8">
             <span className="text-[#C9A86A] text-xs font-semibold uppercase tracking-[0.2em]">Every Box Contains</span>
             <h2 className="text-3xl font-bold text-[#3A281C] mt-3">What's Included</h2>
             <div className="w-16 h-0.5 bg-[#C9A86A] mx-auto mt-4" />

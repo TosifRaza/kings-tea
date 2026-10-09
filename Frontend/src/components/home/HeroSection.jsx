@@ -13,7 +13,7 @@ export default function HeroSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
-    <section ref={ref} className="relative h-screen min-h-[600px] overflow-hidden">
+    <section ref={ref} className="relative h-[min(72svh,640px)] min-h-[480px] overflow-hidden">
       {/* Parallax Background */}
       <motion.div style={{ y }} className="absolute inset-0">
         <div
@@ -33,7 +33,7 @@ export default function HeroSection() {
           initial={{ width: 0 }}
           animate={{ width: 80 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className="h-px bg-gradient-to-r from-transparent via-imperial-gold to-transparent mb-8"
+          className="h-px bg-gradient-to-r from-transparent via-imperial-gold to-transparent mb-6"
         />
 
         <motion.h1
@@ -49,7 +49,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl text-warm-ivory/80 max-w-xl mb-10 tracking-wide"
+          className="font-[family-name:var(--font-cormorant)] text-xl sm:text-2xl text-warm-ivory/80 max-w-xl mb-7 tracking-wide"
         >
           Experience centuries of tea heritage in every cup.
         </motion.p>
@@ -62,13 +62,13 @@ export default function HeroSection() {
         >
           <Link
             to="/shop"
-            className="btn-luxury bg-imperial-gold hover:bg-imperial-gold-light text-deep-walnut font-semibold px-8 py-6 text-sm uppercase tracking-widest rounded-none inline-block text-center"
+            className="btn-luxury bg-imperial-gold hover:bg-imperial-gold-light text-deep-walnut font-semibold px-7 py-4 text-sm uppercase tracking-widest rounded-none inline-block text-center"
           >
             Explore Collection
           </Link>
           <Link
             to="/culture"
-            className="btn-luxury border border-imperial-gold/60 text-imperial-gold hover:bg-imperial-gold/10 font-semibold px-8 py-6 text-sm uppercase tracking-widest rounded-none bg-transparent inline-block text-center"
+            className="btn-luxury border border-imperial-gold/60 text-imperial-gold hover:bg-imperial-gold/10 font-semibold px-7 py-4 text-sm uppercase tracking-widest rounded-none bg-transparent inline-block text-center"
           >
             Discover Heritage
           </Link>

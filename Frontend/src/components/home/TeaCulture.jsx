@@ -26,9 +26,9 @@ export default function TeaCulture() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section ref={ref} className="py-20 lg:py-28 bg-warm-ivory-dark">
+    <section ref={ref} className="py-12 lg:py-16 bg-warm-ivory-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           {/* Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -90,7 +90,7 @@ export default function TeaCulture() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative"
           >
-            <div className="aspect-[4/5] rounded-sm overflow-hidden img-zoom">
+            <div className="aspect-[4/3] rounded-sm overflow-hidden img-zoom">
               <img
                 src="/images/tea-ceremony.png"
                 alt="Tea ceremony"

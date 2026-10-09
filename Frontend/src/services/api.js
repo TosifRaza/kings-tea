@@ -114,7 +114,7 @@ export const orderAPI = {
 // ============ USER API ============
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
-  updateProfile: (data) => api.put('/users/profile', data),
+  updateProfile: (id, data) => api.put(`/users/${id}`, data),
 };
 
 // ============ CART API ============

@@ -1426,9 +1426,13 @@ export default function ProductDetail() {
     );
   }
 
-  const related = (allProducts || []).filter(
-    (p) => (p._id || p.id) !== productId && p.category === product.category
-  ).slice(0, 3);
+  const configuredRelated = Array.isArray(product.relatedProducts)
+    ? product.relatedProducts.filter((p) => p && typeof p === 'object' && (p._id || p.id))
+    : [];
+  const automaticRelated = (allProducts || [])
+    .filter((p) => (p._id || p.id) !== productId)
+    .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category));
+  const related = (configuredRelated.length ? configuredRelated : automaticRelated).slice(0, 10);
 
   const gradient = product.gradientColor
     ? (gradientMap[product.gradientColor] || 'bg-gradient-to-br from-[#1F4D3A] to-[#1F4D3A]/70')
@@ -1441,7 +1445,7 @@ export default function ProductDetail() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="pt-24 pb-16 min-h-screen"
+      className="pt-20 pb-12 min-h-screen"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
@@ -1452,7 +1456,7 @@ export default function ProductDetail() {
           Back to Collection
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
           {/* ============ IMAGE GALLERY (NEW — with thumbnails + zoom) ============ */}
           <div>
             {/* Main Image Container */}
@@ -1692,9 +1696,9 @@ export default function ProductDetail() {
         </div>
 
         {/* ============ TABS SECTION ============ */}
-        <div className="mt-16">
+        <div className="mt-12">
           <div className="flex gap-8 border-b border-[#C9A86A]/10">
-            {['description', 'reviews', 'related'].map((tab) => (
+            {['description', 'reviews'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -1853,15 +1857,20 @@ export default function ProductDetail() {
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-[#1F4D3A]/10 flex items-center justify-center">
                           <span className="text-[#1F4D3A] text-xs font-semibold">
-                            {(review.userId?.name || review.name || 'A').charAt(0)}
+                            {(review.userId?.name || review.reviewerName || review.name || 'A').charAt(0)}
                           </span>
                         </div>
                         <span className="font-medium text-[#3A281C] text-sm">
-                          {review.userId?.name || review.name || 'Anonymous'}
+                          {review.userId?.name || review.reviewerName || review.name || 'Anonymous'}
                         </span>
                         {review.verified && (
                           <span className="text-[10px] text-[#1F4D3A] bg-[#1F4D3A]/10 px-2 py-0.5 rounded">
                             Verified Buyer
+                          </span>
+                        )}
+                        {review.isSeeded && (
+                          <span className="text-[10px] text-[#3A281C]/55 bg-[#3A281C]/5 px-2 py-0.5 rounded">
+                            Demo sample
                           </span>
                         )}
                       </div>
@@ -1897,8 +1906,12 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {activeTab === 'related' && (
-            <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <section className="mt-12 border-t border-[#C9A86A]/10 pt-8">
+              <div className="mb-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C9A86A]">Selected for you</p>
+                <h2 className="mt-1 font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#3A281C]">Related products</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
               {related.map((p) => {
                 const relGradient = p.gradientColor
                   ? (gradientMap[p.gradientColor] || 'bg-gradient-to-br from-[#1F4D3A] to-[#1F4D3A]/70')
@@ -1934,12 +1947,12 @@ export default function ProductDetail() {
                 );
               })}
               {related.length === 0 && (
-                <p className="text-[#3A281C]/40 text-sm col-span-3 text-center py-8">
-                  No related products found.
+                <p className="col-span-full rounded-xl border border-[#C9A86A]/10 bg-[#FBF9F4] py-10 text-center text-sm text-[#3A281C]/50">
+                  More teas will be added to this collection soon.
                 </p>
               )}
-            </div>
-          )}
+              </div>
+          </section>
         </div>
       </div>
 

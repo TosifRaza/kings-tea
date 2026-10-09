@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const Category = require('../models/CategoryModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
@@ -10,6 +11,40 @@ const getGalleryPaths = (value) => {
   } catch {
     return [];
   }
+};
+
+const getRelatedProductIds = (value) => {
+  if (value === undefined) return undefined;
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  try {
+    const ids = JSON.parse(value);
+    return Array.isArray(ids) ? ids : [];
+  } catch {
+    return null;
+  }
+};
+
+const validateRelatedProducts = async (value, currentProductId) => {
+  const ids = getRelatedProductIds(value);
+  if (ids === undefined) return { ids: undefined };
+  if (ids === null) return { error: 'Related products must be a valid list.' };
+
+  const uniqueIds = [...new Set(ids.map((id) => String(id)))].filter((id) => id !== String(currentProductId || ''));
+  if (uniqueIds.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+    return { error: 'One or more related product IDs are invalid.' };
+  }
+  if (uniqueIds.length > 10) return { error: 'You can select up to 10 related products.' };
+
+  const existingCount = await Product.countDocuments({ _id: { $in: uniqueIds } });
+  if (existingCount !== uniqueIds.length) return { error: 'One or more related products no longer exist.' };
+  return { ids: uniqueIds };
+};
+
+const relatedProductsPopulate = {
+  path: 'relatedProducts',
+  match: { isActive: true },
+  select: 'name slug price comparePrice images category origin rating reviewCount featured bestSeller isNew gradientColor',
 };
 console.log('🎯 ProductController.js LOADED at', new Date().toISOString());
 // Get all products
@@ -53,7 +88,7 @@ const getProducts = async (req, res) => {
 // Get product by ID
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate(relatedProductsPopulate);
 
     if (!product) {
       return errorResponse(res, 'Product not found', 404);
@@ -70,7 +105,7 @@ const getProductById = async (req, res) => {
 // ============================================================
 const getProductBySlug = async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug });
+    const product = await Product.findOne({ slug: req.params.slug }).populate(relatedProductsPopulate);
 
     if (!product) {
       return errorResponse(res, 'Product not found', 404);
@@ -151,6 +186,10 @@ const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
 
+    const related = await validateRelatedProducts(productData.relatedProducts);
+    if (related.error) return errorResponse(res, related.error, 400);
+    if (related.ids !== undefined) productData.relatedProducts = related.ids;
+
     // 🔍 DEBUG BLOCK
     console.log('========================================');
     console.log('📦 CREATE PRODUCT DEBUG');
@@ -211,6 +250,10 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+
+    const related = await validateRelatedProducts(productData.relatedProducts, req.params.id);
+    if (related.error) return errorResponse(res, related.error, 400);
+    if (related.ids !== undefined) productData.relatedProducts = related.ids;
 
     // if (req.files && req.files.length > 0) {
     //   productData.images = req.files.map((file) => `/uploads/${file.filename}`);

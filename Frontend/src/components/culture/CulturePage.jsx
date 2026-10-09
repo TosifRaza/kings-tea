@@ -42,9 +42,9 @@ export default function CulturePage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <section className="mb-20">
-          <div className="text-center mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <section className="mb-12">
+          <div className="text-center mb-8">
             <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">Techniques</span>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-deep-walnut mt-3">Brewing Methods</h2>
             <div className="section-divider mt-4" />

@@ -3,14 +3,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../store/productSlice';
 import { getCategories } from '../services/api';
 import { getAdminImageUrl, getTeaCategoryGallery } from '../utils/teaImages';
-import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Link2, Search } from 'lucide-react';
 
-const ProductFormModal = ({ product, onClose }) => {
+const ProductFormModal = ({ product, products = [], onClose }) => {
   const dispatch = useDispatch();
   const isEdit = !!product;
 
   const [categories, setCategories] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [relatedSearch, setRelatedSearch] = useState('');
+  const [relatedProducts, setRelatedProducts] = useState(
+    (product?.relatedProducts || []).map((related) => String(related?._id || related))
+  );
   const [imageItems, setImageItems] = useState(
     (product?.images || []).map((path) => ({ path, preview: path }))
   );
@@ -173,9 +179,21 @@ const ProductFormModal = ({ product, onClose }) => {
     setImageItems(gallery.map((path) => ({ path, preview: path })));
   };
 
+  const toggleRelatedProduct = (id) => {
+    setRelatedProducts((current) => current.includes(id)
+      ? current.filter((relatedId) => relatedId !== id)
+      : current.length < 10 ? [...current, id] : current);
+  };
+
+  const availableRelatedProducts = products
+    .filter((candidate) => String(candidate._id) !== String(product?._id))
+    .filter((candidate) => candidate.name?.toLowerCase().includes(relatedSearch.toLowerCase()));
+
   // Replace handleSubmit with this:
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
+    setSubmitError('');
 
     // Use FormData for file uploads
     const data = new FormData();
@@ -201,6 +219,7 @@ const ProductFormModal = ({ product, onClose }) => {
     data.append('featured', formData.featured);
     data.append('bestSeller', formData.bestSeller);
     data.append('isNew', formData.isNew);
+    data.append('relatedProducts', JSON.stringify(relatedProducts));
 
     data.append('galleryImages', JSON.stringify(
       imageItems.filter((item) => item.path).map((item) => item.path)
@@ -211,12 +230,18 @@ const ProductFormModal = ({ product, onClose }) => {
       data.append('images', item.file);
     });
 
-    if (isEdit) {
-      await dispatch(editProduct({ id: product._id, data }));
-    } else {
-      await dispatch(addProduct(data));
+    try {
+      if (isEdit) {
+        await dispatch(editProduct({ id: product._id, data })).unwrap();
+      } else {
+        await dispatch(addProduct(data)).unwrap();
+      }
+      onClose();
+    } catch (error) {
+      setSubmitError(typeof error === 'string' ? error : 'The product could not be saved. Please try again.');
+    } finally {
+      setSaving(false);
     }
-    onClose();
   };
 
 
@@ -459,6 +484,39 @@ const ProductFormModal = ({ product, onClose }) => {
             />
           </div>
 
+          {/* Related Products */}
+          <section className="rounded-xl border border-imperial-gold/15 bg-[#FBF9F4] p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-tea-green/10 text-tea-green"><Link2 className="h-4 w-4" /></div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-deep-walnut">Related products</h3>
+                <p className="mt-1 text-xs leading-5 text-deep-walnut/50">Choose up to 10 teas to recommend on this product page. Leave empty to show category matches followed by other teas.</p>
+              </div>
+              <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-tea-green">{relatedProducts.length}/10</span>
+            </div>
+            <div className="relative mt-4">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-deep-walnut/30" />
+              <input value={relatedSearch} onChange={(event) => setRelatedSearch(event.target.value)} className="w-full rounded-lg border border-imperial-gold/15 bg-white py-2.5 pl-9 pr-3 text-sm text-deep-walnut outline-none focus:border-tea-green/40" placeholder="Find a product..." />
+            </div>
+            <div className="mt-3 max-h-56 space-y-1 overflow-y-auto rounded-lg border border-imperial-gold/10 bg-white p-2">
+              {availableRelatedProducts.length ? availableRelatedProducts.map((candidate) => {
+                const id = String(candidate._id);
+                const checked = relatedProducts.includes(id);
+                const disabled = !checked && relatedProducts.length >= 10;
+                return (
+                  <label key={id} className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 transition ${checked ? 'bg-tea-green/5' : 'hover:bg-warm-ivory'} ${disabled ? 'cursor-not-allowed opacity-45' : ''}`}>
+                    <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleRelatedProduct(id)} className="h-4 w-4 rounded border-imperial-gold/30 text-tea-green focus:ring-tea-green" />
+                    {candidate.images?.[0] ? <img src={getAdminImageUrl(candidate.images[0])} alt="" className="h-10 w-10 rounded-md object-cover" /> : <div className="flex h-10 w-10 items-center justify-center rounded-md bg-warm-ivory text-xs font-semibold text-tea-green">{candidate.name?.charAt(0)}</div>}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-deep-walnut">{candidate.name}</span>
+                      <span className="block truncate text-xs text-deep-walnut/45">{candidate.category || 'Tea'} · Rs. {Number(candidate.price || 0).toLocaleString('en-IN')}</span>
+                    </span>
+                  </label>
+                );
+              }) : <p className="px-3 py-5 text-center text-xs text-deep-walnut/45">No matching products found.</p>}
+            </div>
+          </section>
+
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-deep-walnut/70 mb-1.5">
@@ -569,6 +627,7 @@ const ProductFormModal = ({ product, onClose }) => {
           </div>
 
           {/* Buttons */}
+          {submitError && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</p>}
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-imperial-gold/5">
             <button
               type="button"
@@ -579,9 +638,10 @@ const ProductFormModal = ({ product, onClose }) => {
             </button>
             <button
               type="submit"
+              disabled={saving}
               className="px-5 py-2.5 text-sm font-medium text-warm-ivory bg-tea-green rounded-lg hover:bg-tea-green/90 transition-colors"
             >
-              {isEdit ? 'Update Product' : 'Create Product'}
+              {saving ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}
             </button>
           </div>
         </form>

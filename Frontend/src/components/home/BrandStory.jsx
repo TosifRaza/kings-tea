@@ -13,9 +13,9 @@ export default function BrandStory() {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section ref={ref} className="py-20 lg:py-28 bg-warm-ivory">
+    <section ref={ref} className="pt-12 pb-4 lg:pt-16 lg:pb-6 bg-warm-ivory">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -23,7 +23,7 @@ export default function BrandStory() {
             transition={{ duration: 0.8 }}
             className="relative"
           >
-            <div className="aspect-[4/5] rounded-sm overflow-hidden img-zoom">
+            <div className="aspect-[4/3] rounded-sm overflow-hidden img-zoom">
               <img
                 src="/images/tea-craftsmanship.png"
                 alt="Tea craftsmanship"
@@ -69,7 +69,7 @@ export default function BrandStory() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-10 pt-10 border-t border-imperial-gold/20">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-imperial-gold/20">
               {stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}

@@ -219,6 +219,7 @@ const ProductManagementPage = () => {
       {showModal && (
         <ProductFormModal
           product={editingProduct}
+          products={products}
           onClose={handleClose}
         />
       )}

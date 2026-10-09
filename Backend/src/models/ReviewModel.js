@@ -6,6 +6,12 @@ const ReviewSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  reviewerName: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Reviewer name cannot exceed 100 characters'],
+    default: ''
+  },
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
@@ -30,6 +36,10 @@ const ReviewSchema = new mongoose.Schema({
     default: ''
   },
   verified: {
+    type: Boolean,
+    default: false
+  },
+  isSeeded: {
     type: Boolean,
     default: false
   }

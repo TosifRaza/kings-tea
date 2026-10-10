@@ -129,7 +129,7 @@ function Header() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 group">
@@ -147,7 +147,7 @@ function Header() {
                   !scrolled && isHome
                     ? 'text-white'
                     : 'text-deep-walnut'
-                }`}
+                } hidden sm:block whitespace-nowrap`}
               >
                 KING&apos;S TEA
               </span>
@@ -182,7 +182,7 @@ function Header() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-3">
               {/* Search */}
               <AnimatePresence>
                 {searchOpen ? (

@@ -335,7 +335,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen">
-        <div className="relative h-[45vh] min-h-[350px] overflow-hidden">
+        <div className="relative h-[38vh] min-h-[280px] sm:h-[45vh] sm:min-h-[350px] overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#1F4D3A]/80 to-[#3A281C]/80" />
           <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
             <Crown className="h-8 w-8 text-[#C9A86A] mb-4" />
@@ -343,10 +343,10 @@ export default function SubscriptionPage() {
             <p className="text-[#F8F3E9]/70 text-lg max-w-xl">Loading subscription plans...</p>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-[400px] rounded-sm bg-[#1F4D3A]/10 animate-pulse"></div>
+              <div key={i} className="h-56 sm:h-72 md:h-[400px] rounded-sm bg-[#1F4D3A]/10 animate-pulse"></div>
             ))}
           </div>
         </div>

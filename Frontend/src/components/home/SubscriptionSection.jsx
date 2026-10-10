@@ -23,16 +23,16 @@ const SubscriptionSection = () => {
 
   if (loading) {
     return (
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
+      <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
-            <p className="text-[#3A281C]/70 mt-3">Loading subscription plans...</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
+            <p className="text-sm sm:text-base text-[#3A281C]/70 mt-3">Loading subscription plans...</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-96 rounded-2xl bg-[#1F4D3A]/10 animate-pulse"></div>
+              <div key={i} className="h-56 sm:h-72 md:h-96 rounded-2xl bg-[#1F4D3A]/10 animate-pulse"></div>
             ))}
           </div>
         </div>

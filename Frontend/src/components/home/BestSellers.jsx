@@ -42,7 +42,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="flex aspect-square items-center justify-center overflow-hidden bg-[#eef0df] sm:aspect-[1.28/1]"
+            className="flex aspect-[1.18/1] items-center justify-center overflow-hidden bg-[#eef0df] sm:aspect-[1.28/1]"
           >
             {imageUrl && !imageFailed ? (
               <img
@@ -89,11 +89,11 @@ function ProductCard({ product, variant = 'default' }) {
           <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
             {product.name}
           </Link>
-          <p className="mt-1.5 line-clamp-2 min-h-8 text-[10px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
+          <p className="mt-1 line-clamp-2 min-h-7 text-[9px] leading-3.5 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
-          <Link to={`/product/${productSlug}`} className="mt-1.5 inline-flex min-h-4 min-w-0 items-center gap-1 text-[10px] sm:mt-2 sm:min-h-5 sm:gap-1.5 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+          <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-h-4 min-w-0 items-center gap-1 text-[9px] sm:mt-2 sm:min-h-5 sm:gap-1.5 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
             <span className="flex items-center" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
@@ -103,32 +103,32 @@ function ProductCard({ product, variant = 'default' }) {
             <span className="truncate text-[#61756d]">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
           </Link>
 
-          <div className="mt-3 grid grid-cols-2 gap-x-1 gap-y-2 sm:mt-4 sm:grid-cols-4 sm:gap-2">
+          <div className="mt-2 grid grid-cols-4 gap-0.5 sm:mt-4 sm:gap-2">
             {details.map((detail) => (
               <div key={detail.label} className="flex min-w-0 flex-col items-center text-center">
-                <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
-                  <detail.icon className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
+                <span className="mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
+                  <detail.icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
                 </span>
-                <span className="text-[8px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
-                <span className="line-clamp-2 text-[9px] leading-3 text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
+                <span className="text-[6px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
+                <span className="line-clamp-2 text-[7px] leading-[9px] text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
               </div>
             ))}
           </div>
 
           <div className="mt-auto pt-4">
-            <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 sm:gap-2">
               <span className="text-lg font-bold tracking-tight text-[#164832] sm:text-[27px]">₹{price.toLocaleString('en-IN')}</span>
               {hasDiscount && <span className="shrink-0 text-[10px] text-[#8a918d] line-through sm:text-sm">₹{comparePrice.toLocaleString('en-IN')}</span>}
-              {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde3df] px-2 py-1 text-[8px] font-semibold text-[#8d392c] sm:px-2.5 sm:text-xs">Save {discount}%</span>}
+              {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde3df] px-1.5 py-0.5 text-[7px] font-semibold text-[#8d392c] sm:px-2.5 sm:py-1 sm:text-xs">Save {discount}%</span>}
             </div>
             {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
             <button
               type="button"
               disabled={isOutOfStock}
               onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
-              className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-2 text-[10px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
+              className="mt-2 flex h-8 w-full items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[9px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
             >
-              <ShoppingBag className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+              <ShoppingBag className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
               {isOutOfStock ? 'Unavailable' : 'Add to cart'}
             </button>
           </div>

@@ -621,11 +621,14 @@ function Footer() {
 }
 
 export default function MainLayout({ children }) {
+  const location = useLocation();
+  const hideFooter = location.pathname === '/shop' || location.pathname.startsWith('/product/');
+
   return (
     <div className="w-full min-h-screen flex flex-col">
       <Header />
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   );
 }

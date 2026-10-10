@@ -5,6 +5,7 @@ import { cartAPI } from '../services/api';
 const initialState = {
   items: [],
   cartOpen: false,
+  notification: null,
 };
 
 export const loadCart = createAsyncThunk(
@@ -46,13 +47,33 @@ const cartSlice = createSlice({
     toggleCart: (state) => {
       state.cartOpen = !state.cartOpen;
     },
-    addToCart: (state, action) => {
-      const { productId, quantity = 1 } = action.payload;
-      const existing = state.items.find((item) => item.productId === productId);
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
-        state.items.push({ productId, quantity });
+    addToCart: {
+      reducer: (state, action) => {
+        const { productId, quantity = 1 } = action.payload;
+        const existing = state.items.find((item) => item.productId === productId);
+        if (existing) {
+          existing.quantity += quantity;
+        } else {
+          state.items.push({ productId, quantity });
+        }
+        state.notification = {
+          id: action.payload.notificationId,
+          productName: action.payload.productName,
+          quantity,
+        };
+      },
+      prepare: ({ productId, quantity = 1, productName = 'Tea' }) => ({
+        payload: {
+          productId,
+          quantity,
+          productName,
+          notificationId: Date.now(),
+        },
+      }),
+    },
+    clearCartNotification: (state, action) => {
+      if (state.notification?.id === action.payload) {
+        state.notification = null;
       }
     },
     removeFromCart: (state, action) => {
@@ -94,10 +115,12 @@ export const {
   removeFromCart,
   updateQuantity,
   clearCart,
+  clearCartNotification,
 } = cartSlice.actions;
 
 export const selectCartItems = (state) => state.cart.items;
 export const selectCartOpen = (state) => state.cart.cartOpen;
+export const selectCartNotification = (state) => state.cart.notification;
 export const selectCartCount = (state) =>
   state.cart.items.reduce((sum, item) => sum + item.quantity, 0);
 // export const selectCartTotal = (state) => {

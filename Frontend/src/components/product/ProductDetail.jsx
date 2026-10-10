@@ -1358,7 +1358,7 @@ export default function ProductDetail() {
 
   // ===== CART HANDLER =====
   const handleAddToCart = () => {
-    dispatch(addToCart({ productId, quantity }));
+    dispatch(addToCart({ productId, productName: product.name, quantity }));
   };
 
   // ===== REVIEW SUBMIT HANDLER (NEW) =====

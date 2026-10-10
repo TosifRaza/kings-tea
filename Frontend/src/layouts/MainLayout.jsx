@@ -28,6 +28,7 @@ import {
   getMe,
 } from '../store/authSlice';
 import CartDrawer from '../components/cart/CartDrawer';
+import CartNotification from '../components/cart/CartNotification';
 import AuthModal from '../components/auth/AuthModal';
 
 const navItems = [
@@ -437,6 +438,7 @@ function Header() {
       </motion.header>
 
       <CartDrawer />
+      <CartNotification />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );

@@ -36,13 +36,13 @@ function ProductCard({ product, variant = 'default' }) {
         layout
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex h-full flex-col overflow-hidden rounded-[26px] border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)]"
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] sm:rounded-[26px]"
       >
         <div className="relative">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="flex aspect-[1.28/1] items-center justify-center overflow-hidden bg-[#eef0df]"
+            className="flex aspect-square items-center justify-center overflow-hidden bg-[#eef0df] sm:aspect-[1.28/1]"
           >
             {imageUrl && !imageFailed ? (
               <img
@@ -60,14 +60,14 @@ function ProductCard({ product, variant = 'default' }) {
             )}
           </Link>
 
-          <div className="absolute left-4 top-4 flex flex-col items-start gap-1.5">
+          <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-4 sm:top-4">
             {product.bestSeller && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/35 bg-[#07553e] px-2.5 py-1.5 text-[10px] font-semibold text-white shadow-sm sm:text-xs">
-                <Crown className="h-3.5 w-3.5 text-[#f5d27b]" /> Best Seller
+              <span className="inline-flex items-center gap-1 rounded-md border border-white/35 bg-[#07553e] px-1.5 py-1 text-[8px] font-semibold text-white shadow-sm sm:gap-1.5 sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs">
+                <Crown className="h-3 w-3 text-[#f5d27b] sm:h-3.5 sm:w-3.5" /> Best Seller
               </span>
             )}
             {!product.bestSeller && product.isNew && (
-              <span className="rounded-lg bg-[#f2d28b] px-2.5 py-1.5 text-[10px] font-semibold text-[#3a281c] shadow-sm sm:text-xs">New Arrival</span>
+              <span className="rounded-md bg-[#f2d28b] px-1.5 py-1 text-[8px] font-semibold text-[#3a281c] shadow-sm sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs">New Arrival</span>
             )}
           </div>
 
@@ -76,59 +76,59 @@ function ProductCard({ product, variant = 'default' }) {
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white"
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
           >
-            <Heart className={`h-5 w-5 transition-colors ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#263b32]'}`} />
+            <Heart className={`h-4 w-4 transition-colors sm:h-5 sm:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#263b32]'}`} />
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.13em] text-[#41695d] sm:text-[11px]">
+        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
+          <p className="mb-1 line-clamp-1 text-[8px] font-semibold uppercase tracking-[0.08em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
             {product.origin || product.category || 'Premium tea'}{product.weight ? ` · ${product.weight}` : ''}
           </p>
-          <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-xl font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
+          <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
             {product.name}
           </Link>
-          <p className="mt-2 line-clamp-2 min-h-10 text-[13px] leading-5 text-[#61756d] sm:text-sm">
+          <p className="mt-1.5 line-clamp-2 min-h-8 text-[10px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
-          <Link to={`/product/${productSlug}`} className="mt-2 inline-flex min-h-5 items-center gap-1.5 text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+          <Link to={`/product/${productSlug}`} className="mt-1.5 inline-flex min-h-4 min-w-0 items-center gap-1 text-[10px] sm:mt-2 sm:min-h-5 sm:gap-1.5 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
             <span className="flex items-center" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className={`h-4 w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
+                <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
               ))}
             </span>
             <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
-            <span className="text-[#61756d]">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
+            <span className="truncate text-[#61756d]">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
           </Link>
 
-          <div className="mt-4 grid grid-cols-4 gap-1.5 sm:gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-x-1 gap-y-2 sm:mt-4 sm:grid-cols-4 sm:gap-2">
             {details.map((detail) => (
               <div key={detail.label} className="flex min-w-0 flex-col items-center text-center">
-                <span className="mb-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:h-10 sm:w-10">
-                  <detail.icon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
+                  <detail.icon className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
+                <span className="text-[8px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
                 <span className="line-clamp-2 text-[9px] leading-3 text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
               </div>
             ))}
           </div>
 
           <div className="mt-auto pt-4">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-2xl font-bold tracking-tight text-[#164832] sm:text-[27px]">₹{price.toLocaleString('en-IN')}</span>
-              {hasDiscount && <span className="shrink-0 text-sm text-[#8a918d] line-through">₹{comparePrice.toLocaleString('en-IN')}</span>}
-              {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde3df] px-2.5 py-1 text-[10px] font-semibold text-[#8d392c] sm:text-xs">Save {discount}%</span>}
+            <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:gap-2">
+              <span className="text-lg font-bold tracking-tight text-[#164832] sm:text-[27px]">₹{price.toLocaleString('en-IN')}</span>
+              {hasDiscount && <span className="shrink-0 text-[10px] text-[#8a918d] line-through sm:text-sm">₹{comparePrice.toLocaleString('en-IN')}</span>}
+              {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde3df] px-2 py-1 text-[8px] font-semibold text-[#8d392c] sm:px-2.5 sm:text-xs">Save {discount}%</span>}
             </div>
             {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
             <button
               type="button"
               disabled={isOutOfStock}
-              onClick={() => dispatch(addToCart({ productId, quantity: 1 }))}
-              className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-3 text-sm font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c]"
+              onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
+              className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-2 text-[10px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
             >
-              <ShoppingBag className="h-[18px] w-[18px]" />
+              <ShoppingBag className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
               {isOutOfStock ? 'Unavailable' : 'Add to cart'}
             </button>
           </div>
@@ -220,7 +220,7 @@ function ProductCard({ product, variant = 'default' }) {
         <button
           type="button"
           disabled={isOutOfStock}
-          onClick={() => dispatch(addToCart({ productId, quantity: 1 }))}
+          onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
           className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f5c542] px-3 text-xs font-semibold text-[#27231b] transition-colors hover:bg-[#eab72f] disabled:cursor-not-allowed disabled:bg-[#e7e5e4] disabled:text-[#78716c]"
         >
           <ShoppingBag className="h-4 w-4" />

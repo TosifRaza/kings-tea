@@ -82,32 +82,32 @@ function ProductCard({ product, variant = 'default' }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
+        <div className="flex flex-1 flex-col px-2.5 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
           <div className="mb-1 flex min-w-0 items-center justify-between gap-1">
-            <p className="min-w-0 truncate text-[8px] font-semibold uppercase tracking-[0.08em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
+            <p className="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.06em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
               {product.origin || product.category || 'Premium tea'}{product.weight ? ` ${'\u00B7'} ${product.weight}` : ''}
             </p>
-            <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[7px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+            <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[8px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
               <span className="flex items-center" aria-hidden="true">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`h-2 w-2 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
+                  <Star key={i} className={`h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
                 ))}
               </span>
               <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
               <span className="hidden text-[#61756d] sm:inline">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
             </Link>
           </div>
-          <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
+          <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-lg font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
             {product.name}
           </Link>
-          <p className="mt-1 line-clamp-2 min-h-7 text-[9px] leading-3.5 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
+          <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 sm:mt-2 sm:gap-2">
-            <span className="text-lg font-bold tracking-tight text-[#164832] sm:text-[27px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-            {hasDiscount && <span className="shrink-0 text-[9px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
-            {hasDiscount && <span className="shrink-0 rounded-full bg-[#fde3df] px-1.5 py-0.5 text-[7px] font-semibold text-[#8d392c] sm:px-2.5 sm:py-1 sm:text-xs">Save {discount}%</span>}
+            <span className="text-xl font-bold tracking-tight text-[#164832] sm:text-[27px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+            {hasDiscount && <span className="shrink-0 text-[10px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            {hasDiscount && <span className="shrink-0 rounded-full bg-[#fde3df] px-1.5 py-0.5 text-[8px] font-semibold text-[#8d392c] sm:px-2.5 sm:py-1 sm:text-xs">Save {discount}%</span>}
           </div>
 
           <div className="mt-2 grid grid-cols-4 gap-0.5 sm:mt-4 sm:gap-2">
@@ -116,8 +116,8 @@ function ProductCard({ product, variant = 'default' }) {
                 <span className="mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
                   <detail.icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
                 </span>
-                <span className="text-[6px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
-                <span className="line-clamp-2 text-[7px] leading-[9px] text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
+                <span className="text-[7px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
+                <span className="line-clamp-2 text-[8px] leading-[10px] text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
               </div>
             ))}
           </div>
@@ -128,7 +128,7 @@ function ProductCard({ product, variant = 'default' }) {
               type="button"
               disabled={isOutOfStock}
               onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
-              className="mt-2 flex h-8 w-full items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[9px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
+              className="mt-2 flex h-9 w-full items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[10px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
             >
               <ShoppingBag className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
               {isOutOfStock ? 'Unavailable' : 'Add to cart'}

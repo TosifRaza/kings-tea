@@ -1227,6 +1227,7 @@ import { fetchProductBySlug, fetchProducts } from '../../store/productSlice';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { getProductImage } from "../../utils/image";
+import { ProductCard } from '../home/BestSellers';
 // Add to existing imports
 import { fetchProductReviews, submitReview, clearReviewState } from '../../store/reviewSlice';
 
@@ -1992,52 +1993,21 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <section className="mt-12 border-t border-[#C9A86A]/10 pt-8">
-              <div className="mb-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C9A86A]">Selected for you</p>
-                <h2 className="mt-1 font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#3A281C]">Related products</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-5">
-              {related.map((p) => {
-                const relGradient = p.gradientColor
-                  ? (gradientMap[p.gradientColor] || 'bg-gradient-to-br from-[#1F4D3A] to-[#1F4D3A]/70')
-                  : 'bg-gradient-to-br from-[#1F4D3A] to-[#1F4D3A]/70';
-                return (
-                  <div
-                    key={p._id || p.id}
-                    onClick={() => {
-                      navigate(`/product/${p.slug}`);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="cursor-pointer group bg-white rounded-sm overflow-hidden border border-[#C9A86A]/10 hover:shadow-lg transition-shadow"
-                  >
-                    <div className={`aspect-[4/5] ${relGradient} flex items-center justify-center`}>
-                      {p.images && p.images.length > 0 ? (
-                        <img
-                          // src={p.images[0].startsWith('http') ? p.images[0] : `${IMAGE_URL}${p.images[0]}`}
-                          src={getProductImage(p.images[0])}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white/20 text-3xl font-bold">{p.name.charAt(0)}</span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-[#3A281C] text-sm mb-1 group-hover:text-[#1F4D3A] transition-colors">
-                        {p.name}
-                      </h3>
-                      <span className="font-semibold text-[#3A281C] text-sm">₹{p.price?.toLocaleString()}</span>
-                    </div>
-                  </div>
-                );
-              })}
+          <section className="mt-12 border-t border-[#e8e4d9] pt-8 sm:mt-16 sm:pt-10">
+            <div className="mb-6 text-center sm:mb-8">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#a9772f] sm:text-xs">Selected for you</p>
+              <h2 className="mt-1 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#123b2d] sm:text-4xl">Related products</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+              {related.map((p) => (
+                <ProductCard key={p._id || p.id} product={p} variant="cherished" />
+              ))}
               {related.length === 0 && (
-                <p className="col-span-full rounded-xl border border-[#C9A86A]/10 bg-[#FBF9F4] py-10 text-center text-sm text-[#3A281C]/50">
+                <p className="col-span-full rounded-xl border border-[#e8e4d9] bg-white py-10 text-center text-sm text-[#6c756f]">
                   More teas will be added to this collection soon.
                 </p>
               )}
-              </div>
+            </div>
           </section>
         </div>
       </div>

@@ -84,9 +84,18 @@ function ProductCard({ product, variant = 'default' }) {
 
         <div className="flex flex-1 flex-col px-2.5 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
           <div className="mb-1 flex min-w-0 items-center justify-between gap-1">
-            <p className="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.06em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
+            <p className="min-w-0 flex-1 truncate text-[8px] font-semibold uppercase tracking-[0.03em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
               {product.origin || product.category || 'Premium tea'}
             </p>
+            <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[8px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+              <span className="flex items-center" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={`h-2 w-2 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
+                ))}
+              </span>
+              <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
+              <span className="hidden text-[#61756d] sm:inline">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
+            </Link>
           </div>
           <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-lg font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
             {product.name}
@@ -94,16 +103,6 @@ function ProductCard({ product, variant = 'default' }) {
           <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
-
-          <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-h-5 min-w-0 items-center gap-1 text-[9px] sm:mt-2 sm:gap-1.5 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
-            <span className="flex items-center" aria-hidden="true">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
-              ))}
-            </span>
-            <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
-            <span className="truncate text-[#61756d]">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
-          </Link>
 
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 sm:mt-2 sm:gap-2">
             <span className="text-xl font-bold tracking-tight text-[#164832] sm:text-[27px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>

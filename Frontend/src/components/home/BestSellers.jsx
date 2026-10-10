@@ -93,7 +93,7 @@ function ProductCard({ product, variant = 'default' }) {
 
         <div className={`flex flex-1 flex-col pb-3 pt-3 ${isCherished ? 'px-3 sm:px-4 sm:pb-4' : 'px-2.5 sm:px-5 sm:pb-5 sm:pt-4'}`}>
           <div className={`mb-1 flex min-w-0 ${isCherished ? '' : 'items-center justify-between gap-1'}`}>
-            <p className={`min-w-0 truncate font-semibold uppercase text-[#34483f] ${isCherished ? 'text-[8px] tracking-[0.08em] sm:text-[10px] sm:tracking-[0.12em]' : 'flex-1 text-[8px] tracking-[0.03em] sm:text-[11px] sm:tracking-[0.13em]'}`}>
+            <p className={`min-w-0 truncate font-semibold uppercase text-[#34483f] ${isCherished ? 'text-[10px] tracking-[0.08em] sm:text-xs sm:tracking-[0.12em]' : 'flex-1 text-[10px] tracking-[0.03em] sm:text-[13px] sm:tracking-[0.13em]'}`}>
               {product.origin || product.category || 'Premium tea'}
             </p>
             {!isCherished && (
@@ -106,10 +106,10 @@ function ProductCard({ product, variant = 'default' }) {
               </Link>
             )}
           </div>
-          <Link to={`/product/${productSlug}`} className={`line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] font-semibold leading-tight text-[#202923] hover:text-tea-green ${isCherished ? 'text-base sm:text-xl' : 'text-lg sm:text-2xl'}`}>
+          <Link to={`/product/${productSlug}`} className={`line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] font-semibold leading-tight text-[#202923] hover:text-tea-green ${isCherished ? 'text-lg sm:text-[22px]' : 'text-xl sm:text-[26px]'}`}>
             {product.name}
           </Link>
-          <p className={`line-clamp-2 ${isCherished ? 'mt-1 min-h-8 text-[10px] leading-4 sm:mt-1.5 sm:min-h-10 sm:text-xs sm:leading-[18px]' : 'mt-1 min-h-8 text-[11px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5'}`}>
+          <p className={`line-clamp-2 ${isCherished ? 'mt-1 min-h-9 text-xs leading-[18px] sm:mt-1.5 sm:min-h-10 sm:text-sm sm:leading-5' : 'mt-1 min-h-9 text-[13px] leading-[18px] text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-base sm:leading-[22px]'}`}>
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
@@ -210,12 +210,12 @@ function ProductCard({ product, variant = 'default' }) {
       </div>
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
-        <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-deep-walnut/50">
+        <p className="mb-1 text-xs font-medium uppercase tracking-[0.12em] text-deep-walnut/50">
           {product.origin || 'Single-origin tea'}{product.weight ? ` · ${product.weight}` : ''}
         </p>
         <Link
           to={`/product/${productSlug}`}
-          className="line-clamp-2 min-h-10 font-[family-name:var(--font-inter)] text-sm font-medium leading-5 text-[#1f2937] hover:text-tea-green"
+          className="line-clamp-2 min-h-10 font-[family-name:var(--font-inter)] text-base font-medium leading-6 text-[#1f2937] hover:text-tea-green"
         >
           {product.name}
         </Link>

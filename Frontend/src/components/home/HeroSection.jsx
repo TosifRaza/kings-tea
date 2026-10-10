@@ -39,7 +39,7 @@ export default function HeroSection() {
 
     const timer = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % heroSlides.length);
-    }, 7000);
+    }, 4000);
 
     return () => window.clearInterval(timer);
   }, [isPaused, prefersReducedMotion]);
@@ -74,7 +74,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 1.035 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ opacity: { duration: prefersReducedMotion ? 0 : 1.2 }, scale: { duration: 7, ease: 'linear' } }}
+            transition={{ opacity: { duration: prefersReducedMotion ? 0 : 1.2 }, scale: { duration: 4, ease: 'linear' } }}
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: `url('${currentSlide.image}')`, backgroundPosition: 'center 56%' }}
           />

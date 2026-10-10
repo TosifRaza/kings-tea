@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, ShoppingBag, Crown, Leaf, Coffee, Thermometer, Timer } from 'lucide-react';
+import { Heart, Star, ShoppingBag, Crown, Leaf, Coffee, Thermometer, Timer, MapPin } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { addToCart } from '../../store/cartSlice';
@@ -21,6 +21,100 @@ function ProductCard({ product, variant = 'default' }) {
   const hasDiscount = comparePrice > price;
   const discount = hasDiscount ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
   const isOutOfStock = product.inStock === false;
+
+  if (variant === 'cherished') {
+    const rating = Number(product.rating || 0);
+    const reviewCount = Number(product.reviewCount || 0);
+
+    return (
+      <motion.article
+        layout
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative isolate aspect-[0.61/1] min-h-[560px] overflow-hidden rounded-[28px] border border-[#d8e0d3] bg-[#052a1d] text-white shadow-[0_14px_36px_rgba(8,38,27,0.2)] sm:min-h-0"
+      >
+        {imageUrl && !imageFailed ? (
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="absolute inset-0 -z-20 h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 -z-20 bg-gradient-to-br from-[#476b40] via-[#174b35] to-[#08271c]" />
+        )}
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(2,32,22,0.88)_0%,rgba(3,39,26,0.65)_28%,rgba(4,37,25,0.08)_56%,rgba(2,30,21,0.25)_72%,rgba(2,26,18,0.92)_100%)]" />
+
+        <div className="absolute inset-x-0 top-0 p-5 sm:p-6">
+          <div className="pr-14 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f4ead0] sm:text-xs">
+            Premium {product.category || 'Tea'}
+          </div>
+          <button
+            onClick={() => dispatch(toggleWishlist(productId))}
+            type="button"
+            aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-pressed={isWishlisted}
+            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-[#163b2d] shadow-md transition hover:scale-105 sm:right-6 sm:top-6 sm:h-11 sm:w-11"
+          >
+            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : ''}`} />
+          </button>
+
+          <Link to={`/product/${productSlug}`} className="mt-2 block max-w-[82%] font-[family-name:var(--font-playfair)] text-[30px] font-bold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.45)] sm:text-4xl">
+            {product.name}
+          </Link>
+          <p className="mt-2 max-w-[85%] text-sm font-medium text-white drop-shadow sm:text-base">
+            {product.shortDescription || 'Fresh · Fragrant · Smooth'}
+          </p>
+          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-white/95 drop-shadow sm:text-sm">
+            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+            {product.origin || product.category || 'Single origin'}
+            {product.weight && <><span aria-hidden="true">·</span>{product.weight}</>}
+          </p>
+          <Link
+            to={`/product/${productSlug}`}
+            className="mt-2 inline-flex items-center gap-2 text-xs drop-shadow sm:text-sm"
+            aria-label={`${rating.toFixed(1)} out of 5 stars, ${reviewCount} reviews`}
+          >
+            <span className="flex items-center" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star key={index} className={`h-4 w-4 ${index < Math.round(rating) ? 'fill-[#ffc21a] text-[#ffc21a]' : 'fill-white/45 text-white/45'}`} />
+              ))}
+            </span>
+            <span className="font-semibold">{rating.toFixed(1)}</span>
+            <span>({reviewCount.toLocaleString('en-IN')} reviews)</span>
+          </Link>
+        </div>
+
+        <div className="absolute right-4 top-[39%] flex h-[94px] w-[94px] flex-col items-center justify-center rounded-full border border-[#a5b851]/60 bg-[#063b29]/95 text-center shadow-lg sm:right-5 sm:h-[108px] sm:w-[108px]">
+          <Leaf className="mb-1 h-5 w-5 text-[#d4dc56]" />
+          <span className="text-sm font-bold leading-tight">100%<br />Natural</span>
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 rounded-t-[25px] border-t border-white/10 bg-[linear-gradient(145deg,rgba(3,38,26,0.97),rgba(1,26,18,0.99))] px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <span className="text-[25px] font-bold tracking-tight sm:text-[30px]">{price.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</span>
+            {hasDiscount && (
+              <span className="text-xs text-white/65 line-through sm:text-sm">{comparePrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</span>
+            )}
+            {hasDiscount && <span className="rounded-full bg-[#b9d957] px-3 py-1 text-xs font-semibold text-[#173620] sm:text-sm">Save {discount}%</span>}
+          </div>
+          <p className="mt-0.5 text-xs text-white/85">Inclusive of all taxes</p>
+          {isOutOfStock && <p className="mt-2 text-xs font-semibold text-[#ffb5a9]">Currently unavailable</p>}
+          <button
+            type="button"
+            disabled={isOutOfStock}
+            onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
+            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#d9e7bb] bg-[#edf4d6] px-4 text-sm font-semibold text-[#103b2c] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:h-[58px] sm:text-base"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {isOutOfStock ? 'Unavailable' : 'Add to cart'}
+          </button>
+        </div>
+      </motion.article>
+    );
+  }
 
   if (variant === 'collection') {
     const brewingGuide = product.brewingGuide || {};
@@ -265,7 +359,7 @@ export default function BestSellers() {
           <div className="section-divider mt-4" />
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {bestSellers.map((product, i) => (
             <motion.div
               key={product._id || product.id}
@@ -273,7 +367,7 @@ export default function BestSellers() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} variant="cherished" />
             </motion.div>
           ))}
         </div>

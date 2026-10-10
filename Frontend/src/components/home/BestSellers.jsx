@@ -1,14 +1,15 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, Crown, ArrowRight, Sparkles, Flame } from 'lucide-react';
+import { Heart, Star, Crown, Sparkles, Flame } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { fetchProducts } from '../../store/productSlice';
 import { IMAGE_URL } from "../../utils/image";
 
 function ProductCard({ product, variant = 'default' }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const productId = product._id || product.id;
   const isWishlisted = useSelector((state) => selectIsWishlisted(state, productId));
   const productSlug = product.slug || productId;
@@ -20,6 +21,15 @@ function ProductCard({ product, variant = 'default' }) {
   const hasDiscount = comparePrice > price;
   const discount = hasDiscount ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
   const isOutOfStock = product.inStock === false;
+  const openProduct = (event) => {
+    if (event.target.closest('a, button')) return;
+    navigate(`/product/${productSlug}`);
+  };
+  const openProductFromKeyboard = (event) => {
+    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    navigate(`/product/${productSlug}`);
+  };
 
   if (variant === 'collection' || variant === 'cherished') {
     const isCherished = variant === 'cherished';
@@ -28,19 +38,23 @@ function ProductCard({ product, variant = 'default' }) {
         layout
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] ${isCherished ? 'sm:rounded-[22px]' : 'sm:rounded-[26px]'}`}
+        onClick={openProduct}
+        onKeyDown={openProductFromKeyboard}
+        tabIndex={0}
+        aria-label={`View ${product.name}`}
+        className={`group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35] ${isCherished ? 'sm:rounded-[22px]' : 'sm:rounded-[26px]'}`}
       >
         <div className="relative">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className={`flex items-center justify-center overflow-hidden bg-[#eef0df] ${isCherished ? 'aspect-[1.62/1]' : 'aspect-[1.55/1] sm:aspect-[1.45/1]'}`}
+            className={`flex items-center justify-center overflow-hidden bg-[#eef0df] ${isCherished ? 'aspect-[1.32/1]' : 'aspect-[1.3/1]'}`}
           >
             {imageUrl && !imageFailed ? (
               <img
                 src={imageUrl}
                 alt={product.name}
-                className={`h-full w-full object-cover transition-transform duration-500 ${isCherished ? 'scale-[1.18] hover:scale-[1.24]' : 'hover:scale-[1.03]'}`}
+                className={`h-full w-full object-cover transition-transform duration-500 ${isCherished ? 'scale-[1.12] group-hover:scale-[1.16]' : 'group-hover:scale-[1.04]'}`}
                 loading="lazy"
                 decoding="async"
                 onError={() => setImageFailed(true)}
@@ -120,12 +134,7 @@ function ProductCard({ product, variant = 'default' }) {
             {hasDiscount && <span className={`shrink-0 rounded-full bg-[#fde9e6] font-semibold text-[#b3261e] ${isCherished ? 'px-1.5 py-1 text-[7px] sm:px-2.5 sm:text-[10px]' : 'ml-auto px-2 py-1 text-[8px] sm:px-3 sm:text-[10px]'}`}>Save {discount}%</span>}
           </div>
 
-          <div className={`mt-auto flex items-center gap-2 ${isCherished ? 'pt-2 sm:pt-3' : 'pt-2 sm:pt-4'}`}>
-            {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
-            <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          {isOutOfStock && <p className="mt-auto pt-3 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
         </div>
       </motion.article>
     );
@@ -136,19 +145,23 @@ function ProductCard({ product, variant = 'default' }) {
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex h-full flex-col overflow-hidden rounded-lg border border-[#e7e5e4] bg-white shadow-sm transition-shadow duration-200 hover:shadow-md"
+      onClick={openProduct}
+      onKeyDown={openProductFromKeyboard}
+      tabIndex={0}
+      aria-label={`View ${product.name}`}
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-[#e7e5e4] bg-white shadow-sm transition-shadow duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35]"
     >
       <div className="relative">
         <Link
           to={`/product/${productSlug}`}
           aria-label={`View ${product.name}`}
-          className="flex aspect-square items-center justify-center overflow-hidden bg-[#faf9f6] p-3 sm:p-4"
+          className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#faf9f6] p-2 sm:p-3"
         >
           {imageUrl && !imageFailed ? (
             <img
               src={imageUrl}
               alt={product.name}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               loading="lazy"
               decoding="async"
               onError={() => setImageFailed(true)}
@@ -211,9 +224,6 @@ function ProductCard({ product, variant = 'default' }) {
           </p>
         )}
 
-        <Link to={`/product/${productSlug}`} className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f5c542] px-3 text-xs font-semibold text-[#27231b] transition-colors hover:bg-[#eab72f]">
-          View product
-        </Link>
       </div>
     </motion.article>
   );

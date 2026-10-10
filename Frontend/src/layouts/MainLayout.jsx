@@ -64,6 +64,15 @@ const customerLinks = [
   'Terms of Service',
 ];
 
+const mobileExploreLinks = [
+  { label: 'Home', path: '/' },
+  { label: 'Shop', path: '/shop' },
+  { label: 'Tea Culture', path: '/culture' },
+  { label: 'About', path: '/about' },
+];
+
+const mobileCustomerLinks = ['Contact Us', 'Shipping & Returns', 'FAQs', 'Track Order'];
+
 function Header() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -472,7 +481,7 @@ function Footer() {
       ),
       Twitter: (
         <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+          <path d="M4 4l16 16M20 4L4 20" />
         </svg>
       ),
       YouTube: (
@@ -486,45 +495,59 @@ function Footer() {
 
   return (
     <footer className="bg-deep-walnut text-warm-ivory/90">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-5 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           {/* Brand Column */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
+          <div className="col-span-2 border-b border-imperial-gold/55 pb-6 sm:col-span-1 sm:border-0 sm:pb-0 lg:col-span-1">
+            <div className="mb-4 flex items-center gap-4 sm:gap-2">
               <img
                 src="/images/kings-tea-logo.png"
                 alt="KING'S TEA"
-                className="h-10 brightness-0 invert"
+                className="h-[72px] w-[72px] rounded-sm border border-imperial-gold/80 p-1 object-cover sm:h-10 sm:w-auto sm:border-0 sm:p-0 sm:brightness-0 sm:invert"
               />
-              <span className="font-[family-name:var(--font-playfair)] font-bold text-lg text-warm-ivory">
-                KING&apos;S TEA
-              </span>
+              <div>
+                <span className="block font-[family-name:var(--font-playfair)] text-[28px] font-bold leading-tight text-warm-ivory sm:text-lg">
+                  KING&apos;S TEA
+                </span>
+                <span className="mt-1 block font-[family-name:var(--font-cormorant)] text-lg leading-tight text-warm-ivory/85 sm:hidden">
+                  Royal taste. Timeless tradition.
+                </span>
+              </div>
             </div>
-            <p className="text-warm-ivory/60 text-sm leading-relaxed mb-4">
+            <p className="mb-5 font-[family-name:var(--font-cormorant)] text-[17px] leading-[1.45] text-warm-ivory/85 sm:mb-4 sm:font-[family-name:var(--font-inter)] sm:text-sm sm:leading-relaxed sm:text-warm-ivory/60">
               Experience centuries of tea heritage in every cup. Premium luxury
               teas sourced from the world&apos;s finest gardens, crafted for
               connoisseurs.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-4 sm:gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-9 h-9 rounded-full border border-warm-ivory/20 flex items-center justify-center text-warm-ivory/60 hover:border-imperial-gold hover:text-imperial-gold transition-colors"
+                  className="flex h-14 w-14 items-center justify-center rounded-full border border-imperial-gold/70 text-imperial-gold transition-colors hover:border-imperial-gold hover:bg-imperial-gold/10 sm:h-9 sm:w-9 sm:border-warm-ivory/20 sm:text-warm-ivory/60"
                 >
-                  <SocialIcon name={social.icon} className="h-4 w-4" />
+                  <SocialIcon name={social.icon} className="h-6 w-6 sm:h-4 sm:w-4" />
                 </a>
               ))}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-warm-ivory mb-4 text-base">
-              Quick Links
+          <div className="border-b border-imperial-gold/55 pb-6 sm:border-0 sm:pb-0">
+            <h3 className="mb-4 font-[family-name:var(--font-playfair)] text-xl font-semibold text-warm-ivory sm:text-base">
+              <span className="sm:hidden">Explore<span className="mt-2 block h-1 w-12 bg-imperial-gold" /></span><span className="hidden sm:inline">Quick Links</span>
             </h3>
-            <ul className="space-y-2.5">
+            <ul className="space-y-3 sm:hidden">
+              {mobileExploreLinks.map((link) => (
+                <li key={link.path}>
+                  <Link to={link.path} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[17px] text-warm-ivory/85 hover:text-imperial-gold">
+                    {link.label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <ul className="hidden space-y-2.5 sm:block">
               {quickLinks.map((link) => (
                 <li key={link.path}>
                   <Link
@@ -539,11 +562,20 @@ function Footer() {
           </div>
 
           {/* Customer Service */}
-          <div>
-            <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-warm-ivory mb-4 text-base">
-              Customer Service
+          <div className="border-b border-imperial-gold/55 pb-6 sm:border-0 sm:pb-0">
+            <h3 className="mb-4 font-[family-name:var(--font-playfair)] text-xl font-semibold text-warm-ivory sm:text-base">
+              <span className="sm:hidden">Customer Care<span className="mt-2 block h-1 w-12 bg-imperial-gold" /></span><span className="hidden sm:inline">Customer Service</span>
             </h3>
-            <ul className="space-y-2.5">
+            <ul className="space-y-3 sm:hidden">
+              {mobileCustomerLinks.map((label) => (
+                <li key={label}>
+                  <Link to={label === 'Contact Us' ? '/contact' : label === 'Track Order' ? '/dashboard?tab=orders' : '/contact'} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[17px] text-warm-ivory/85 hover:text-imperial-gold">
+                    {label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <ul className="hidden space-y-2.5 sm:block">
               {customerLinks.map((link) => (
                 <li key={link}>
                   <button className="text-warm-ivory/60 hover:text-imperial-gold transition-colors text-sm">
@@ -555,7 +587,7 @@ function Footer() {
           </div>
 
           {/* Contact & Newsletter */}
-          <div>
+          <div className="hidden lg:block">
             <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-warm-ivory mb-4 text-base">
               Stay Connected
             </h3>
@@ -593,13 +625,13 @@ function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-warm-ivory/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-warm-ivory/40 text-xs">
-            &copy; {new Date().getFullYear()} KING&apos;S TEA. All rights
-            reserved.
+      <div className="border-t border-imperial-gold/55">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-5 py-5 sm:px-6 lg:px-8">
+          <p className="font-[family-name:var(--font-cormorant)] text-sm text-warm-ivory/80 sm:font-[family-name:var(--font-inter)] sm:text-xs sm:text-warm-ivory/40">
+            <span className="sm:hidden">&copy; {new Date().getFullYear()} King&apos;s Tea</span>
+            <span className="hidden sm:inline">&copy; {new Date().getFullYear()} KING&apos;S TEA. All rights reserved.</span>
           </p>
-          <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-4 sm:flex">
             <span className="text-warm-ivory/40 text-xs">
               Accepted Payments:
             </span>
@@ -613,6 +645,11 @@ function Footer() {
                 </span>
               ))}
             </div>
+          </div>
+          <div className="flex items-center gap-2 font-[family-name:var(--font-cormorant)] text-sm text-warm-ivory/80 sm:hidden">
+            <button type="button" className="hover:text-imperial-gold">Privacy</button>
+            <span aria-hidden="true">•</span>
+            <button type="button" className="hover:text-imperial-gold">Terms</button>
           </div>
         </div>
       </div>

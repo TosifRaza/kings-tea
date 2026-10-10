@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Leaf, LayoutGrid } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts } from '../../store/productSlice';
@@ -158,7 +158,7 @@ export default function ShopPage() {
     setSelectedCategories([]);
     setSelectedOrigins([]);
     setSelectedFermentations([]);
-    setPriceRange([0, 200]);
+    setPriceRange([0, 20000]);
     setQuery('');
     setCurrentPage(1);
   };
@@ -214,7 +214,8 @@ export default function ShopPage() {
     selectedOrigins.length > 0 ||
     selectedFermentations.length > 0 ||
     priceRange[0] > 0 ||
-    priceRange[1] < 200;
+    priceRange[1] < 20000;
+  const activeFilterCount = selectedCategories.length + selectedOrigins.length + selectedFermentations.length + (priceRange[0] > 0 || priceRange[1] < 20000 ? 1 : 0);
 
   const filterProps = {
     categories,
@@ -237,53 +238,75 @@ export default function ShopPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="pt-20 pb-12 min-h-screen"
+      className="min-h-screen bg-[#fbfaf5] pb-12 pt-[68px] sm:pt-20"
     >
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-deep-walnut">
+        <section className="relative -mx-2 mb-4 flex min-h-[122px] flex-col items-center justify-center overflow-hidden border-b border-[#e8e2d3] bg-[linear-gradient(180deg,#faf8ef_0%,#f3f0e4_72%,#eeecdf_100%)] px-4 py-4 text-center sm:mx-0 sm:mb-7 sm:min-h-[190px] sm:rounded-2xl">
+          <svg className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] w-full opacity-60" viewBox="0 0 1200 180" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 112 120 78 220 101 330 54 440 101 555 68 670 103 790 48 900 96 1010 55 1120 93 1200 68V180H0Z" fill="#fffdf5" />
+            <path d="M0 139 140 105 270 127 390 91 520 131 650 100 770 134 900 91 1040 128 1140 96 1200 118V180H0Z" fill="#e7e7d9" opacity=".65" />
+          </svg>
+          <svg className="pointer-events-none absolute -left-3 top-1 h-[92%] w-[86px] text-[#61784d]/65 sm:w-28" viewBox="0 0 100 220" fill="none" aria-hidden="true">
+            <path d="M4 210C44 166 22 105 83 18M16 175C8 146-1 137 2 117c18 2 28 15 29 34M30 139c-3-24 2-39 20-52 12 20 7 38-11 55M49 100c4-27 18-42 38-49 8 25-3 44-34 56M18 169c22-15 41-15 57-5-12 23-31 28-55 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 117c18 2 28 15 29 34-18-2-28-14-29-34ZM50 87c12 20 7 38-11 55-7-21-3-39 11-55ZM87 51c8 25-3 44-34 56 4-27 18-42 34-56ZM75 164c-12 23-31 28-55 17 22-15 41-15 55-17Z" fill="currentColor" fillOpacity=".22" />
+          </svg>
+          <svg className="pointer-events-none absolute -right-3 top-1 h-[92%] w-[86px] -scale-x-100 text-[#61784d]/65 sm:w-28" viewBox="0 0 100 220" fill="none" aria-hidden="true">
+            <path d="M4 210C44 166 22 105 83 18M16 175C8 146-1 137 2 117c18 2 28 15 29 34M30 139c-3-24 2-39 20-52 12 20 7 38-11 55M49 100c4-27 18-42 38-49 8 25-3 44-34 56M18 169c22-15 41-15 57-5-12 23-31 28-55 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 117c18 2 28 15 29 34-18-2-28-14-29-34ZM50 87c12 20 7 38-11 55-7-21-3-39 11-55ZM87 51c8 25-3 44-34 56 4-27 18-42 34-56ZM75 164c-12 23-31 28-55 17 22-15 41-15 55-17Z" fill="currentColor" fillOpacity=".22" />
+          </svg>
+          <div className="relative z-10 mb-1 flex items-center gap-2 text-[#c99c3a]">
+            <span className="h-px w-8 bg-[#d6a12e]" />
+            <Leaf className="h-5 w-5 rotate-[-28deg] fill-current/30" />
+            <span className="h-px w-8 bg-[#d6a12e]" />
+          </div>
+          <h1 className="relative z-10 font-[family-name:var(--font-playfair)] text-[30px] font-bold leading-none tracking-tight text-[#0d3025] sm:text-5xl">
             Our Collection
           </h1>
-          <div className="section-divider mt-4" />
-        </div>
+          <p className="relative z-10 mt-2 font-[family-name:var(--font-playfair)] text-base text-[#60776c] sm:mt-3 sm:text-xl">Find your perfect cup</p>
+        </section>
 
         {/* Search & Sort Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-deep-walnut/40" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#143b2d]" />
             <input
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search teas by name, origin, category..."
-              className="pl-9 h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold"
+              placeholder="Search teas, origins..."
+              className="h-12 w-full rounded-full border border-[#dddcd3] bg-white/80 pl-12 pr-4 text-sm text-[#263b32] shadow-[0_2px_8px_rgba(32,45,35,0.05)] outline-none transition focus:border-[#8d9d87] sm:h-14 sm:text-base"
             />
           </div>
 
-          <div className="flex gap-2">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="h-10 text-xs border border-imperial-gold/20 px-3 bg-white focus:outline-none focus:border-imperial-gold"
-            >
-              <option value="rating">Top Rated</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="newest">Newest First</option>
-              <option value="name">Name A-Z</option>
-            </select>
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <label className="flex h-11 min-w-0 items-center rounded-xl border border-[#dcdace] bg-white/65 px-3 text-xs font-medium text-[#26332d] sm:h-12 sm:px-5 sm:text-sm">
+              <span className="shrink-0">Sort:&nbsp;</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                aria-label="Sort products"
+                className="min-w-0 flex-1 appearance-none bg-transparent text-xs outline-none sm:text-sm"
+              >
+                <option value="rating">Top rated</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="newest">Newest First</option>
+                <option value="name">Name A-Z</option>
+              </select>
+              <span className="ml-1 text-base leading-none text-[#12382a]">⌄</span>
+            </label>
 
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className="lg:hidden h-10 border border-imperial-gold/20 text-xs px-3 flex items-center gap-1 hover:bg-warm-ivory-dark transition-colors"
+              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0b4b35] to-[#073c2b] px-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:h-12 sm:px-6 lg:hidden"
             >
-              <SlidersHorizontal className="h-4 w-4" />
+              <SlidersHorizontal className="h-5 w-5" />
               Filters
-              {hasFilters && (
-                <span className="bg-imperial-gold text-deep-walnut text-[10px] h-4 w-4 flex items-center justify-center rounded-full">
-                  !
+              {activeFilterCount > 0 && (
+                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#38ad69] px-1 text-xs font-bold text-white">
+                  {activeFilterCount}
                 </span>
               )}
             </button>
@@ -329,9 +352,12 @@ export default function ShopPage() {
           </div>
         )}
 
-        <p className="text-deep-walnut/50 text-xs font-[family-name:var(--font-inter)] mb-6">
-          Showing {paginatedProducts.length} of {filteredProducts.length} teas
-        </p>
+        <div className="mb-4 flex items-center gap-3 text-sm text-[#315d50] sm:mb-6">
+          <p className="shrink-0 font-medium sm:hidden">{filteredProducts.length} teas</p>
+          <p className="hidden shrink-0 font-[family-name:var(--font-inter)] text-xs text-deep-walnut/50 sm:block">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
+          <span className="h-px flex-1 bg-[#dcdace]" />
+          <LayoutGrid className="h-5 w-5 shrink-0 text-[#174b35]" aria-hidden="true" />
+        </div>
 
         {loading ? (
           <div className="text-center py-20">

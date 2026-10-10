@@ -83,6 +83,7 @@ function Header() {
   const wishlistCount = wishlistItems.length;
   const isHome = location.pathname === '/';
   const isAccountDashboard = location.pathname === '/dashboard';
+  const isShop = location.pathname.startsWith('/shop');
 
   // useEffect(() => {
   //   dispatch(getMe());
@@ -121,7 +122,9 @@ function Header() {
     <>
       <motion.header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isAccountDashboard
+          isShop
+            ? 'bg-[#faf8ef]/95 backdrop-blur-md shadow-[0_2px_12px_rgba(45,54,38,0.08)] py-1.5'
+            : isAccountDashboard
             ? 'bg-tea-green shadow-md py-2'
             : scrolled
             ? 'bg-warm-ivory/95 backdrop-blur-md shadow-sm py-2'
@@ -140,9 +143,7 @@ function Header() {
               <img
                 src="/images/kings-tea-logo.png"
                 alt="KING'S TEA"
-                className={`transition-all duration-300 ${
-                  scrolled || !isHome ? 'h-10' : 'h-12'
-                }`}
+                className={`transition-all duration-300 ${isShop ? 'h-14 w-14 rounded-md object-cover sm:h-10 sm:w-auto sm:rounded-none' : scrolled || !isHome ? 'h-10' : 'h-12'}`}
               />
               <span
                 className={`flex flex-col font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 ${
@@ -271,8 +272,8 @@ function Header() {
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                     }`}
                   >
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isAccountDashboard ? 'border border-white/50 bg-white/10' : 'bg-tea-green'}`}>
-                      <span className="text-warm-ivory text-[10px] font-bold font-[family-name:var(--font-playfair)]">
+                    <div className={`${isShop ? 'h-8 w-8' : 'h-7 w-7'} rounded-full flex items-center justify-center ${isAccountDashboard ? 'border border-white/50 bg-white/10' : 'bg-tea-green'}`}>
+                      <span className="text-warm-ivory text-xs font-bold font-[family-name:var(--font-playfair)]">
                         {user.name?.charAt(0).toUpperCase()}
                       </span>
                     </div>

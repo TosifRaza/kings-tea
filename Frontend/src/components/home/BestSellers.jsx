@@ -48,7 +48,7 @@ function ProductCard({ product, variant = 'default' }) {
               <img
                 src={imageUrl}
                 alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]"
+                className="h-full w-full scale-[1.18] object-cover transition-transform duration-500 hover:scale-[1.24]"
                 loading="lazy"
                 decoding="async"
                 onError={() => setImageFailed(true)}

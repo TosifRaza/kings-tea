@@ -1,9 +1,8 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, ShoppingBag, Crown, Leaf, Coffee, Thermometer, Timer, ArrowRight, Sparkles, Flame } from 'lucide-react';
+import { Heart, Star, Crown, ArrowRight, Sparkles, Flame } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { addToCart } from '../../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { fetchProducts } from '../../store/productSlice';
 import { IMAGE_URL } from "../../utils/image";
@@ -24,14 +23,6 @@ function ProductCard({ product, variant = 'default' }) {
 
   if (variant === 'collection' || variant === 'cherished') {
     const isCherished = variant === 'cherished';
-    const brewingGuide = product.brewingGuide || {};
-    const details = [
-      { label: 'Origin', value: product.origin || product.category || 'Selected tea', icon: Leaf },
-      { label: 'Caffeine', value: product.caffeine ? `${product.caffeine[0].toUpperCase()}${product.caffeine.slice(1)}` : 'Not specified', icon: Coffee },
-      { label: 'Brew', value: brewingGuide.temperature || 'See brew guide', icon: Thermometer },
-      { label: 'Steep', value: brewingGuide.steepTime || 'See brew guide', icon: Timer },
-    ];
-
     return (
       <motion.article
         layout
@@ -129,32 +120,11 @@ function ProductCard({ product, variant = 'default' }) {
             {hasDiscount && <span className={`shrink-0 rounded-full bg-[#fde9e6] font-semibold text-[#b3261e] ${isCherished ? 'px-1.5 py-1 text-[7px] sm:px-2.5 sm:text-[10px]' : 'ml-auto px-2 py-1 text-[8px] sm:px-3 sm:text-[10px]'}`}>Save {discount}%</span>}
           </div>
 
-          <div className={`grid grid-cols-4 gap-1 ${isCherished ? 'mt-2 sm:mt-3 sm:gap-2' : 'mt-2 sm:mt-4 sm:gap-2'}`}>
-            {details.map((detail) => (
-              <div key={detail.label} className={`flex min-w-0 flex-col items-center px-0.5 text-center ${!isCherished && detail.label !== 'Steep' ? 'border-r border-[#e6e5dc]' : ''}`}>
-                <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
-                  <detail.icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
-                </span>
-                <span className="text-[7px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[9px]">{detail.label}</span>
-                <span className="line-clamp-2 text-[8px] leading-[10px] text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
-              </div>
-            ))}
-          </div>
-
           <div className={`mt-auto flex items-center gap-2 ${isCherished ? 'pt-2 sm:pt-3' : 'pt-2 sm:pt-4'}`}>
             {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
-            <button
-              type="button"
-              disabled={isOutOfStock}
-              onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
-              className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] ${isCherished ? 'h-9 text-[9px] sm:h-10 sm:gap-2 sm:px-3 sm:text-xs' : 'h-9 text-[10px] sm:h-11 sm:gap-2 sm:px-3 sm:text-sm'}`}
-            >
-              <ShoppingBag className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-              {isOutOfStock ? 'Unavailable' : 'Add to cart'}
-            </button>
-            {isCherished && <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
+            <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
               <ArrowRight className="h-4 w-4" />
-            </Link>}
+            </Link>
           </div>
         </div>
       </motion.article>
@@ -241,15 +211,9 @@ function ProductCard({ product, variant = 'default' }) {
           </p>
         )}
 
-        <button
-          type="button"
-          disabled={isOutOfStock}
-          onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
-          className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f5c542] px-3 text-xs font-semibold text-[#27231b] transition-colors hover:bg-[#eab72f] disabled:cursor-not-allowed disabled:bg-[#e7e5e4] disabled:text-[#78716c]"
-        >
-          <ShoppingBag className="h-4 w-4" />
-          {isOutOfStock ? 'Unavailable' : 'Add to cart'}
-        </button>
+        <Link to={`/product/${productSlug}`} className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f5c542] px-3 text-xs font-semibold text-[#27231b] transition-colors hover:bg-[#eab72f]">
+          View product
+        </Link>
       </div>
     </motion.article>
   );

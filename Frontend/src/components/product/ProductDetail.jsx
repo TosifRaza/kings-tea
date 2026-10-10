@@ -1215,6 +1215,11 @@ import {
   Clock,
   Scale,
   Lightbulb,
+  MapPin,
+  Truck,
+  ShieldCheck,
+  Leaf,
+  Zap,
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
@@ -1361,6 +1366,11 @@ export default function ProductDetail() {
     dispatch(addToCart({ productId, productName: product.name, price: product.price, image: product.images?.[0], weight: product.weight, quantity }));
   };
 
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate('/checkout');
+  };
+
   // ===== REVIEW SUBMIT HANDLER (NEW) =====
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
@@ -1461,25 +1471,25 @@ export default function ProductDetail() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="pt-20 pb-12 min-h-screen"
+      className="min-h-screen bg-[#fbfaf5] pb-16 pt-24 text-[#183b2d] sm:pt-28"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-10">
         <button
           onClick={() => navigate('/shop')}
-          className="flex items-center gap-2 text-[#3A281C]/60 hover:text-[#3A281C] transition-colors mb-8 text-sm"
+          className="mb-5 inline-flex items-center gap-2 rounded-full px-2 py-2 text-sm text-[#315344] transition hover:bg-[#edf1e7] hover:text-[#123d2e] sm:mb-7"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Collection
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
           {/* ============ IMAGE GALLERY (NEW — with thumbnails + zoom) ============ */}
           <div>
             {/* Main Image Container */}
-            <div className="flex flex-col-reverse lg:flex-row gap-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:gap-5">
               {/* Thumbnails (only show if more than 1 image) */}
               {hasRealImages && images.length > 1 && (
-                <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0 lg:max-h-[600px]">
+                <div className="order-2 flex gap-2 overflow-x-auto pb-1 lg:order-1 lg:max-h-[680px] lg:flex-col lg:gap-3 lg:overflow-x-visible lg:overflow-y-auto lg:pb-0">
                   {images.map((img, idx) => (
                     <button
                       key={`${img}-${idx}`}
@@ -1487,11 +1497,10 @@ export default function ProductDetail() {
                       onClick={() => goToImage(idx)}
                       aria-label={`View image ${idx + 1}`}
                       className={`
-                        flex-shrink-0 w-16 h-16 lg:w-20 lg:h-20 rounded-md overflow-hidden
-                        border-2 transition-all duration-200
+                        h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-200 sm:h-[76px] sm:w-[76px] lg:h-24 lg:w-24
                         ${idx === activeImageIndex
-                          ? 'border-[#C9A86A] ring-2 ring-[#C9A86A]/30 scale-105'
-                          : 'border-[#C9A86A]/20 hover:border-[#C9A86A]/60 opacity-70 hover:opacity-100'
+                          ? 'border-[#164a36] ring-2 ring-[#164a36]/15'
+                          : 'border-transparent opacity-80 hover:border-[#c9a86a] hover:opacity-100'
                         }
                       `}
                     >
@@ -1508,13 +1517,13 @@ export default function ProductDetail() {
               )}
 
               {/* Main Image Display */}
-              <div className="flex-1 relative group">
+              <div className="group relative order-1 min-w-0 flex-1 lg:order-2">
                 <motion.div
                   key={activeImageIndex}
                   initial={{ opacity: 0.3 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
-                  className="relative aspect-[4/5] overflow-hidden bg-[#F8F3E9] cursor-zoom-in"
+                  className="relative aspect-[4/5] cursor-zoom-in overflow-hidden rounded-2xl bg-[#f1f0e5] shadow-[0_16px_44px_rgba(40,49,37,0.12)] sm:aspect-[5/6] lg:aspect-[0.82/1]"
                   onClick={() => setIsLightboxOpen(true)}
                 >
                   {hasRealImages ? (
@@ -1533,7 +1542,7 @@ export default function ProductDetail() {
 
                   {/* Zoom indicator badge */}
                   {hasRealImages && (
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm">
+                    <div className="absolute right-4 top-4 rounded-full bg-white/95 p-2.5 text-[#143e2e] shadow-md backdrop-blur-sm">
                       <ZoomIn className="h-4 w-4 text-[#3A281C]" />
                     </div>
                   )}
@@ -1541,12 +1550,12 @@ export default function ProductDetail() {
                   {/* Badges */}
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     {product.isNew && (
-                      <span className="bg-[#C9A86A] text-[#3A281C] text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-sm">
+                      <span className="rounded-full bg-[#f2d28b] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#3a281c]">
                         New
                       </span>
                     )}
                     {product.bestSeller && (
-                      <span className="bg-[#A65A3A] text-white text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-sm">
+                      <span className="rounded-full bg-[#07553e] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow-sm">
                         Best Seller
                       </span>
                     )}
@@ -1557,60 +1566,68 @@ export default function ProductDetail() {
           </div>
 
           {/* ============ PRODUCT INFO ============ */}
-          <div>
-            <div className="mb-6">
-              <span className="text-[#C9A86A] text-xs font-semibold uppercase tracking-[0.2em]">
+          <div className="min-w-0 lg:pt-1">
+            <div className="mb-5 sm:mb-6">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#a9772f] sm:text-sm">
+                <MapPin className="h-4 w-4" />
                 {product.origin || 'Premium Tea'}
               </span>
-              <h1 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-[#3A281C] mt-2 mb-3">
+              <h1 className="mt-2 mb-3 font-[family-name:var(--font-playfair)] text-3xl font-bold leading-tight text-[#123b2d] sm:text-4xl lg:text-5xl">
                 {product.name}
               </h1>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.floor(product.rating || 0) ? 'text-[#C9A86A] fill-[#C9A86A]' : 'text-[#3A281C]/15'
+                        i < Math.round(product.rating || 0) ? 'fill-[#b0803e] text-[#b0803e]' : 'text-[#b0803e]/35'
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-[#3A281C]/60 text-sm">
-                  {product.rating || 0} ({product.reviewCount || 0} reviews)
+                <span className="text-sm text-[#53645d]">
+                  {Number(product.rating || 0).toFixed(1)} ({product.reviewCount || 0} reviews)
                 </span>
               </div>
             </div>
 
-            <div className="mb-6">
-              <div className="flex items-baseline gap-3">
-                <span className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#3A281C]">
+            <div className="mb-4">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#123b2d] sm:text-4xl">
                   ₹{product.price?.toLocaleString()}
                 </span>
                 {product.comparePrice && product.comparePrice > product.price && (
-                  <span className="text-[#3A281C]/40 text-lg line-through">
+                  <span className="text-lg text-[#78827d] line-through">
                     ₹{product.comparePrice?.toLocaleString()}
                   </span>
                 )}
+                {product.comparePrice > product.price && (
+                  <span className="rounded-full bg-[#f5ead4] px-3 py-1 text-xs font-semibold text-[#8a6128]">
+                    Save {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
+                  </span>
+                )}
               </div>
+              <p className="mt-1 text-xs text-[#65736d]">Inclusive of all taxes</p>
             </div>
 
             <div className="mb-6">
-              <p className="text-[#3A281C]/70 text-sm leading-relaxed line-clamp-3">
-                {product.description}
+              <p className="text-[15px] leading-7 text-[#59645f] sm:text-base">
+                {product.description || product.shortDescription || 'A carefully selected tea for a memorable cup.'}
               </p>
             </div>
 
             {/* Tasting Notes */}
             {product.tastingNotes && product.tastingNotes.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-semibold text-[#3A281C] text-sm mb-2">Tasting Notes</h3>
-                <div className="flex flex-wrap gap-2">
+              <div className="mb-6 sm:mb-7">
+                <h3 className="mb-3 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#183b2d]">Tasting Notes</h3>
+                <div className="flex flex-wrap gap-2.5">
                   {product.tastingNotes.map((note, i) => (
                     <span
                       key={i}
-                      className="text-xs bg-[#1F4D3A]/5 text-[#1F4D3A] px-3 py-1 rounded-sm border border-[#1F4D3A]/10"
+                      className="inline-flex items-center gap-2 rounded-full border border-[#dbe4d3] bg-[#eef2e7] px-3 py-2 text-sm text-[#244735]"
                     >
+                      <Leaf className="h-3.5 w-3.5" />
                       {note}
                     </span>
                   ))}
@@ -1619,97 +1636,105 @@ export default function ProductDetail() {
             )}
 
             {/* Quantity & Add to Cart */}
-            <div className="mb-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center border border-[#C9A86A]/30 rounded-sm">
+            <div className="mb-5 sm:mb-6">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex h-12 items-center rounded-lg border border-[#d9d2c0] bg-white/60">
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-[#F8F3E9] transition-colors"
+                    aria-label="Decrease quantity"
+                    className="flex h-11 w-10 items-center justify-center rounded-l-lg transition-colors hover:bg-[#f1f0e7]"
                   >
-                    <Minus className="h-4 w-4 text-[#3A281C]" />
+                    <Minus className="h-4 w-4 text-[#264638]" />
                   </button>
-                  <span className="w-12 text-center font-semibold text-[#3A281C]">{quantity}</span>
+                  <span className="w-8 text-center font-medium text-[#173d2e]">{quantity}</span>
                   <button
+                    type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-[#F8F3E9] transition-colors"
+                    aria-label="Increase quantity"
+                    className="flex h-11 w-10 items-center justify-center rounded-r-lg transition-colors hover:bg-[#f1f0e7]"
                   >
-                    <Plus className="h-4 w-4 text-[#3A281C]" />
+                    <Plus className="h-4 w-4 text-[#264638]" />
                   </button>
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-[#1F4D3A] hover:bg-[#1F4D3A]/90 text-[#F8F3E9] py-3 px-6 text-xs font-semibold uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+                  className="flex h-12 min-w-[150px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#124b36] px-4 text-xs font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#0b3c2b] sm:text-sm"
                 >
                   <ShoppingBag className="h-4 w-4" />
                   Add to Cart
                 </button>
                 <button
-                  // onClick={() => dispatch(toggleWishlistLocal(productId))}
+                  type="button"
                   onClick={() => dispatch(toggleWishlist(productId))}
-                  className="w-12 h-12 border border-[#C9A86A]/30 hover:border-[#A65A3A] flex items-center justify-center transition-colors"
+                  aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#c9c7b8] bg-white/60 transition hover:border-[#a9772f] hover:bg-white"
                 >
                   <Heart
                     className={`h-5 w-5 ${
-                      isWishlisted ? 'fill-[#A65A3A] text-[#A65A3A]' : 'text-[#3A281C]/40'
+                      isWishlisted ? 'fill-[#a65a3a] text-[#a65a3a]' : 'text-[#244735]'
                     }`}
                   />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#bd914d] to-[#9d7133] px-4 text-xs font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition hover:brightness-95 sm:w-auto sm:flex-1 sm:text-sm"
+                >
+                  <Zap className="h-4 w-4" /> Buy Now
                 </button>
               </div>
             </div>
 
-            {/* Quick Details */}
-            <div className="grid grid-cols-2 gap-4 py-6 border-y border-[#C9A86A]/10">
-              <div>
-                <span className="text-[#3A281C]/50 text-xs uppercase tracking-wider">Weight</span>
-                <p className="text-[#3A281C] text-sm font-medium mt-1">{product.weight || '100g'}</p>
+            <div className="mb-5 grid grid-cols-1 gap-3 border-y border-[#e5e1d5] py-4 sm:mb-6 sm:grid-cols-3 sm:gap-4 sm:py-5">
+              <div className="flex items-center gap-3 sm:justify-center">
+                <Truck className="h-5 w-5 shrink-0 text-[#173f2f]" />
+                <div><p className="text-sm font-medium text-[#253d32]">Free Shipping</p><p className="text-xs text-[#768079]">On orders above ₹2,000</p></div>
               </div>
-              <div>
-                <span className="text-[#3A281C]/50 text-xs uppercase tracking-wider">Origin</span>
-                <p className="text-[#3A281C] text-sm font-medium mt-1">{product.origin || 'India'}</p>
+              <div className="flex items-center gap-3 sm:justify-center sm:border-x sm:border-[#e5e1d5] sm:px-3">
+                <ShieldCheck className="h-5 w-5 shrink-0 text-[#173f2f]" />
+                <div><p className="text-sm font-medium text-[#253d32]">Secure Checkout</p><p className="text-xs text-[#768079]">Safe and encrypted</p></div>
               </div>
-              <div>
-                <span className="text-[#3A281C]/50 text-xs uppercase tracking-wider">Caffeine</span>
-                <p className="text-[#3A281C] text-sm font-medium mt-1">{product.caffeine || 'Medium'}</p>
-              </div>
-              <div>
-                <span className="text-[#3A281C]/50 text-xs uppercase tracking-wider">Fermentation</span>
-                <p className="text-[#3A281C] text-sm font-medium mt-1">{product.fermentation || 'Full'}</p>
+              <div className="flex items-center gap-3 sm:justify-center">
+                <Leaf className="h-5 w-5 shrink-0 text-[#173f2f]" />
+                <div><p className="text-sm font-medium text-[#253d32]">Premium Quality</p><p className="text-xs text-[#768079]">Sourced with care</p></div>
               </div>
             </div>
 
-            {/* Brewing Guide */}
-            {brewing && (brewing.temperature || brewing.steepTime || brewing.amount) && (
-              <div className="mt-6 p-6 bg-[#F8F3E9] rounded-sm border border-[#C9A86A]/10">
-                <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#3A281C] mb-4">
-                  Brewing Guide
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {brewing.temperature && (
-                    <div className="text-center">
-                      <Thermometer className="h-5 w-5 text-[#1F4D3A] mx-auto mb-2" />
-                      <div className="text-[#3A281C] font-semibold text-sm">{brewing.temperature}</div>
-                      <div className="text-[#3A281C]/50 text-xs">Temperature</div>
-                    </div>
-                  )}
-                  {brewing.steepTime && (
-                    <div className="text-center">
-                      <Clock className="h-5 w-5 text-[#1F4D3A] mx-auto mb-2" />
-                      <div className="text-[#3A281C] font-semibold text-sm">{brewing.steepTime}</div>
-                      <div className="text-[#3A281C]/50 text-xs">Steep Time</div>
-                    </div>
-                  )}
-                  {brewing.amount && (
-                    <div className="text-center">
-                      <Scale className="h-5 w-5 text-[#1F4D3A] mx-auto mb-2" />
-                      <div className="text-[#3A281C] font-semibold text-sm">{brewing.amount}</div>
-                      <div className="text-[#3A281C]/50 text-xs">Amount</div>
-                    </div>
-                  )}
+            {/* Product details */}
+            <div className="grid grid-cols-2 gap-x-5 gap-y-4 py-1 sm:gap-x-8">
+              {[
+                { label: 'Weight', value: product.weight || '100g', icon: Scale },
+                { label: 'Origin', value: product.origin || 'India', icon: MapPin },
+                { label: 'Caffeine', value: product.caffeine || 'Medium', icon: Leaf },
+                { label: 'Fermentation', value: product.fermentation || 'Full', icon: Lightbulb },
+              ].map(({ label, value, icon: DetailIcon }) => (
+                <div key={label} className="flex min-w-0 items-center gap-3">
+                  <DetailIcon className="h-5 w-5 shrink-0 text-[#a9772f]" />
+                  <div className="min-w-0">
+                    <span className="block text-[10px] uppercase tracking-[0.16em] text-[#899088]">{label}</span>
+                    <p className="mt-0.5 truncate text-sm font-medium text-[#213c30]">{value}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
+
           </div>
         </div>
+
+        {brewing && (brewing.temperature || brewing.steepTime || brewing.amount) && (
+          <section className="mt-9 rounded-2xl border border-[#ebe7da] bg-[#f6f4eb] px-5 py-6 sm:mt-11 sm:px-8 sm:py-7">
+            <div className="mb-5 flex items-center justify-between border-b border-[#e6e1d4] pb-4">
+              <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#183b2d] sm:text-3xl">Brewing Guide</h2>
+              <span className="hidden text-sm text-[#627269] sm:block">A perfect cup, every time</span>
+            </div>
+            <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-3 sm:gap-4">
+              {brewing.amount && <div className="flex items-center gap-3 sm:justify-center"><Scale className="h-6 w-6 text-[#a9772f]" /><div><p className="font-medium text-[#183b2d]">{brewing.amount}</p><p className="text-xs text-[#778078]">Tea Leaves</p></div></div>}
+              {brewing.temperature && <div className="flex items-center gap-3 sm:justify-center"><Thermometer className="h-6 w-6 text-[#a9772f]" /><div><p className="font-medium text-[#183b2d]">{brewing.temperature}</p><p className="text-xs text-[#778078]">Water Temperature</p></div></div>}
+              {brewing.steepTime && <div className="flex items-center gap-3 sm:justify-center"><Clock className="h-6 w-6 text-[#a9772f]" /><div><p className="font-medium text-[#183b2d]">{brewing.steepTime}</p><p className="text-xs text-[#778078]">Steeping Time</p></div></div>}
+            </div>
+          </section>
+        )}
 
         {/* ============ TABS SECTION ============ */}
         <div className="mt-12">

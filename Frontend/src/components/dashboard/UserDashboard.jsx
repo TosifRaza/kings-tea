@@ -542,8 +542,8 @@ export default function UserDashboard() {
   const inputClassName = 'mt-2 h-12 w-full rounded-xl border border-deep-walnut/10 bg-[#FCFBF8] px-4 text-sm text-deep-walnut outline-none transition placeholder:text-deep-walnut/30 focus:border-tea-green/50 focus:bg-white focus:ring-4 focus:ring-tea-green/5 disabled:cursor-not-allowed disabled:bg-warm-ivory-dark/40';
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="min-h-screen bg-[#F6F4EE] pb-16 pt-24 sm:pb-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="min-h-screen w-full min-w-0 bg-[#F6F4EE] pb-16 pt-24 sm:pb-20">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-col gap-5 border-b border-imperial-gold/20 pb-7 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-tea-green/70">
@@ -563,19 +563,19 @@ export default function UserDashboard() {
           </div>
         </header>
 
-        <div className="grid items-start gap-6 lg:grid-cols-[270px_minmax(0,1fr)] lg:gap-8">
-          <aside className="space-y-4 lg:sticky lg:top-24">
-            <div className="overflow-hidden rounded-2xl border border-imperial-gold/15 bg-white shadow-[0_12px_40px_rgba(58,40,28,0.05)]">
-              <div className="relative overflow-hidden bg-tea-green px-5 pb-5 pt-6 text-center">
+        <div className="grid min-w-0 w-full items-start gap-6 lg:grid-cols-[270px_minmax(0,1fr)] lg:gap-8">
+          <aside className="min-w-0 w-full space-y-4 lg:sticky lg:top-24">
+            <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-imperial-gold/15 bg-white shadow-[0_12px_40px_rgba(58,40,28,0.05)]">
+              <div className="relative min-w-0 overflow-hidden bg-tea-green px-4 pb-5 pt-6 text-center sm:px-5">
                 <div className="pointer-events-none absolute -right-9 -top-12 h-36 w-36 rounded-full border border-white/10" />
                 <div className="pointer-events-none absolute -right-2 -top-5 h-24 w-24 rounded-full border border-imperial-gold/20" />
                 <div className="relative mx-auto mb-3 flex h-[68px] w-[68px] items-center justify-center rounded-full border border-imperial-gold/50 bg-white/10 text-2xl font-semibold text-warm-ivory shadow-inner">
                   {user.name?.trim()?.charAt(0).toUpperCase() || <User className="h-7 w-7" />}
                 </div>
-                <p className="relative font-[family-name:var(--font-playfair)] text-lg font-semibold text-white">{user.name}</p>
-                <div className="relative mt-1 flex items-center justify-center gap-1.5 text-xs text-white/65">
-                  <Mail className="h-3.5 w-3.5" />
-                  <span className="max-w-full truncate">{user.email}</span>
+                <p className="relative max-w-full break-words font-[family-name:var(--font-playfair)] text-lg font-semibold text-white">{user.name}</p>
+                <div className="relative mx-auto mt-1 flex min-w-0 max-w-full items-center justify-center gap-1.5 text-xs text-white/65">
+                  <Mail className="h-3.5 w-3.5 shrink-0" />
+                  <span className="min-w-0 max-w-full truncate">{user.email}</span>
                 </div>
                 <div className="relative mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] text-white/85">
                   <BadgeCheck className="h-3.5 w-3.5 text-imperial-gold-light" />
@@ -583,7 +583,7 @@ export default function UserDashboard() {
                 </div>
               </div>
 
-              <nav aria-label="Account sections" className="flex gap-1 overflow-x-auto p-2 lg:block lg:space-y-1">
+              <nav aria-label="Account sections" className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto p-2 lg:block lg:space-y-1">
                 {sidebarItems.map((item) => {
                   const ItemIcon = item.icon;
                   const count = item.id === 'orders' ? orders.length : item.id === 'wishlist' ? wishlistItems.length : null;
@@ -592,7 +592,7 @@ export default function UserDashboard() {
                       key={item.id}
                       type="button"
                       onClick={() => setActiveTab(item.id)}
-                      className={`group flex min-w-fit items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm transition-all lg:w-full ${
+                      className={`group flex min-w-fit shrink-0 items-center gap-3 whitespace-nowrap rounded-xl px-3.5 py-3 text-left text-sm transition-all lg:w-full ${
                         activeTab === item.id
                           ? 'bg-[#EAF1ED] font-medium text-tea-green shadow-sm'
                           : 'text-deep-walnut/55 hover:bg-warm-ivory-dark/60 hover:text-deep-walnut'
@@ -608,7 +608,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex min-w-fit items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm text-royal-terracotta/75 transition-colors hover:bg-royal-terracotta/5 hover:text-royal-terracotta lg:mt-2 lg:w-full"
+                  className="flex min-w-fit shrink-0 items-center gap-3 whitespace-nowrap rounded-xl px-3.5 py-3 text-left text-sm text-royal-terracotta/75 transition-colors hover:bg-royal-terracotta/5 hover:text-royal-terracotta lg:mt-2 lg:w-full"
                 >
                   <LogOut className="h-[18px] w-[18px]" />
                   Sign out

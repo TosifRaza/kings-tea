@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
 @theme {
   --color-tea-green: #1F4D3A;
   --color-tea-green-light: #2A6B4F;

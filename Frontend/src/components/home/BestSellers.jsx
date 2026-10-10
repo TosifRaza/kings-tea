@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, ShoppingBag, Crown, Leaf, Coffee, Thermometer, Timer, MapPin } from 'lucide-react';
+import { Heart, Star, ShoppingBag, Crown, Leaf, Coffee, Thermometer, Timer, ArrowRight, Sparkles, Flame } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { addToCart } from '../../store/cartSlice';
@@ -22,100 +22,6 @@ function ProductCard({ product, variant = 'default' }) {
   const discount = hasDiscount ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
   const isOutOfStock = product.inStock === false;
 
-  if (variant === 'cherished') {
-    const rating = Number(product.rating || 0);
-    const reviewCount = Number(product.reviewCount || 0);
-
-    return (
-      <motion.article
-        layout
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative isolate aspect-[0.61/1] min-h-[560px] overflow-hidden rounded-[28px] border border-[#d8e0d3] bg-[#052a1d] text-white shadow-[0_14px_36px_rgba(8,38,27,0.2)] sm:min-h-0"
-      >
-        {imageUrl && !imageFailed ? (
-          <img
-            src={imageUrl}
-            alt={product.name}
-            className="absolute inset-0 -z-20 h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <div className="absolute inset-0 -z-20 bg-gradient-to-br from-[#476b40] via-[#174b35] to-[#08271c]" />
-        )}
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(2,32,22,0.88)_0%,rgba(3,39,26,0.65)_28%,rgba(4,37,25,0.08)_56%,rgba(2,30,21,0.25)_72%,rgba(2,26,18,0.92)_100%)]" />
-
-        <div className="absolute inset-x-0 top-0 p-5 sm:p-6">
-          <div className="pr-14 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f4ead0] sm:text-xs">
-            Premium {product.category || 'Tea'}
-          </div>
-          <button
-            onClick={() => dispatch(toggleWishlist(productId))}
-            type="button"
-            aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-            aria-pressed={isWishlisted}
-            className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/95 text-[#163b2d] shadow-md transition hover:scale-105 sm:right-6 sm:top-6 sm:h-11 sm:w-11"
-          >
-            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : ''}`} />
-          </button>
-
-          <Link to={`/product/${productSlug}`} className="mt-2 block max-w-[82%] font-[family-name:var(--font-playfair)] text-[30px] font-bold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.45)] sm:text-4xl">
-            {product.name}
-          </Link>
-          <p className="mt-2 max-w-[85%] text-sm font-medium text-white drop-shadow sm:text-base">
-            {product.shortDescription || 'Fresh · Fragrant · Smooth'}
-          </p>
-          <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-white/95 drop-shadow sm:text-sm">
-            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-            {product.origin || product.category || 'Single origin'}
-            {product.weight && <><span aria-hidden="true">·</span>{product.weight}</>}
-          </p>
-          <Link
-            to={`/product/${productSlug}`}
-            className="mt-2 inline-flex items-center gap-2 text-xs drop-shadow sm:text-sm"
-            aria-label={`${rating.toFixed(1)} out of 5 stars, ${reviewCount} reviews`}
-          >
-            <span className="flex items-center" aria-hidden="true">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Star key={index} className={`h-4 w-4 ${index < Math.round(rating) ? 'fill-[#ffc21a] text-[#ffc21a]' : 'fill-white/45 text-white/45'}`} />
-              ))}
-            </span>
-            <span className="font-semibold">{rating.toFixed(1)}</span>
-            <span>({reviewCount.toLocaleString('en-IN')} reviews)</span>
-          </Link>
-        </div>
-
-        <div className="absolute right-4 top-[39%] flex h-[94px] w-[94px] flex-col items-center justify-center rounded-full border border-[#a5b851]/60 bg-[#063b29]/95 text-center shadow-lg sm:right-5 sm:h-[108px] sm:w-[108px]">
-          <Leaf className="mb-1 h-5 w-5 text-[#d4dc56]" />
-          <span className="text-sm font-bold leading-tight">100%<br />Natural</span>
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 rounded-t-[25px] border-t border-white/10 bg-[linear-gradient(145deg,rgba(3,38,26,0.97),rgba(1,26,18,0.99))] px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
-          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-            <span className="text-[25px] font-bold tracking-tight sm:text-[30px]">{price.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</span>
-            {hasDiscount && (
-              <span className="text-xs text-white/65 line-through sm:text-sm">{comparePrice.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}</span>
-            )}
-            {hasDiscount && <span className="rounded-full bg-[#b9d957] px-3 py-1 text-xs font-semibold text-[#173620] sm:text-sm">Save {discount}%</span>}
-          </div>
-          <p className="mt-0.5 text-xs text-white/85">Inclusive of all taxes</p>
-          {isOutOfStock && <p className="mt-2 text-xs font-semibold text-[#ffb5a9]">Currently unavailable</p>}
-          <button
-            type="button"
-            disabled={isOutOfStock}
-            onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
-            className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#d9e7bb] bg-[#edf4d6] px-4 text-sm font-semibold text-[#103b2c] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:h-[58px] sm:text-base"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {isOutOfStock ? 'Unavailable' : 'Add to cart'}
-          </button>
-        </div>
-      </motion.article>
-    );
-  }
-
   if (variant === 'collection') {
     const brewingGuide = product.brewingGuide || {};
     const details = [
@@ -130,13 +36,13 @@ function ProductCard({ product, variant = 'default' }) {
         layout
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] sm:rounded-[26px]"
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] sm:rounded-[22px]"
       >
         <div className="relative">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="flex aspect-[1.55/1] items-center justify-center overflow-hidden bg-[#eef0df] sm:aspect-[1.45/1]"
+            className="flex aspect-[1.62/1] items-center justify-center overflow-hidden bg-[#eef0df]"
           >
             {imageUrl && !imageFailed ? (
               <img
@@ -156,12 +62,18 @@ function ProductCard({ product, variant = 'default' }) {
 
           <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-4 sm:top-4">
             {product.bestSeller && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-white/35 bg-[#07553e] px-1.5 py-1 text-[8px] font-semibold text-white shadow-sm sm:gap-1.5 sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:gap-1.5 sm:px-3 sm:text-xs">
                 <Crown className="h-3 w-3 text-[#f5d27b] sm:h-3.5 sm:w-3.5" /> Best Seller
               </span>
             )}
             {!product.bestSeller && product.isNew && (
-              <span className="rounded-md bg-[#f2d28b] px-1.5 py-1 text-[8px] font-semibold text-[#3a281c] shadow-sm sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs">New Arrival</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#fff7db] bg-[#f2d28b] px-2 py-1.5 text-[9px] font-semibold text-[#3a281c] shadow-sm sm:px-3 sm:text-xs"><Sparkles className="h-3 w-3" />New Arrival</span>
+            )}
+            {!product.bestSeller && !product.isNew && product.featured && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#d4a03e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:px-3 sm:text-xs"><Sparkles className="h-3 w-3" />Premium</span>
+            )}
+            {!product.bestSeller && !product.isNew && !product.featured && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:px-3 sm:text-xs"><Flame className="h-3 w-3" />Popular</span>
             )}
           </div>
 
@@ -170,63 +82,65 @@ function ProductCard({ product, variant = 'default' }) {
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white sm:right-3 sm:top-3 sm:h-10 sm:w-10"
           >
             <Heart className={`h-4 w-4 transition-colors sm:h-5 sm:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#263b32]'}`} />
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-2.5 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
-          <div className="mb-1 flex min-w-0 items-center justify-between gap-1">
-            <p className="min-w-0 flex-1 truncate text-[8px] font-semibold uppercase tracking-[0.03em] text-[#41695d] sm:text-[11px] sm:tracking-[0.13em]">
+        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
+          <p className="mb-1 truncate text-[8px] font-semibold uppercase tracking-[0.08em] text-[#34483f] sm:text-[10px] sm:tracking-[0.12em]">
               {product.origin || product.category || 'Premium tea'}
-            </p>
-            <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[8px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
-              <span className="flex items-center" aria-hidden="true">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`h-2 w-2 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
-                ))}
-              </span>
-              <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
-              <span className="hidden text-[#61756d] sm:inline">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
-            </Link>
-          </div>
-          <Link to={`/product/${productSlug}`} className="line-clamp-2 font-[family-name:var(--font-playfair)] text-lg font-semibold leading-tight text-[#173b2c] hover:text-tea-green sm:text-2xl">
+          </p>
+          <Link to={`/product/${productSlug}`} className="line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#202923] hover:text-tea-green sm:text-xl">
             {product.name}
           </Link>
-          <p className="mt-1 line-clamp-2 min-h-8 text-[11px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5">
+          <p className="mt-1 line-clamp-2 min-h-8 text-[10px] leading-4 text-[#69746f] sm:mt-1.5 sm:min-h-10 sm:text-xs sm:leading-[18px]">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
-          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1 gap-y-0.5 sm:mt-2 sm:gap-2">
-            <span className="text-xl font-bold tracking-tight text-[#164832] sm:text-[27px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-            {hasDiscount && <span className="shrink-0 text-[10px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
-            {hasDiscount && <span className="shrink-0 rounded-full bg-[#fde3df] px-1.5 py-0.5 text-[8px] font-semibold text-[#8d392c] sm:px-2.5 sm:py-1 sm:text-xs">Save {discount}%</span>}
+          <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-w-0 items-center gap-1 text-[8px] sm:mt-1.5 sm:gap-1.5 sm:text-[11px]" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+            <span className="flex items-center" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#f2aa19] text-[#f2aa19]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
+              ))}
+            </span>
+            <span className="font-medium text-[#34483f]">{Number(product.rating || 0).toFixed(1)}</span>
+            <span className="truncate text-[#78827d]">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
+          </Link>
+
+          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:mt-2 sm:gap-x-2">
+            <span className="text-lg font-bold tracking-tight text-[#07553e] sm:text-2xl">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+            {hasDiscount && <span className="shrink-0 text-[9px] text-[#8a918d] line-through sm:text-xs">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde9e6] px-2 py-1 text-[8px] font-semibold text-[#b3261e] sm:px-3 sm:text-[10px]">Save {discount}%</span>}
           </div>
 
-          <div className="mt-2 grid grid-cols-4 gap-0.5 sm:mt-4 sm:gap-2">
+          <div className="mt-2 grid grid-cols-4 gap-1 sm:mt-3 sm:gap-2">
             {details.map((detail) => (
-              <div key={detail.label} className={`flex min-w-0 flex-col items-center px-0.5 text-center ${detail.label !== 'Steep' ? 'border-r border-[#e6e5dc]' : ''}`}>
-                <span className="mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
+              <div key={detail.label} className="flex min-w-0 flex-col items-center text-center">
+                <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
                   <detail.icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
                 </span>
-                <span className="text-[7px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[10px]">{detail.label}</span>
+                <span className="text-[7px] font-semibold uppercase tracking-wide text-[#718177] sm:text-[9px]">{detail.label}</span>
                 <span className="line-clamp-2 text-[8px] leading-[10px] text-[#254337] sm:text-[10px] sm:leading-4">{detail.value}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-auto pt-2 sm:pt-4">
+          <div className="mt-auto flex items-center gap-2 pt-2 sm:pt-3">
             {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
             <button
               type="button"
               disabled={isOutOfStock}
               onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
-              className="mt-2 flex h-9 w-full items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[10px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
+              className="flex h-9 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[9px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:h-10 sm:gap-2 sm:px-3 sm:text-xs"
             >
-              <ShoppingBag className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
+              <ShoppingBag className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
               {isOutOfStock ? 'Unavailable' : 'Add to cart'}
             </button>
+            <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </motion.article>
@@ -359,7 +273,7 @@ export default function BestSellers() {
           <div className="section-divider mt-4" />
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {bestSellers.map((product, i) => (
             <motion.div
               key={product._id || product.id}
@@ -367,7 +281,7 @@ export default function BestSellers() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <ProductCard product={product} variant="cherished" />
+              <ProductCard product={product} variant="collection" />
             </motion.div>
           ))}
         </div>

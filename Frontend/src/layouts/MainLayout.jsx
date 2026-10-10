@@ -139,16 +139,16 @@ function Header() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex shrink-0 items-center gap-2 group">
               <img
                 src="/images/kings-tea-logo.png"
                 alt="KING'S TEA"
-                className={`transition-all duration-300 ${isShop ? 'h-14 w-14 rounded-md object-cover sm:h-10 sm:w-auto sm:rounded-none' : scrolled || !isHome ? 'h-10' : 'h-12'}`}
+                className={`transition-all duration-300 ${isShop ? 'h-10 w-10 rounded-md object-cover sm:h-10 sm:w-auto sm:rounded-none' : scrolled || !isHome ? 'h-9 sm:h-10' : 'h-10 sm:h-12'}`}
               />
               <span
-                className={`flex flex-col font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 ${
+                className={`hidden flex-col font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 sm:flex ${
                   isAccountDashboard ? 'text-base text-warm-ivory' : scrolled || !isHome ? 'text-lg text-deep-walnut' : 'text-xl text-white'
-                } ${isAccountDashboard ? 'block' : 'hidden sm:block'} whitespace-nowrap`}
+                } whitespace-nowrap`}
               >
                 KING&apos;S TEA
                 {isAccountDashboard && <span className="mt-0.5 font-[family-name:var(--font-inter)] text-[9px] font-normal tracking-normal text-warm-ivory/70">Your tea ritual, delivered</span>}
@@ -184,7 +184,7 @@ function Header() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-1 sm:gap-3">
+            <div className="flex shrink-0 items-center gap-0.5 sm:gap-3">
               {/* Search */}
               <AnimatePresence>
                 {searchOpen ? (
@@ -216,7 +216,7 @@ function Header() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     onClick={() => setSearchOpen(true)}
-                    className={`p-2 rounded-full transition-colors ${
+                    className={`rounded-full p-1.5 sm:p-2 transition-colors ${
                       isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -230,7 +230,7 @@ function Header() {
               {/* Wishlist */}
               <Link
                 to="/dashboard?tab=wishlist"
-                className={`p-2 rounded-full transition-colors relative ${
+                className={`relative rounded-full p-1.5 sm:p-2 transition-colors ${
                   isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -247,7 +247,7 @@ function Header() {
               {/* Cart */}
               <button
                 onClick={() => dispatch(openCart())}
-                className={`p-2 rounded-full transition-colors relative ${
+                className={`relative rounded-full p-1.5 sm:p-2 transition-colors ${
                   isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -266,7 +266,7 @@ function Header() {
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className={`flex items-center gap-1.5 p-2 rounded-full transition-colors ${
+                    className={`flex items-center gap-1.5 rounded-full p-1 sm:p-2 transition-colors ${
                       isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -339,7 +339,7 @@ function Header() {
               ) : (
                 <button
                   onClick={() => setAuthOpen(true)}
-                  className={`p-2 rounded-full transition-colors ${
+                  className={`rounded-full p-1.5 sm:p-2 transition-colors ${
                     isAccountDashboard || (!scrolled && isHome)
                       ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'

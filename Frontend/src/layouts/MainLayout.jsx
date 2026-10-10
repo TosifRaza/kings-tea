@@ -81,6 +81,7 @@ function Header() {
 
   const wishlistCount = wishlistItems.length;
   const isHome = location.pathname === '/';
+  const isAccountDashboard = location.pathname === '/dashboard';
 
   // useEffect(() => {
   //   dispatch(getMe());
@@ -119,7 +120,9 @@ function Header() {
     <>
       <motion.header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+          isAccountDashboard
+            ? 'bg-tea-green shadow-md py-2'
+            : scrolled
             ? 'bg-warm-ivory/95 backdrop-blur-md shadow-sm py-2'
             : isHome
             ? 'bg-transparent py-4'
@@ -141,15 +144,12 @@ function Header() {
                 }`}
               />
               <span
-                className={`font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 ${
-                  scrolled || !isHome ? 'text-lg' : 'text-xl'
-                } ${
-                  !scrolled && isHome
-                    ? 'text-white'
-                    : 'text-deep-walnut'
-                } hidden sm:block whitespace-nowrap`}
+                className={`flex flex-col font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 ${
+                  isAccountDashboard ? 'text-base text-warm-ivory' : scrolled || !isHome ? 'text-lg text-deep-walnut' : 'text-xl text-white'
+                } ${isAccountDashboard ? 'block' : 'hidden sm:block'} whitespace-nowrap`}
               >
                 KING&apos;S TEA
+                {isAccountDashboard && <span className="mt-0.5 font-[family-name:var(--font-inter)] text-[9px] font-normal tracking-normal text-warm-ivory/70">Your tea ritual, delivered</span>}
               </span>
             </Link>
 
@@ -160,7 +160,7 @@ function Header() {
                   key={item.path}
                   to={item.path}
                   className={`relative font-[family-name:var(--font-inter)] text-sm font-medium tracking-wide uppercase transition-colors duration-300 ${
-                    !scrolled && isHome
+                    isAccountDashboard || (!scrolled && isHome)
                       ? 'text-white/90 hover:text-white'
                       : 'text-deep-walnut/80 hover:text-deep-walnut'
                   } ${
@@ -215,7 +215,7 @@ function Header() {
                     animate={{ opacity: 1 }}
                     onClick={() => setSearchOpen(true)}
                     className={`p-2 rounded-full transition-colors ${
-                      !scrolled && isHome
+                      isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                     }`}
@@ -229,7 +229,7 @@ function Header() {
               <Link
                 to="/dashboard?tab=wishlist"
                 className={`p-2 rounded-full transition-colors relative ${
-                  !scrolled && isHome
+                  isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                 }`}
@@ -246,7 +246,7 @@ function Header() {
               <button
                 onClick={() => dispatch(openCart())}
                 className={`p-2 rounded-full transition-colors relative ${
-                  !scrolled && isHome
+                  isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                 }`}
@@ -265,12 +265,12 @@ function Header() {
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className={`flex items-center gap-1.5 p-2 rounded-full transition-colors ${
-                      !scrolled && isHome
+                      isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                     }`}
                   >
-                    <div className="w-7 h-7 rounded-full bg-tea-green flex items-center justify-center">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${isAccountDashboard ? 'border border-white/50 bg-white/10' : 'bg-tea-green'}`}>
                       <span className="text-warm-ivory text-[10px] font-bold font-[family-name:var(--font-playfair)]">
                         {user.name?.charAt(0).toUpperCase()}
                       </span>
@@ -338,7 +338,7 @@ function Header() {
                 <button
                   onClick={() => setAuthOpen(true)}
                   className={`p-2 rounded-full transition-colors ${
-                    !scrolled && isHome
+                    isAccountDashboard || (!scrolled && isHome)
                       ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                   }`}
@@ -351,7 +351,7 @@ function Header() {
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className={`p-2 rounded-full lg:hidden transition-colors ${
-                  !scrolled && isHome
+                  isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
                 }`}

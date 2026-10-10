@@ -324,11 +324,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
   Check,
   ChevronRight,
+  Coffee,
   Crown,
   Heart,
+  Home,
   Loader2,
   LogOut,
   Mail,
@@ -336,6 +339,7 @@ import {
   Package,
   Phone,
   Save,
+  ShoppingBag,
   ShieldCheck,
   Sparkles,
   User,
@@ -357,7 +361,8 @@ export default function UserDashboard() {
   const wishlistItems = useSelector(selectWishlistItems);
   const orders = useSelector(selectOrders);
   const ordersLoading = useSelector(selectOrdersLoading);
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -377,7 +382,7 @@ export default function UserDashboard() {
   // Auto-open tab from URL query (?tab=wishlist) — used by the heart icon in MainLayout
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['profile', 'orders', 'wishlist', 'addresses', 'subscriptions'].includes(tab)) {
+    if (tab && ['overview', 'profile', 'orders', 'wishlist', 'addresses', 'subscriptions'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -399,7 +404,7 @@ export default function UserDashboard() {
   }, [user]);
 
   useEffect(() => {
-    if (activeTab === 'orders') {
+    if (activeTab === 'overview' || activeTab === 'orders') {
       dispatch(fetchMyOrders());
     }
   }, [activeTab, dispatch]);
@@ -489,6 +494,7 @@ export default function UserDashboard() {
   }
 
   const sidebarItems = [
+    { id: 'overview', label: 'Overview', icon: Home },
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'orders', label: 'Orders', icon: Package },
     { id: 'wishlist', label: 'Wishlist', icon: Heart },
@@ -539,12 +545,18 @@ export default function UserDashboard() {
     cancelled: 'bg-red-50 text-red-600',
   };
 
+  const activeOrderCount = orders.filter((order) => !['delivered', 'cancelled'].includes(order.status?.toLowerCase())).length;
+  const totalSpent = orders.reduce((total, order) => total + Number(order.total || order.totalAmount || 0), 0);
+  const recentOrders = [...orders]
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, 4);
+
   const inputClassName = 'mt-2 h-12 w-full rounded-xl border border-deep-walnut/10 bg-[#FCFBF8] px-4 text-sm text-deep-walnut outline-none transition placeholder:text-deep-walnut/30 focus:border-tea-green/50 focus:bg-white focus:ring-4 focus:ring-tea-green/5 disabled:cursor-not-allowed disabled:bg-warm-ivory-dark/40';
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="min-h-screen w-full min-w-0 bg-[#F6F4EE] pb-16 pt-24 sm:pb-20">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="min-h-screen w-full min-w-0 bg-[#F6F4EE] pb-28 pt-24 sm:pb-20 lg:pb-20">
       <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
-        <header className="mb-8 flex flex-col gap-5 border-b border-imperial-gold/20 pb-7 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+        <header className={`${activeTab === 'overview' ? 'hidden lg:flex' : 'flex'} mb-8 flex-col gap-5 border-b border-imperial-gold/20 pb-7 sm:mb-10 sm:flex-row sm:items-end sm:justify-between`}>
           <div>
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-tea-green/70">
               <Sparkles className="h-3.5 w-3.5" />
@@ -563,8 +575,8 @@ export default function UserDashboard() {
           </div>
         </header>
 
-        <div className="grid min-w-0 w-full items-start gap-6 lg:grid-cols-[270px_minmax(0,1fr)] lg:gap-8">
-          <aside className="min-w-0 w-full space-y-4 lg:sticky lg:top-24">
+        <div className="grid min-w-0 w-full grid-cols-1 items-start gap-6 lg:grid-cols-[270px_minmax(0,1fr)] lg:gap-8">
+          <aside className="hidden min-w-0 w-full space-y-4 lg:sticky lg:top-24 lg:block">
             <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-imperial-gold/15 bg-white shadow-[0_12px_40px_rgba(58,40,28,0.05)]">
               <div className="relative min-w-0 overflow-hidden bg-tea-green px-4 pb-5 pt-6 text-center sm:px-5">
                 <div className="pointer-events-none absolute -right-9 -top-12 h-36 w-36 rounded-full border border-white/10" />
@@ -629,6 +641,119 @@ export default function UserDashboard() {
           </aside>
 
           <main className="min-w-0">
+            {activeTab === 'overview' && (
+              <div className="space-y-5 sm:space-y-6">
+                <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-tea-green/70 sm:text-xs">
+                      <Sparkles className="h-4 w-4" /> King&apos;s Tea account
+                    </p>
+                    <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold tracking-tight text-deep-walnut sm:text-4xl">
+                      Good to see you, {user.name?.split(' ')[0] || 'tea lover'}!
+                    </h1>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-deep-walnut/55 sm:text-base">
+                      Your orders, saved teas, and account details in one place.
+                    </p>
+                  </div>
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-tea-green/10 bg-white/85 px-4 py-2.5 text-xs text-tea-green/80 shadow-sm sm:text-sm">
+                    <ShieldCheck className="h-4 w-4" /> Your account is private
+                  </div>
+                </section>
+
+                <section aria-label="Account summary" className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+                  {[
+                    { label: 'Orders placed', value: ordersLoading ? '—' : orders.length, icon: ShoppingBag, tone: 'bg-[#E8F4EC] text-tea-green' },
+                    { label: 'On the way', value: ordersLoading ? '—' : activeOrderCount, icon: Package, tone: 'bg-[#FFF3D9] text-[#A96F13]' },
+                    { label: 'Saved teas', value: wishlistItems.length, icon: Heart, tone: 'bg-[#F1EAFE] text-[#7651C8]' },
+                    { label: 'Total spent', value: ordersLoading ? '—' : `₹${totalSpent.toLocaleString('en-IN')}`, icon: Crown, tone: 'bg-[#E8F2FB] text-[#3574A8]' },
+                  ].map((stat) => (
+                    <div key={stat.label} className="min-w-0 rounded-2xl border border-white bg-white p-3.5 shadow-[0_8px_24px_rgba(58,40,28,0.06)] sm:p-5">
+                      <div className={`mb-3 flex h-9 w-9 items-center justify-center rounded-full ${stat.tone} sm:h-10 sm:w-10`}>
+                        <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                      </div>
+                      <p className="truncate font-[family-name:var(--font-playfair)] text-xl font-semibold text-deep-walnut sm:text-2xl">{stat.value}</p>
+                      <p className="mt-1 text-[11px] text-deep-walnut/55 sm:text-sm">{stat.label}</p>
+                    </div>
+                  ))}
+                </section>
+
+                <section className="relative isolate min-h-[210px] overflow-hidden rounded-2xl bg-tea-green shadow-[0_12px_32px_rgba(31,77,58,0.18)] sm:min-h-[240px]">
+                  <img src="/images/tea-collection.png" alt="Freshly prepared tea" className="absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-45" />
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#0B3A2A] via-[#124632]/90 to-[#124632]/25" />
+                  <div className="flex min-h-[210px] max-w-xl flex-col items-start justify-center p-5 text-white sm:min-h-[240px] sm:p-8">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#E4C77F] sm:text-xs">A little time for yourself</p>
+                    <h2 className="max-w-sm font-[family-name:var(--font-playfair)] text-2xl font-semibold leading-tight sm:text-3xl">Make your next cup a special one.</h2>
+                    <p className="mt-2 max-w-xs text-xs leading-5 text-white/75 sm:text-sm">Explore handpicked teas for your next quiet moment.</p>
+                    <button type="button" onClick={() => navigate('/shop')} className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#FCFBF8] px-4 py-2.5 text-xs font-semibold text-tea-green transition hover:bg-white sm:px-5 sm:py-3 sm:text-sm">
+                      Explore teas <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </section>
+
+                <section className="overflow-hidden rounded-2xl border border-imperial-gold/10 bg-white shadow-[0_8px_28px_rgba(58,40,28,0.05)]">
+                  <div className="flex items-center justify-between border-b border-deep-walnut/5 px-4 py-4 sm:px-6">
+                    <h2 className="flex items-center gap-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-deep-walnut sm:text-xl">
+                      <ShoppingBag className="h-5 w-5 text-tea-green" /> Recent orders
+                    </h2>
+                    <button type="button" onClick={() => setActiveTab('orders')} className="inline-flex items-center gap-1 text-xs font-medium text-tea-green hover:text-tea-green-light sm:text-sm">
+                      View all <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                  {ordersLoading ? (
+                    <div className="flex items-center justify-center gap-2 px-4 py-10 text-sm text-deep-walnut/50"><Loader2 className="h-4 w-4 animate-spin text-tea-green" /> Loading your orders…</div>
+                  ) : recentOrders.length ? (
+                    <div className="divide-y divide-deep-walnut/5">
+                      {recentOrders.map((order) => {
+                        const firstItem = order.items?.[0];
+                        const image = getProductImage(firstItem?.image || firstItem?.product?.images?.[0] || firstItem?.images?.[0]);
+                        const status = order.status?.toLowerCase() || 'pending';
+                        return (
+                          <button key={order._id} type="button" onClick={() => setActiveTab('orders')} className="flex w-full min-w-0 items-center gap-3 px-4 py-3 text-left transition hover:bg-warm-ivory/50 sm:px-6">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F4F1E9]">
+                              {image ? <img src={image} alt={firstItem?.name || 'Tea'} className="h-full w-full object-cover" /> : <Coffee className="h-5 w-5 text-tea-green/70" />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-deep-walnut">{firstItem?.name || `Order #${order.orderNumber || order._id?.slice(-6).toUpperCase()}`}</p>
+                              <p className="mt-1 text-[11px] text-deep-walnut/50">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {order.items?.length || 0} item{order.items?.length === 1 ? '' : 's'}</p>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <span className={`inline-flex rounded-full px-2 py-1 text-[10px] font-medium capitalize ${statusColors[status] || statusColors.pending}`}>{status}</span>
+                              <p className="mt-1 text-xs font-semibold text-deep-walnut">₹{Number(order.total || order.totalAmount || 0).toLocaleString('en-IN')}</p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 shrink-0 text-deep-walnut/30" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-8 text-center sm:py-10">
+                      <Package className="mx-auto mb-2 h-8 w-8 text-deep-walnut/25" />
+                      <p className="text-sm font-medium text-deep-walnut">No orders yet</p>
+                      <p className="mt-1 text-xs text-deep-walnut/50">Your next tea order will show up here.</p>
+                      <button type="button" onClick={() => navigate('/shop')} className="mt-4 rounded-full bg-tea-green px-4 py-2 text-xs font-semibold text-white">Browse teas</button>
+                    </div>
+                  )}
+                </section>
+
+                <section className="rounded-2xl border border-imperial-gold/10 bg-white p-4 shadow-[0_8px_28px_rgba(58,40,28,0.04)] sm:p-6">
+                  <h2 className="mb-4 flex items-center gap-2 font-[family-name:var(--font-playfair)] text-lg font-semibold text-deep-walnut"><Sparkles className="h-5 w-5 text-tea-green" /> Quick actions</h2>
+                  <div className="grid grid-cols-4 gap-1 sm:gap-3">
+                    {[
+                      { label: 'Shop teas', icon: Coffee, action: () => navigate('/shop'), tone: 'bg-[#E8F4EC] text-tea-green' },
+                      { label: 'Orders', icon: Package, action: () => setActiveTab('orders'), tone: 'bg-[#FFF3D9] text-[#A96F13]' },
+                      { label: 'Wishlist', icon: Heart, action: () => setActiveTab('wishlist'), tone: 'bg-[#F1EAFE] text-[#7651C8]' },
+                      { label: 'Profile', icon: User, action: () => setActiveTab('profile'), tone: 'bg-[#E8F2FB] text-[#3574A8]' },
+                    ].map((action) => (
+                      <button key={action.label} type="button" onClick={action.action} className="flex min-w-0 flex-col items-center gap-2 rounded-xl px-1 py-3 text-center transition hover:bg-warm-ivory/60 sm:px-2">
+                        <span className={`flex h-10 w-10 items-center justify-center rounded-full sm:h-12 sm:w-12 ${action.tone}`}><action.icon className="h-5 w-5" /></span>
+                        <span className="text-[10px] font-medium text-deep-walnut/75 sm:text-xs">{action.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+
             {activeTab === 'profile' && (
               <div className="overflow-hidden rounded-2xl border border-imperial-gold/15 bg-white shadow-[0_12px_40px_rgba(58,40,28,0.05)]">
                 <div className="border-b border-deep-walnut/5 px-5 py-6 sm:px-8 sm:py-7">
@@ -911,6 +1036,39 @@ export default function UserDashboard() {
             )}
           </main>
         </div>
+
+        <nav aria-label="Mobile account navigation" className="fixed inset-x-0 bottom-0 z-40 border-t border-imperial-gold/15 bg-white/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] shadow-[0_-8px_24px_rgba(58,40,28,0.08)] backdrop-blur lg:hidden">
+          {mobileMoreOpen && (
+            <div className="absolute bottom-full right-3 mb-2 min-w-44 overflow-hidden rounded-2xl border border-imperial-gold/15 bg-white p-1.5 shadow-xl">
+              {[
+                { label: 'Profile details', tab: 'profile', icon: User },
+                { label: 'Addresses', tab: 'addresses', icon: MapPin },
+                { label: 'Subscriptions', tab: 'subscriptions', icon: Crown },
+              ].map((item) => (
+                <button key={item.tab} type="button" onClick={() => { setActiveTab(item.tab); setMobileMoreOpen(false); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs text-deep-walnut hover:bg-warm-ivory">
+                  <item.icon className="h-4 w-4 text-tea-green" /> {item.label}
+                </button>
+              ))}
+              <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-xs text-royal-terracotta hover:bg-royal-terracotta/5">
+                <LogOut className="h-4 w-4" /> Sign out
+              </button>
+            </div>
+          )}
+          <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+            {[
+              { label: 'Home', icon: Home, active: activeTab === 'overview', action: () => { setActiveTab('overview'); setMobileMoreOpen(false); } },
+              { label: 'Shop', icon: Coffee, active: false, action: () => navigate('/shop') },
+              { label: 'Orders', icon: Package, active: activeTab === 'orders', action: () => { setActiveTab('orders'); setMobileMoreOpen(false); } },
+              { label: 'Wishlist', icon: Heart, active: activeTab === 'wishlist', action: () => { setActiveTab('wishlist'); setMobileMoreOpen(false); } },
+              { label: 'More', icon: ChevronRight, active: mobileMoreOpen || ['profile', 'addresses', 'subscriptions'].includes(activeTab), action: () => setMobileMoreOpen((open) => !open) },
+            ].map((item) => (
+              <button key={item.label} type="button" onClick={item.action} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-[10px] transition ${item.active ? 'text-tea-green' : 'text-deep-walnut/50 hover:text-tea-green'}`}>
+                <item.icon className={`h-5 w-5 ${item.active ? 'fill-tea-green/10' : ''}`} />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
       </div>
     </motion.div>
   );

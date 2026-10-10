@@ -495,53 +495,53 @@ function Footer() {
 
   return (
     <footer className="bg-deep-walnut text-warm-ivory/90">
-      <div className="max-w-7xl mx-auto px-5 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+      <div className="max-w-7xl mx-auto px-5 py-5 sm:px-6 sm:py-10 lg:px-8">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           {/* Brand Column */}
-          <div className="col-span-2 border-b border-imperial-gold/55 pb-6 sm:col-span-1 sm:border-0 sm:pb-0 lg:col-span-1">
-            <div className="mb-4 flex items-center gap-4 sm:gap-2">
+          <div className="col-span-2 border-b border-imperial-gold/55 pb-3 sm:col-span-1 sm:border-0 sm:pb-0 lg:col-span-1">
+            <div className="mb-3 flex items-center gap-3 sm:mb-4 sm:gap-2">
               <img
                 src="/images/kings-tea-logo.png"
                 alt="KING'S TEA"
-                className="h-[72px] w-[72px] rounded-sm border border-imperial-gold/80 p-1 object-cover sm:h-10 sm:w-auto sm:border-0 sm:p-0 sm:brightness-0 sm:invert"
+                className="h-14 w-14 rounded-sm border border-imperial-gold/80 p-1 object-cover sm:h-10 sm:w-auto sm:border-0 sm:p-0 sm:brightness-0 sm:invert"
               />
               <div>
-                <span className="block font-[family-name:var(--font-playfair)] text-[28px] font-bold leading-tight text-warm-ivory sm:text-lg">
+                <span className="block font-[family-name:var(--font-playfair)] text-[22px] font-bold leading-tight text-warm-ivory sm:text-lg">
                   KING&apos;S TEA
                 </span>
-                <span className="mt-1 block font-[family-name:var(--font-cormorant)] text-lg leading-tight text-warm-ivory/85 sm:hidden">
+                <span className="mt-0.5 block font-[family-name:var(--font-cormorant)] text-[15px] leading-tight text-warm-ivory/85 sm:hidden">
                   Royal taste. Timeless tradition.
                 </span>
               </div>
             </div>
-            <p className="mb-5 font-[family-name:var(--font-cormorant)] text-[17px] leading-[1.45] text-warm-ivory/85 sm:mb-4 sm:font-[family-name:var(--font-inter)] sm:text-sm sm:leading-relaxed sm:text-warm-ivory/60">
+            <p className="mb-3 font-[family-name:var(--font-cormorant)] text-sm leading-[1.35] text-warm-ivory/85 sm:mb-4 sm:font-[family-name:var(--font-inter)] sm:text-sm sm:leading-relaxed sm:text-warm-ivory/60">
               Experience centuries of tea heritage in every cup. Premium luxury
               teas sourced from the world&apos;s finest gardens, crafted for
               connoisseurs.
             </p>
-            <div className="flex gap-4 sm:gap-3">
+            <div className="flex gap-3 sm:gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="flex h-14 w-14 items-center justify-center rounded-full border border-imperial-gold/70 text-imperial-gold transition-colors hover:border-imperial-gold hover:bg-imperial-gold/10 sm:h-9 sm:w-9 sm:border-warm-ivory/20 sm:text-warm-ivory/60"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-imperial-gold/70 text-imperial-gold transition-colors hover:border-imperial-gold hover:bg-imperial-gold/10 sm:h-9 sm:w-9 sm:border-warm-ivory/20 sm:text-warm-ivory/60"
                 >
-                  <SocialIcon name={social.icon} className="h-6 w-6 sm:h-4 sm:w-4" />
+                  <SocialIcon name={social.icon} className="h-5 w-5 sm:h-4 sm:w-4" />
                 </a>
               ))}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="border-b border-imperial-gold/55 pb-6 sm:border-0 sm:pb-0">
-            <h3 className="mb-4 font-[family-name:var(--font-playfair)] text-xl font-semibold text-warm-ivory sm:text-base">
-              <span className="sm:hidden">Explore<span className="mt-2 block h-1 w-12 bg-imperial-gold" /></span><span className="hidden sm:inline">Quick Links</span>
+          <div className="border-b border-imperial-gold/55 pb-3 sm:border-0 sm:pb-0">
+            <h3 className="mb-3 font-[family-name:var(--font-playfair)] text-lg font-semibold text-warm-ivory sm:mb-4 sm:text-base">
+              <span className="sm:hidden">Explore<span className="mt-1 block h-1 w-10 bg-imperial-gold" /></span><span className="hidden sm:inline">Quick Links</span>
             </h3>
-            <ul className="space-y-3 sm:hidden">
+            <ul className="space-y-2 sm:hidden">
               {mobileExploreLinks.map((link) => (
                 <li key={link.path}>
-                  <Link to={link.path} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[17px] text-warm-ivory/85 hover:text-imperial-gold">
+                  <Link to={link.path} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[15px] text-warm-ivory/85 hover:text-imperial-gold">
                     {link.label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
                   </Link>
                 </li>
@@ -562,14 +562,14 @@ function Footer() {
           </div>
 
           {/* Customer Service */}
-          <div className="border-b border-imperial-gold/55 pb-6 sm:border-0 sm:pb-0">
-            <h3 className="mb-4 font-[family-name:var(--font-playfair)] text-xl font-semibold text-warm-ivory sm:text-base">
-              <span className="sm:hidden">Customer Care<span className="mt-2 block h-1 w-12 bg-imperial-gold" /></span><span className="hidden sm:inline">Customer Service</span>
+          <div className="border-b border-imperial-gold/55 pb-3 sm:border-0 sm:pb-0">
+            <h3 className="mb-3 font-[family-name:var(--font-playfair)] text-lg font-semibold text-warm-ivory sm:mb-4 sm:text-base">
+              <span className="sm:hidden">Customer Care<span className="mt-1 block h-1 w-10 bg-imperial-gold" /></span><span className="hidden sm:inline">Customer Service</span>
             </h3>
-            <ul className="space-y-3 sm:hidden">
+            <ul className="space-y-2 sm:hidden">
               {mobileCustomerLinks.map((label) => (
                 <li key={label}>
-                  <Link to={label === 'Contact Us' ? '/contact' : label === 'Track Order' ? '/dashboard?tab=orders' : '/contact'} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[17px] text-warm-ivory/85 hover:text-imperial-gold">
+                  <Link to={label === 'Contact Us' ? '/contact' : label === 'Track Order' ? '/dashboard?tab=orders' : '/contact'} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[15px] text-warm-ivory/85 hover:text-imperial-gold">
                     {label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
                   </Link>
                 </li>
@@ -626,8 +626,8 @@ function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-imperial-gold/55">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-5 py-5 sm:px-6 lg:px-8">
-          <p className="font-[family-name:var(--font-cormorant)] text-sm text-warm-ivory/80 sm:font-[family-name:var(--font-inter)] sm:text-xs sm:text-warm-ivory/40">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-5 py-3 sm:px-6 sm:py-5 lg:px-8">
+          <p className="font-[family-name:var(--font-cormorant)] text-xs text-warm-ivory/80 sm:font-[family-name:var(--font-inter)] sm:text-xs sm:text-warm-ivory/40">
             <span className="sm:hidden">&copy; {new Date().getFullYear()} King&apos;s Tea</span>
             <span className="hidden sm:inline">&copy; {new Date().getFullYear()} KING&apos;S TEA. All rights reserved.</span>
           </p>
@@ -646,7 +646,7 @@ function Footer() {
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-2 font-[family-name:var(--font-cormorant)] text-sm text-warm-ivory/80 sm:hidden">
+          <div className="flex items-center gap-2 font-[family-name:var(--font-cormorant)] text-xs text-warm-ivory/80 sm:hidden">
             <button type="button" className="hover:text-imperial-gold">Privacy</button>
             <span aria-hidden="true">•</span>
             <button type="button" className="hover:text-imperial-gold">Terms</button>

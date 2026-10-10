@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Leaf, LayoutGrid, ChevronDown } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Leaf, LayoutGrid } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts } from '../../store/productSlice';
@@ -240,8 +240,8 @@ export default function ShopPage() {
       transition={{ duration: 0.4 }}
       className="min-h-screen bg-[#fbfaf5] pb-12 pt-[68px] sm:pt-20"
     >
-      <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
-        <section className="relative -mx-2 mb-4 flex min-h-[150px] flex-col items-center justify-center overflow-hidden border-b border-[#e8e2d3] bg-[linear-gradient(180deg,#faf8ef_0%,#f3f0e4_72%,#eeecdf_100%)] px-4 py-5 text-center sm:mx-0 sm:mb-5 sm:min-h-[218px] sm:rounded-2xl">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <section className="relative -mx-2 mb-4 flex min-h-[122px] flex-col items-center justify-center overflow-hidden border-b border-[#e8e2d3] bg-[linear-gradient(180deg,#faf8ef_0%,#f3f0e4_72%,#eeecdf_100%)] px-4 py-4 text-center sm:mx-0 sm:mb-7 sm:min-h-[190px] sm:rounded-2xl">
           <svg className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] w-full opacity-60" viewBox="0 0 1200 180" preserveAspectRatio="none" aria-hidden="true">
             <path d="M0 112 120 78 220 101 330 54 440 101 555 68 670 103 790 48 900 96 1010 55 1120 93 1200 68V180H0Z" fill="#fffdf5" />
             <path d="M0 139 140 105 270 127 390 91 520 131 650 100 770 134 900 91 1040 128 1140 96 1200 118V180H0Z" fill="#e7e7d9" opacity=".65" />
@@ -254,14 +254,15 @@ export default function ShopPage() {
             <path d="M4 210C44 166 22 105 83 18M16 175C8 146-1 137 2 117c18 2 28 15 29 34M30 139c-3-24 2-39 20-52 12 20 7 38-11 55M49 100c4-27 18-42 38-49 8 25-3 44-34 56M18 169c22-15 41-15 57-5-12 23-31 28-55 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M2 117c18 2 28 15 29 34-18-2-28-14-29-34ZM50 87c12 20 7 38-11 55-7-21-3-39 11-55ZM87 51c8 25-3 44-34 56 4-27 18-42 34-56ZM75 164c-12 23-31 28-55 17 22-15 41-15 55-17Z" fill="currentColor" fillOpacity=".22" />
           </svg>
-          <div className="relative z-10 mb-1 flex items-center gap-2 text-[#1e5b3e]">
+          <div className="relative z-10 mb-1 flex items-center gap-2 text-[#c99c3a]">
+            <span className="h-px w-8 bg-[#d6a12e]" />
             <Leaf className="h-5 w-5 rotate-[-28deg] fill-current/30" />
-            <span className="text-[9px] font-bold uppercase tracking-[0.26em] sm:text-[11px]">Premium tea selection</span>
+            <span className="h-px w-8 bg-[#d6a12e]" />
           </div>
-          <h1 className="relative z-10 font-[family-name:var(--font-playfair)] text-[34px] font-bold leading-none tracking-tight text-[#1b211e] sm:text-6xl">
-            Most Cherished
+          <h1 className="relative z-10 font-[family-name:var(--font-playfair)] text-[30px] font-bold leading-none tracking-tight text-[#0d3025] sm:text-5xl">
+            Our Collection
           </h1>
-          <p className="relative z-10 mt-2 max-w-[560px] font-[family-name:var(--font-inter)] text-xs leading-relaxed text-[#65706a] sm:mt-3 sm:text-base">Handpicked teas loved by our customers. Discover the finest flavors of nature, in every cup.</p>
+          <p className="relative z-10 mt-2 font-[family-name:var(--font-playfair)] text-base text-[#60776c] sm:mt-3 sm:text-xl">Find your perfect cup</p>
         </section>
 
         {/* Search & Sort Bar */}
@@ -279,7 +280,7 @@ export default function ShopPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
+          <div className="grid grid-cols-2 gap-2 sm:flex">
             <label className="flex h-11 min-w-0 items-center rounded-xl border border-[#dcdace] bg-white/65 px-3 text-xs font-medium text-[#26332d] sm:h-12 sm:px-5 sm:text-sm">
               <span className="shrink-0">Sort:&nbsp;</span>
               <select
@@ -294,12 +295,12 @@ export default function ShopPage() {
                 <option value="newest">Newest First</option>
                 <option value="name">Name A-Z</option>
               </select>
-              <ChevronDown className="ml-1 h-4 w-4 shrink-0 text-[#12382a]" />
+              <span className="ml-1 text-base leading-none text-[#12382a]">⌄</span>
             </label>
 
             <button
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0b4b35] to-[#073c2b] px-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:h-12 sm:px-6"
+              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0b4b35] to-[#073c2b] px-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:h-12 sm:px-6 lg:hidden"
             >
               <SlidersHorizontal className="h-5 w-5" />
               Filters
@@ -310,30 +311,6 @@ export default function ShopPage() {
               )}
             </button>
           </div>
-        </div>
-
-        <div className="mb-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mb-6 sm:flex-wrap">
-          <button
-            type="button"
-            onClick={() => { setSelectedCategories([]); setCurrentPage(1); }}
-            className={`shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition sm:px-5 ${selectedCategories.length === 0 ? 'bg-[#07553e] text-white shadow-sm' : 'border border-[#e8e6dc] bg-white/70 text-[#263b32] hover:border-[#98aa9a]'}`}
-          >
-            All
-          </button>
-          {categories.map((category) => {
-            const categoryName = category.name || category;
-            const active = selectedCategories.includes(categoryName);
-            return (
-              <button
-                key={category._id || categoryName}
-                type="button"
-                onClick={() => toggleFilter(selectedCategories, setSelectedCategories, categoryName)}
-                className={`shrink-0 rounded-full px-4 py-2 text-xs font-medium transition sm:px-5 ${active ? 'border border-[#07553e] bg-[#eaf2e9] text-[#07553e]' : 'border border-[#e8e6dc] bg-white/70 text-[#263b32] hover:border-[#98aa9a]'}`}
-              >
-                {categoryName}
-              </button>
-            );
-          })}
         </div>
 
         {/* Active Filters */}
@@ -375,8 +352,9 @@ export default function ShopPage() {
           </div>
         )}
 
-        <div className="mb-4 flex items-center gap-3 text-sm text-[#315d50] sm:mb-5">
-          <p className="shrink-0 font-medium text-xs sm:text-sm">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
+        <div className="mb-4 flex items-center gap-3 text-sm text-[#315d50] sm:mb-6">
+          <p className="shrink-0 font-medium sm:hidden">{filteredProducts.length} teas</p>
+          <p className="hidden shrink-0 font-[family-name:var(--font-inter)] text-xs text-deep-walnut/50 sm:block">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
           <span className="h-px flex-1 bg-[#dcdace]" />
           <LayoutGrid className="h-5 w-5 shrink-0 text-[#174b35]" aria-hidden="true" />
         </div>
@@ -387,10 +365,15 @@ export default function ShopPage() {
             <p className="text-deep-walnut/40 text-sm">Loading teas...</p>
           </div>
         ) : (
-          <div className="w-full">
+          <div className="flex gap-8">
+            {/* Desktop Sidebar */}
+            <div className="hidden lg:block w-56 flex-shrink-0">
+              <FilterSidebar {...filterProps} />
+            </div>
+
             {/* Mobile Filters */}
             {filtersOpen && (
-              <div className="fixed inset-0 z-50 bg-warm-ivory p-6 overflow-y-auto">
+              <div className="lg:hidden fixed inset-0 z-50 bg-warm-ivory p-6 overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="font-[family-name:var(--font-playfair)] font-bold text-deep-walnut text-lg">
                     Filters
@@ -425,7 +408,7 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-5 xl:grid-cols-3">
                     {paginatedProducts.map((product) => (
                       <ProductCard key={product._id || product.id} product={product} variant="collection" />
                     ))}

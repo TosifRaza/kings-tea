@@ -22,7 +22,8 @@ function ProductCard({ product, variant = 'default' }) {
   const discount = hasDiscount ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
   const isOutOfStock = product.inStock === false;
 
-  if (variant === 'collection') {
+  if (variant === 'collection' || variant === 'cherished') {
+    const isCherished = variant === 'cherished';
     const brewingGuide = product.brewingGuide || {};
     const details = [
       { label: 'Origin', value: product.origin || product.category || 'Selected tea', icon: Leaf },
@@ -36,19 +37,19 @@ function ProductCard({ product, variant = 'default' }) {
         layout
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] sm:rounded-[22px]"
+        className={`flex h-full flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] ${isCherished ? 'sm:rounded-[22px]' : 'sm:rounded-[26px]'}`}
       >
         <div className="relative">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="flex aspect-[1.62/1] items-center justify-center overflow-hidden bg-[#eef0df]"
+            className={`flex items-center justify-center overflow-hidden bg-[#eef0df] ${isCherished ? 'aspect-[1.62/1]' : 'aspect-[1.55/1] sm:aspect-[1.45/1]'}`}
           >
             {imageUrl && !imageFailed ? (
               <img
                 src={imageUrl}
                 alt={product.name}
-                className="h-full w-full scale-[1.18] object-cover transition-transform duration-500 hover:scale-[1.24]"
+                className={`h-full w-full object-cover transition-transform duration-500 ${isCherished ? 'scale-[1.18] hover:scale-[1.24]' : 'hover:scale-[1.03]'}`}
                 loading="lazy"
                 decoding="async"
                 onError={() => setImageFailed(true)}
@@ -62,17 +63,19 @@ function ProductCard({ product, variant = 'default' }) {
 
           <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-4 sm:top-4">
             {product.bestSeller && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:gap-1.5 sm:px-3 sm:text-xs">
+              <span className={`inline-flex items-center gap-1 font-semibold shadow-sm ${isCherished ? 'rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] text-white sm:gap-1.5 sm:px-3 sm:text-xs' : 'rounded-md bg-[#07553e] px-1.5 py-1 text-[8px] text-white sm:gap-1.5 sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs'}`}>
                 <Crown className="h-3 w-3 text-[#f5d27b] sm:h-3.5 sm:w-3.5" /> Best Seller
               </span>
             )}
             {!product.bestSeller && product.isNew && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-[#fff7db] bg-[#f2d28b] px-2 py-1.5 text-[9px] font-semibold text-[#3a281c] shadow-sm sm:px-3 sm:text-xs"><Sparkles className="h-3 w-3" />New Arrival</span>
+              <span className={`inline-flex items-center gap-1 font-semibold shadow-sm ${isCherished ? 'rounded-full border border-[#fff7db] bg-[#f2d28b] px-2 py-1.5 text-[9px] text-[#3a281c] sm:px-3 sm:text-xs' : 'rounded-md bg-[#f2d28b] px-1.5 py-1 text-[8px] text-[#3a281c] sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs'}`}>
+                {isCherished && <Sparkles className="h-3 w-3" />}{isCherished ? 'New Arrival' : 'New arrival'}
+              </span>
             )}
-            {!product.bestSeller && !product.isNew && product.featured && (
+            {isCherished && !product.bestSeller && !product.isNew && product.featured && (
               <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#d4a03e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:px-3 sm:text-xs"><Sparkles className="h-3 w-3" />Premium</span>
             )}
-            {!product.bestSeller && !product.isNew && !product.featured && (
+            {isCherished && !product.bestSeller && !product.isNew && !product.featured && (
               <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:px-3 sm:text-xs"><Flame className="h-3 w-3" />Popular</span>
             )}
           </div>
@@ -88,18 +91,29 @@ function ProductCard({ product, variant = 'default' }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-3 pb-3 pt-3 sm:px-4 sm:pb-4">
-          <p className="mb-1 truncate text-[8px] font-semibold uppercase tracking-[0.08em] text-[#34483f] sm:text-[10px] sm:tracking-[0.12em]">
+        <div className={`flex flex-1 flex-col pb-3 pt-3 ${isCherished ? 'px-3 sm:px-4 sm:pb-4' : 'px-2.5 sm:px-5 sm:pb-5 sm:pt-4'}`}>
+          <div className={`mb-1 flex min-w-0 ${isCherished ? '' : 'items-center justify-between gap-1'}`}>
+            <p className={`min-w-0 truncate font-semibold uppercase text-[#34483f] ${isCherished ? 'text-[8px] tracking-[0.08em] sm:text-[10px] sm:tracking-[0.12em]' : 'flex-1 text-[8px] tracking-[0.03em] sm:text-[11px] sm:tracking-[0.13em]'}`}>
               {product.origin || product.category || 'Premium tea'}
-          </p>
-          <Link to={`/product/${productSlug}`} className="line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#202923] hover:text-tea-green sm:text-xl">
+            </p>
+            {!isCherished && (
+              <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[8px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+                <span className="flex items-center" aria-hidden="true">
+                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-2 w-2 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
+                </span>
+                <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
+                <span className="hidden text-[#61756d] sm:inline">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
+              </Link>
+            )}
+          </div>
+          <Link to={`/product/${productSlug}`} className={`line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] font-semibold leading-tight text-[#202923] hover:text-tea-green ${isCherished ? 'text-base sm:text-xl' : 'text-lg sm:text-2xl'}`}>
             {product.name}
           </Link>
-          <p className="mt-1 line-clamp-2 min-h-8 text-[10px] leading-4 text-[#69746f] sm:mt-1.5 sm:min-h-10 sm:text-xs sm:leading-[18px]">
+          <p className={`line-clamp-2 ${isCherished ? 'mt-1 min-h-8 text-[10px] leading-4 sm:mt-1.5 sm:min-h-10 sm:text-xs sm:leading-[18px]' : 'mt-1 min-h-8 text-[11px] leading-4 text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-sm sm:leading-5'}`}>
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
-          <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-w-0 items-center gap-1 text-[8px] sm:mt-1.5 sm:gap-1.5 sm:text-[11px]" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+          {isCherished && <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-w-0 items-center gap-1 text-[8px] sm:mt-1.5 sm:gap-1.5 sm:text-[11px]" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
             <span className="flex items-center" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#f2aa19] text-[#f2aa19]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />
@@ -107,17 +121,17 @@ function ProductCard({ product, variant = 'default' }) {
             </span>
             <span className="font-medium text-[#34483f]">{Number(product.rating || 0).toFixed(1)}</span>
             <span className="truncate text-[#78827d]">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
-          </Link>
+          </Link>}
 
-          <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:mt-2 sm:gap-x-2">
-            <span className="text-lg font-bold tracking-tight text-[#07553e] sm:text-2xl">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-            {hasDiscount && <span className="shrink-0 text-[9px] text-[#8a918d] line-through sm:text-xs">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
-            {hasDiscount && <span className="ml-auto shrink-0 rounded-full bg-[#fde9e6] px-2 py-1 text-[8px] font-semibold text-[#b3261e] sm:px-3 sm:text-[10px]">Save {discount}%</span>}
+          <div className={`mt-1 min-w-0 items-center sm:mt-2 ${isCherished ? 'flex flex-nowrap justify-between gap-x-1' : 'flex flex-wrap gap-x-1.5 gap-y-1 sm:gap-x-2'}`}>
+            <span className={`font-bold tracking-tight text-[#07553e] ${isCherished ? 'shrink-0 text-base leading-none sm:text-2xl' : 'text-lg sm:text-2xl'}`}>{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+            {hasDiscount && <span className={`shrink-0 text-[#8a918d] line-through ${isCherished ? 'text-[8px] sm:text-xs' : 'text-[9px] sm:text-xs'}`}>{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            {hasDiscount && <span className={`shrink-0 rounded-full bg-[#fde9e6] font-semibold text-[#b3261e] ${isCherished ? 'px-1.5 py-1 text-[7px] sm:px-2.5 sm:text-[10px]' : 'ml-auto px-2 py-1 text-[8px] sm:px-3 sm:text-[10px]'}`}>Save {discount}%</span>}
           </div>
 
-          <div className="mt-2 grid grid-cols-4 gap-1 sm:mt-3 sm:gap-2">
+          <div className={`grid grid-cols-4 gap-1 ${isCherished ? 'mt-2 sm:mt-3 sm:gap-2' : 'mt-2 sm:mt-4 sm:gap-2'}`}>
             {details.map((detail) => (
-              <div key={detail.label} className="flex min-w-0 flex-col items-center text-center">
+              <div key={detail.label} className={`flex min-w-0 flex-col items-center px-0.5 text-center ${!isCherished && detail.label !== 'Steep' ? 'border-r border-[#e6e5dc]' : ''}`}>
                 <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-full bg-[#edf3e8] text-[#174b35] sm:mb-1.5 sm:h-10 sm:w-10">
                   <detail.icon className="h-3 w-3 sm:h-[18px] sm:w-[18px]" />
                 </span>
@@ -127,20 +141,20 @@ function ProductCard({ product, variant = 'default' }) {
             ))}
           </div>
 
-          <div className="mt-auto flex items-center gap-2 pt-2 sm:pt-3">
+          <div className={`mt-auto flex items-center gap-2 ${isCherished ? 'pt-2 sm:pt-3' : 'pt-2 sm:pt-4'}`}>
             {isOutOfStock && <p className="mt-1 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
             <button
               type="button"
               disabled={isOutOfStock}
               onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
-              className="flex h-9 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[9px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:h-10 sm:gap-2 sm:px-3 sm:text-xs"
+              className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] ${isCherished ? 'h-9 text-[9px] sm:h-10 sm:gap-2 sm:px-3 sm:text-xs' : 'h-9 text-[10px] sm:h-11 sm:gap-2 sm:px-3 sm:text-sm'}`}
             >
               <ShoppingBag className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
               {isOutOfStock ? 'Unavailable' : 'Add to cart'}
             </button>
-            <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
+            {isCherished && <Link to={`/product/${productSlug}`} aria-label={`View ${product.name}`} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#e9e8df] text-[#174b35] transition hover:border-[#174b35] hover:bg-[#edf3e8] sm:h-10 sm:w-10">
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </Link>}
           </div>
         </div>
       </motion.article>
@@ -264,13 +278,15 @@ export default function BestSellers() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8"
         >
-          <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">
-            Customer Favorites
+          <span className="text-[#1e5b3e] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.26em] font-[family-name:var(--font-inter)]">
+            Premium Tea Selection
           </span>
-          <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-deep-walnut mt-3">
+          <h2 className="font-[family-name:var(--font-playfair)] text-4xl sm:text-6xl font-bold text-[#1b211e] mt-2">
             Most Cherished
           </h2>
-          <div className="section-divider mt-4" />
+          <p className="mx-auto mt-3 max-w-xl font-[family-name:var(--font-inter)] text-sm text-[#65706a] sm:text-base">
+            Handpicked teas loved by our customers. Discover the finest flavors of nature, in every cup.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
@@ -281,7 +297,7 @@ export default function BestSellers() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <ProductCard product={product} variant="collection" />
+              <ProductCard product={product} variant="cherished" />
             </motion.div>
           ))}
         </div>

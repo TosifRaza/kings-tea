@@ -184,7 +184,7 @@ function Header() {
             </nav>
 
             {/* Right Actions */}
-            <div className="flex shrink-0 items-center gap-0.5 sm:gap-3">
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
               {/* Search */}
               <AnimatePresence>
                 {searchOpen ? (
@@ -216,7 +216,7 @@ function Header() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     onClick={() => setSearchOpen(true)}
-                    className={`rounded-full p-1.5 sm:p-2 transition-colors ${
+                    className={`rounded-full p-2 transition-colors ${
                       isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -230,7 +230,7 @@ function Header() {
               {/* Wishlist */}
               <Link
                 to="/dashboard?tab=wishlist"
-                className={`relative rounded-full p-1.5 sm:p-2 transition-colors ${
+                className={`relative rounded-full p-2 transition-colors ${
                   isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -247,7 +247,7 @@ function Header() {
               {/* Cart */}
               <button
                 onClick={() => dispatch(openCart())}
-                className={`relative rounded-full p-1.5 sm:p-2 transition-colors ${
+                className={`relative rounded-full p-2 transition-colors ${
                   isAccountDashboard || (!scrolled && isHome)
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'
@@ -266,7 +266,7 @@ function Header() {
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className={`flex items-center gap-1.5 rounded-full p-1 sm:p-2 transition-colors ${
+                    className={`flex items-center gap-1.5 rounded-full p-1.5 sm:p-2 transition-colors ${
                       isAccountDashboard || (!scrolled && isHome)
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-deep-walnut/70 hover:text-deep-walnut hover:bg-deep-walnut/5'

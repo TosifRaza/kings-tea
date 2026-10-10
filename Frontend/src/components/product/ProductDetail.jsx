@@ -1638,8 +1638,8 @@ export default function ProductDetail() {
 
             {/* Quantity & Add to Cart */}
             <div className="mb-5 sm:mb-6">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex h-12 items-center rounded-lg border border-[#d9d2c0] bg-white/60">
+              <div className="grid grid-cols-2 items-center gap-3 sm:flex sm:flex-wrap sm:gap-3">
+                <div className="col-start-1 row-start-1 flex h-12 w-fit items-center rounded-lg border border-[#d9d2c0] bg-white/60 sm:order-1">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -1660,16 +1660,16 @@ export default function ProductDetail() {
                 </div>
                 <button
                   onClick={handleAddToCart}
-                  className="flex h-12 min-w-[150px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#124b36] px-4 text-xs font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-[#0b3c2b] sm:text-sm"
+                  className="col-start-1 row-start-2 flex h-12 min-w-0 w-full items-center justify-center gap-1.5 rounded-lg bg-[#124b36] px-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-white shadow-sm transition hover:bg-[#0b3c2b] sm:order-2 sm:h-12 sm:min-w-[150px] sm:flex-1 sm:gap-2 sm:px-4 sm:text-sm sm:tracking-[0.12em]"
                 >
-                  <ShoppingBag className="h-4 w-4" />
+                  <ShoppingBag className="h-4 w-4 shrink-0" />
                   Add to Cart
                 </button>
                 <button
                   type="button"
                   onClick={() => dispatch(toggleWishlist(productId))}
                   aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#c9c7b8] bg-white/60 transition hover:border-[#a9772f] hover:bg-white"
+                  className="col-start-2 row-start-1 flex h-12 w-12 shrink-0 items-center justify-center justify-self-start rounded-lg border border-[#c9c7b8] bg-white/60 transition hover:border-[#a9772f] hover:bg-white sm:order-3"
                 >
                   <Heart
                     className={`h-5 w-5 ${
@@ -1680,9 +1680,9 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#bd914d] to-[#9d7133] px-4 text-xs font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition hover:brightness-95 sm:w-auto sm:flex-1 sm:text-sm"
+                  className="col-start-2 row-start-2 flex h-12 min-w-0 w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#bd914d] to-[#9d7133] px-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-white shadow-sm transition hover:brightness-95 sm:order-4 sm:h-12 sm:w-auto sm:flex-1 sm:gap-2 sm:px-4 sm:text-sm sm:tracking-[0.12em]"
                 >
-                  <Zap className="h-4 w-4" /> Buy Now
+                  <Zap className="h-4 w-4 shrink-0" /> Buy Now
                 </button>
               </div>
             </div>

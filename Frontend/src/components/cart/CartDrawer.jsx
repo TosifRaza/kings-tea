@@ -320,7 +320,14 @@ export default function CartDrawer() {
     .map((item) => {
       const product = (products || []).find(
         (p) => (p._id || p.id) === item.productId
-      );
+      ) || (item.productName || item.name ? {
+        _id: item.productId,
+        slug: item.slug || item.productId,
+        name: item.productName || item.name,
+        price: Number(item.price) || 0,
+        images: item.image ? [item.image] : [],
+        weight: item.weight || '',
+      } : null);
       return { ...item, product };
     })
     .filter((item) => item.product);
@@ -422,7 +429,7 @@ export default function CartDrawer() {
                       className={`w-16 h-20 rounded-sm ${gradient} flex-shrink-0 cursor-pointer flex items-center justify-center overflow-hidden relative`}
                       onClick={() => {
                         dispatch(closeCart());
-                        navigate(`/product/${item.product.slug}`);
+                        navigate(`/product/${item.product.slug || item.product._id}`);
                       }}
                     >
                       {imgSrc ? (

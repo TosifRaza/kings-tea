@@ -127,7 +127,7 @@ function ProductCard({ product, variant = 'default' }) {
             <button
               type="button"
               disabled={isOutOfStock}
-              onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
+              onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
               className="mt-2 flex h-9 w-full items-center justify-center gap-1 rounded-full border border-[#0c523b] bg-gradient-to-r from-[#0b6948] to-[#07543d] px-1.5 text-[10px] font-semibold text-white shadow-sm transition hover:from-[#07543d] hover:to-[#064431] disabled:cursor-not-allowed disabled:border-[#bdbdbd] disabled:bg-[#e7e5e4] disabled:text-[#78716c] sm:mt-3 sm:h-11 sm:gap-2 sm:px-3 sm:text-sm"
             >
               <ShoppingBag className="h-3.5 w-3.5 sm:h-[18px] sm:w-[18px]" />
@@ -222,7 +222,7 @@ function ProductCard({ product, variant = 'default' }) {
         <button
           type="button"
           disabled={isOutOfStock}
-          onClick={() => dispatch(addToCart({ productId, productName: product.name, quantity: 1 }))}
+          onClick={() => dispatch(addToCart({ productId, productName: product.name, price, image: imageUrl, weight: product.weight, quantity: 1 }))}
           className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-full bg-[#f5c542] px-3 text-xs font-semibold text-[#27231b] transition-colors hover:bg-[#eab72f] disabled:cursor-not-allowed disabled:bg-[#e7e5e4] disabled:text-[#78716c]"
         >
           <ShoppingBag className="h-4 w-4" />

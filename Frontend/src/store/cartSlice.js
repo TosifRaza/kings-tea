@@ -1,20 +1,82 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { cartAPI } from '../services/api';
-// import { products as staticProducts } from '../assets/data';
+
+const CART_STORAGE_KEY = 'kingsTeaCart';
+
+const getId = (value) => {
+  if (value && typeof value === 'object') return String(value._id || value.id || '');
+  return String(value || '');
+};
+
+const normalizeItems = (items = []) => items
+  .filter((item) => item && getId(item.productId || item.product?._id || item.product?.id))
+  .map((item) => ({
+    productId: getId(item.productId || item.product?._id || item.product?.id),
+    quantity: Math.max(1, Number(item.quantity) || 1),
+    productName: item.productName || item.name || item.product?.name || '',
+    price: Number(item.price ?? item.product?.price) || 0,
+    image: item.image || item.product?.images?.[0] || '',
+    weight: item.weight || item.product?.weight || '',
+  }));
+
+const readStoredCart = () => {
+  try {
+    if (typeof localStorage === 'undefined') return { items: [], ownerId: null };
+    const saved = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || 'null');
+    if (!saved) return { items: [], ownerId: null };
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const currentUserId = getId(user?._id || user?.id);
+    const savedOwnerId = getId(saved.ownerId) || null;
+
+    // Never show one account's stored cart to a different or signed-out user.
+    if (savedOwnerId && (!token || (currentUserId && savedOwnerId !== currentUserId))) {
+      return { items: [], ownerId: currentUserId || null };
+    }
+
+    return {
+      items: normalizeItems(Array.isArray(saved) ? saved : saved.items),
+      ownerId: savedOwnerId,
+    };
+  } catch {
+    return { items: [], ownerId: null };
+  }
+};
+
+const mergeItems = (...lists) => {
+  const merged = new Map();
+  lists.flat().forEach((rawItem) => {
+    const [item] = normalizeItems([rawItem]);
+    if (!item) return;
+    const existing = merged.get(item.productId);
+    merged.set(item.productId, existing
+      ? { ...existing, ...item, quantity: existing.quantity + item.quantity }
+      : item);
+  });
+  return [...merged.values()];
+};
 
 const initialState = {
-  items: [],
+  ...readStoredCart(),
   cartOpen: false,
   notification: null,
 };
 
 export const loadCart = createAsyncThunk(
   'cart/loadCart',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState, dispatch }) => {
     try {
       const response = await cartAPI.getCart();
-      // return response.data;
-      return response.data.data;
+      const serverItems = normalizeItems(response.data?.data?.items || []);
+      const cart = getState().cart;
+      const user = getState().auth.user || JSON.parse(localStorage.getItem('user') || 'null');
+      const ownerId = getId(user?._id || user?.id) || null;
+      const hasGuestCart = !cart.ownerId && cart.items.length > 0;
+      const items = hasGuestCart ? mergeItems(serverItems, cart.items) : serverItems;
+
+      // Bring a guest cart into the customer's saved cart after sign-in.
+      if (hasGuestCart) dispatch(saveCart(items));
+      return { items, ownerId };
     } catch (error) {
       return rejectWithValue('Failed to load cart');
     }
@@ -25,9 +87,8 @@ export const saveCart = createAsyncThunk(
   'cart/saveCart',
   async (items, { rejectWithValue }) => {
     try {
-      const response = await cartAPI.saveCart(items);
-      // return response.data;
-      return response.data.data;
+      const response = await cartAPI.saveCart(normalizeItems(items));
+      return response.data?.data;
     } catch (error) {
       return rejectWithValue('Failed to save cart');
     }
@@ -50,11 +111,23 @@ const cartSlice = createSlice({
     addToCart: {
       reducer: (state, action) => {
         const { productId, quantity = 1 } = action.payload;
-        const existing = state.items.find((item) => item.productId === productId);
+        const normalizedId = getId(productId);
+        const existing = state.items.find((item) => getId(item.productId) === normalizedId);
         if (existing) {
           existing.quantity += quantity;
+          existing.productName = action.payload.productName || existing.productName;
+          existing.price = Number(action.payload.price) || existing.price;
+          existing.image = action.payload.image || existing.image;
+          existing.weight = action.payload.weight || existing.weight;
         } else {
-          state.items.push({ productId, quantity });
+          state.items.push({
+            productId: normalizedId,
+            quantity,
+            productName: action.payload.productName,
+            price: Number(action.payload.price) || 0,
+            image: action.payload.image || '',
+            weight: action.payload.weight || '',
+          });
         }
         state.notification = {
           id: action.payload.notificationId,
@@ -62,11 +135,14 @@ const cartSlice = createSlice({
           quantity,
         };
       },
-      prepare: ({ productId, quantity = 1, productName = 'Tea' }) => ({
+      prepare: ({ productId, quantity = 1, productName = 'Tea', price = 0, image = '', weight = '' }) => ({
         payload: {
           productId,
           quantity,
           productName,
+          price,
+          image,
+          weight,
           notificationId: Date.now(),
         },
       }),
@@ -78,7 +154,7 @@ const cartSlice = createSlice({
     },
     removeFromCart: (state, action) => {
       state.items = state.items.filter(
-        (item) => item.productId !== action.payload
+        (item) => getId(item.productId) !== getId(action.payload)
       );
     },
     updateQuantity: (state, action) => {
@@ -87,7 +163,7 @@ const cartSlice = createSlice({
       if (item) {
         if (quantity <= 0) {
           state.items = state.items.filter(
-            (item) => item.productId !== productId
+            (item) => getId(item.productId) !== getId(productId)
           );
         } else {
           item.quantity = quantity;
@@ -97,12 +173,15 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = [];
     },
+    clearCartOnLogout: (state) => {
+      state.items = [];
+      state.ownerId = null;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(loadCart.fulfilled, (state, action) => {
-      if (action.payload?.items) {
-        state.items = action.payload.items;
-      }
+      state.items = normalizeItems(action.payload?.items || []);
+      state.ownerId = action.payload?.ownerId || null;
     });
   },
 });
@@ -115,6 +194,7 @@ export const {
   removeFromCart,
   updateQuantity,
   clearCart,
+  clearCartOnLogout,
   clearCartNotification,
 } = cartSlice.actions;
 
@@ -132,8 +212,8 @@ export const selectCartCount = (state) =>
 export const selectCartTotal = (state) => {
   const products = state.products?.products || [];
   return state.cart.items.reduce((sum, item) => {
-    const product = products.find((p) => (p._id || p.id) === item.productId);
-    return sum + (product ? (product.price || 0) * item.quantity : 0);
+    const product = products.find((p) => getId(p._id || p.id) === getId(item.productId));
+    return sum + (Number(product?.price ?? item.price) || 0) * item.quantity;
   }, 0);
 };
 

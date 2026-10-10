@@ -268,7 +268,12 @@ export default function CheckoutPage() {
     .map((item) => {
       const product = (products || []).find(
         (p) => (p._id || p.id) === item.productId
-      );
+      ) || (item.productName || item.name ? {
+        _id: item.productId,
+        name: item.productName || item.name,
+        price: Number(item.price) || 0,
+        images: item.image ? [item.image] : [],
+      } : null);
       return { ...item, product };
     })
     .filter((item) => item.product);

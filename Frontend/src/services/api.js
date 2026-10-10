@@ -126,6 +126,7 @@ export const userAPI = {
 // ============ CART API ============
 export const cartAPI = {
   getCart: () => api.get('/cart'),
+  saveCart: (items) => api.post('/cart', { items }),
   addToCart: (data) => api.post('/cart', data),
   updateCartItem: (id, data) => api.put(`/cart/${id}`, data),
   removeFromCart: (id) => api.delete(`/cart/${id}`),

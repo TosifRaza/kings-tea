@@ -293,15 +293,21 @@ const createProduct = async (req, res) => {
 
     if (productData.price) productData.price = Number(productData.price);
     if (productData.comparePrice) productData.comparePrice = Number(productData.comparePrice);
-    if (productData.stockQuantity) productData.stockQuantity = Number(productData.stockQuantity);
-    if (productData.stock) productData.stock = Number(productData.stock);
+    const requestedStock = productData.stockQuantity !== undefined
+      ? productData.stockQuantity
+      : productData.stock;
+    delete productData.stock;
+    if (requestedStock !== undefined) {
+      const stockQuantity = Number(requestedStock);
+      if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+        return errorResponse(res, 'Stock must be a non-negative number.', 400);
+      }
+      productData.stockQuantity = stockQuantity;
+      productData.inStock = stockQuantity > 0;
+    }
 
     if (productData.tastingNotes && typeof productData.tastingNotes === 'string') {
       productData.tastingNotes = productData.tastingNotes.split(',').map(t => t.trim());
-    }
-
-    if (productData.stockQuantity !== undefined) {
-      productData.inStock = Number(productData.stockQuantity) > 0;
     }
 
     const product = await Product.create(productData);
@@ -354,15 +360,21 @@ const updateProduct = async (req, res) => {
 
     if (productData.price) productData.price = Number(productData.price);
     if (productData.comparePrice) productData.comparePrice = Number(productData.comparePrice);
-    if (productData.stockQuantity) productData.stockQuantity = Number(productData.stockQuantity);
-    if (productData.stock) productData.stock = Number(productData.stock);
+    const requestedStock = productData.stockQuantity !== undefined
+      ? productData.stockQuantity
+      : productData.stock;
+    delete productData.stock;
+    if (requestedStock !== undefined) {
+      const stockQuantity = Number(requestedStock);
+      if (!Number.isFinite(stockQuantity) || stockQuantity < 0) {
+        return errorResponse(res, 'Stock must be a non-negative number.', 400);
+      }
+      productData.stockQuantity = stockQuantity;
+      productData.inStock = stockQuantity > 0;
+    }
 
     if (productData.tastingNotes && typeof productData.tastingNotes === 'string') {
       productData.tastingNotes = productData.tastingNotes.split(',').map(t => t.trim());
-    }
-
-    if (productData.stockQuantity !== undefined) {
-      productData.inStock = Number(productData.stockQuantity) > 0;
     }
 
     const product = await Product.findByIdAndUpdate(

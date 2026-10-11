@@ -159,7 +159,7 @@ router.post(
     body('name').trim().notEmpty().withMessage('Product name is required'),
     body('price').isNumeric().withMessage('Price must be a number'),
     body('category').trim().notEmpty().withMessage('Category is required'),
-    body('stock').isNumeric().withMessage('Stock must be a number'),
+    body('stockQuantity').isNumeric().withMessage('Stock must be a number'),
   ],
   createProduct
 );

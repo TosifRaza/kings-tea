@@ -220,8 +220,8 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
     }
     if (formData.weight) data.append('weight', formData.weight);
     data.append('caffeine', formData.caffeine);
-    data.append('stock', Number(formData.stockQuantity));
-    data.append('inStock', formData.inStock);
+    data.append('stockQuantity', Number(formData.stockQuantity));
+    data.append('inStock', Number(formData.stockQuantity) > 0);
     data.append('featured', formData.featured);
     data.append('bestSeller', formData.bestSeller);
     data.append('isNew', formData.isNew);
@@ -373,6 +373,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                 className="w-full px-4 py-2.5 text-sm border border-imperial-gold/20 rounded-lg bg-white text-deep-walnut focus:outline-none focus:ring-2 focus:ring-imperial-gold/30 focus:border-imperial-gold"
                 placeholder="0"
               />
+              <p className="mt-1 text-xs text-deep-walnut/45">Enter available units. A quantity above 0 marks the product in stock.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-deep-walnut/70 mb-1.5">
@@ -616,9 +617,9 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
               <input
                 type="checkbox"
                 name="inStock"
-                checked={formData.inStock}
-                onChange={handleChange}
-                className="w-4 h-4 text-tea-green border-imperial-gold/30 rounded focus:ring-tea-green"
+                checked={Number(formData.stockQuantity) > 0}
+                disabled
+                className="w-4 h-4 text-tea-green border-imperial-gold/30 rounded"
               />
               <span className="text-sm text-deep-walnut/70">In Stock</span>
             </label>

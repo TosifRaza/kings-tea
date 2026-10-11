@@ -17,7 +17,9 @@ function ProductCard({ product, variant = 'default' }) {
   const [imageFailed, setImageFailed] = useState(false);
   const image = product.images?.[0];
   const imageUrl = image?.startsWith('/uploads/') ? `${IMAGE_URL}${image}` : image;
-  const packetImage = product.images?.find((imagePath) => imagePath.includes('/kingstea-packets/')) || '';
+  const packetImage = product.slug === 'himalayan-black-reserve'
+    ? '/images/tea-products/kingstea-packets/himalayan-black-reserve-estate.png'
+    : product.images?.find((imagePath) => imagePath.includes('/kingstea-packets/')) || '';
   const packetImageUrl = packetImage?.startsWith('/uploads/') ? `${IMAGE_URL}${packetImage}` : packetImage;
   const thumbnailUrl = packetImageUrl || imageUrl;
   const price = Number(product.price || 0);
@@ -45,7 +47,7 @@ function ProductCard({ product, variant = 'default' }) {
         productId,
         productName: product.name,
         price,
-        image: imageUrl,
+        image: thumbnailUrl,
         weight: product.weight,
         quantity: 1,
       }));
@@ -72,7 +74,9 @@ function ProductCard({ product, variant = 'default' }) {
               <img
                 src={thumbnailUrl}
                 alt={`${product.name} King's Tea packet`}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                className={product.slug === 'himalayan-black-reserve'
+                  ? 'h-full w-full object-contain'
+                  : 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]'}
                 loading="lazy"
                 decoding="async"
                 onError={() => setImageFailed(true)}
@@ -182,13 +186,15 @@ function ProductCard({ product, variant = 'default' }) {
         <Link
           to={`/product/${productSlug}`}
           aria-label={`View ${product.name}`}
-          className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#faf9f6] p-2 sm:p-3"
+          className={`flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#faf9f6] ${product.slug === 'himalayan-black-reserve' ? '' : 'p-2 sm:p-3'}`}
         >
           {thumbnailUrl && !imageFailed ? (
             <img
               src={thumbnailUrl}
               alt={`${product.name} King's Tea packet`}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              className={product.slug === 'himalayan-black-reserve'
+                ? 'h-full w-full object-contain'
+                : 'h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]'}
               loading="lazy"
               decoding="async"
               onError={() => setImageFailed(true)}

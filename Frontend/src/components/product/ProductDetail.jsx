@@ -1315,9 +1315,14 @@ export default function ProductDetail() {
     if (!product) return [];
 
     if (Array.isArray(product.images) && product.images.length > 0) {
-      return product.images.map((img) =>
+      const productImages = product.images.map((img) =>
         typeof img === 'string' ? img : img?.url || img?.src || ''
       ).filter(Boolean);
+      if (product.slug === 'himalayan-black-reserve') {
+        const estatePhoto = '/images/tea-products/kingstea-packets/himalayan-black-reserve-estate.png';
+        return [estatePhoto, ...productImages.filter((image) => image !== estatePhoto && !image.includes('/kingstea-packets/'))];
+      }
+      return productImages;
     }
 
     if (product.image) {
@@ -1383,7 +1388,7 @@ export default function ProductDetail() {
 
   // ===== CART HANDLER =====
   const handleAddToCart = () => {
-    dispatch(addToCart({ productId, productName: product.name, price: product.price, image: product.images?.[0], weight: product.weight, quantity }));
+    dispatch(addToCart({ productId, productName: product.name, price: product.price, image: images[0] || product.images?.[0], weight: product.weight, quantity }));
   };
 
   const handleBuyNow = () => {
@@ -1550,7 +1555,7 @@ export default function ProductDetail() {
                     <img
                       src={getProductImage(activeImage)}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full ${activeImage.endsWith('himalayan-black-reserve-estate.png') ? 'object-contain' : 'object-cover'}`}
                     />
                   ) : (
                     <div className={`w-full h-full ${gradient} flex items-center justify-center`}>

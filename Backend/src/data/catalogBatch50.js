@@ -89,7 +89,9 @@ module.exports = products.map(([name, category, tastingNotes], index) => {
     },
     images: [
       ...categoryAssets[category].map((filename) => `/images/tea-products/${filename}`),
-      `/images/tea-products/kingstea-packets/${slug}.svg`,
+      slug === 'himalayan-black-reserve'
+        ? '/images/tea-products/kingstea-packets/himalayan-black-reserve-estate.png'
+        : `/images/tea-products/kingstea-packets/${slug}.svg`,
     ],
     newArrival: true,
   };

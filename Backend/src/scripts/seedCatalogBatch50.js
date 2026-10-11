@@ -41,10 +41,16 @@ const getAssetMetadata = (product, imagePath) => {
   const relative = imagePath.replace(/^\/images\//, '');
   const filename = path.basename(imagePath);
   const isPacket = relative.startsWith('tea-products/kingstea-packets/');
+  const isEstatePhoto = filename === 'himalayan-black-reserve-estate.png';
   const actualPath = isPacket ? path.join(assetDir, 'kingstea-packets', filename) : path.join(assetDir, filename);
   const stat = fs.statSync(actualPath);
+  const pngHeader = isEstatePhoto ? fs.readFileSync(actualPath).subarray(0, 24) : null;
+  const width = isEstatePhoto ? pngHeader.readUInt32BE(16) : isPacket ? 900 : 0;
+  const height = isEstatePhoto ? pngHeader.readUInt32BE(20) : isPacket ? 1100 : 0;
   const photo = attribution[filename];
-  const altText = isPacket
+  const altText = isEstatePhoto
+    ? `King's Tea Himalayan Black Reserve tea estate photograph, 100g`
+    : isPacket
     ? `King's Tea premium packet illustration for ${product.name}, 100g`
     : `${product.category} tea product photography by ${photo?.creator || 'King’s Tea'}`;
   return {
@@ -52,12 +58,13 @@ const getAssetMetadata = (product, imagePath) => {
     url: imagePath,
     provider: 'static',
     sourceUrl: photo?.url || '',
-    sourceProvider: isPacket ? "King's Tea original vector artwork" : (photo?.provider || 'Unknown'),
+    sourceProvider: isEstatePhoto ? "King's Tea supplied product photograph" : isPacket ? "King's Tea original vector artwork" : (photo?.provider || 'Unknown'),
     licenseReference: photo?.license || 'King’s Tea original vector artwork',
     attribution: photo ? `Photo by ${photo.creator}` : "Original King's Tea vector packet illustration",
     altText,
-    width: isPacket ? 900 : 0,
-    height: isPacket ? 1100 : 0,
+    ...(isEstatePhoto ? { licenseReference: 'User-provided product image', attribution: "User-supplied King's Tea product photograph" } : {}),
+    width,
+    height,
     mimeType: filename.endsWith('.svg') ? 'image/svg+xml' : (filename.endsWith('.png') ? 'image/png' : 'image/jpeg'),
     bytes: stat.size,
     format: path.extname(filename).slice(1),

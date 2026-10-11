@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, BookOpen, CheckCircle2, CircleHelp, Gift, Leaf, MapPin, ShieldCheck, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { categoryAPI, collectionAPI, productAPI, reviewAPI, siteContentAPI } from '../../services/api';
+import { categoryAPI, productAPI, reviewAPI, siteContentAPI } from '../../services/api';
 import { IMAGE_URL } from '../../utils/image';
 
 const unwrapList = (response, keys) => {
@@ -121,11 +121,62 @@ export function NewArrivals({ content = {} }) {
   </div></section>;
 }
 
+const moments = [
+  { id: 'morning', label: 'A bold start', description: 'Fuller black teas and matcha for a more robust cup.' },
+  { id: 'afternoon', label: 'Fresh & fragrant', description: 'Green and unroasted oolong teas with fresh, floral or bright notes.' },
+  { id: 'gentle', label: 'A gentle pause', description: 'Delicate white teas with relatively low caffeine; they are not caffeine-free.' },
+  { id: 'slow', label: 'Slow, rich sips', description: 'Pu-erh and roasted teas with earthy, woody or deeper flavors.' },
+];
+
+function getProductMoment(product) {
+  const category = String(product.category || '').toLowerCase();
+  const caffeine = String(product.caffeine || '').toLowerCase();
+  const notes = [product.name, product.shortDescription, product.description, ...(product.tastingNotes || [])]
+    .join(' ')
+    .toLowerCase();
+
+  if (category.includes('pu-erh') || /(earthy|woody|roasted|dark chocolate|deep)/.test(notes)) return 'slow';
+  if (category.includes('white')) return 'gentle';
+  if (category.includes('matcha') || category.includes('black') || caffeine === 'high') return 'morning';
+  if (category.includes('green') || category.includes('oolong')) return 'afternoon';
+  if (caffeine === 'low') return 'gentle';
+  return null;
+}
+
 export function ShopByMood({ content = {} }) {
-  const [items, setItems] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
-  useEffect(() => { let active = true; collectionAPI.getCollections({ featured: 'true', limit: Number(content.limit) || 4 }).then((r) => { if (active) setItems(unwrapList(r, ['collections']).filter((x) => x.isActive !== false)); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [content.limit]);
-  return <section className="bg-[#fffefa] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Choose your moment'} title={content.heading || 'Tea for every ritual'} description={content.description || 'Browse the collections curated by King’s Tea.'} />
-    {loading ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map((x) => <div key={x} className="h-48 animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Collections could not be loaded.</p> : items.length ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{items.slice(0, Number(content.limit) || 4).map((item) => <Link key={item._id || item.slug} to={`/shop?collection=${encodeURIComponent(item.slug || item._id)}`} className="group relative flex min-h-48 items-end overflow-hidden rounded-2xl bg-tea-green p-5 text-white">{getImage(item.image || item.images) && <img src={getImage(item.image || item.images)} alt={item.name || item.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />}<span className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" /><span className="relative"><strong className="block font-[family-name:var(--font-playfair)] text-xl">{item.name || item.title}</strong><span className="mt-1 line-clamp-2 block text-sm text-white/80">{item.description}</span></span></Link>)}</div> : <EmptyState icon={Leaf} href="/shop" action="Browse available teas">{content.emptyText || 'Curated mood collections will appear here once they are published.'}</EmptyState>}
+  const [products, setProducts] = useState([]);
+  const [activeMoment, setActiveMoment] = useState('morning');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    productAPI.getProducts({ limit: 100, sort: '-createdAt' })
+      .then((response) => {
+        if (active) setProducts(unwrapList(response, ['products']).filter((product) =>
+          product.isActive !== false && product.inStock !== false && !(product.stockQuantity !== undefined && product.stockQuantity <= 0)
+        ));
+      })
+      .catch(() => { if (active) setError(true); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  const groupedMoments = useMemo(() => moments.map((moment) => ({
+    ...moment,
+    products: products.filter((product) => getProductMoment(product) === moment.id),
+  })).filter((moment) => moment.products.length > 0), [products]);
+  const selectedMoment = groupedMoments.find((moment) => moment.id === activeMoment) || groupedMoments[0];
+
+  return <section className="bg-[#fffefa] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Choose your moment'} title={content.heading || 'Tea for every ritual'} description={content.description || 'Find a tea to match the pace and flavor you are in the mood for.'} />
+    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="h-12 animate-pulse rounded-full bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Tea selections could not be loaded.</p> : selectedMoment ? <>
+      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Choose a tea moment">
+        {groupedMoments.map((moment) => <button key={moment.id} type="button" aria-pressed={selectedMoment.id === moment.id} onClick={() => setActiveMoment(moment.id)} className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${selectedMoment.id === moment.id ? 'border-tea-green bg-tea-green text-white' : 'border-[#ded9cd] bg-white text-tea-green hover:border-tea-green'}`}>{moment.label}<span className="ml-2 text-xs opacity-75">{moment.products.length}</span></button>)}
+      </div>
+      <div aria-live="polite">
+        <p className="mb-4 text-sm text-deep-walnut/70">{selectedMoment.description}</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductTile key={product._id || product.slug} product={product} />)}</div>
+      </div>
+    </> : <EmptyState icon={Leaf} href="/shop" action="Browse available teas">{content.emptyText || 'There are no in-stock teas for these moments right now.'}</EmptyState>}
   </div></section>;
 }
 

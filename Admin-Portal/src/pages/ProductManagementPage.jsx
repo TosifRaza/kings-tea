@@ -129,12 +129,19 @@ const ProductManagementPage = () => {
             >
               {/* Product Image */}
               <div className="h-40 bg-warm-ivory flex items-center justify-center">
-                {product.images?.[0] ? (
+                {product.images?.[0] || getTeaCategoryImage(product.category) ? (
                   <img
-                    src={getAdminImageUrl(product.images[0])}
+                    src={getAdminImageUrl(product.images?.[0] || getTeaCategoryImage(product.category))}
                     alt={product.name}
                     className="h-full w-full object-cover"
-                    onError={(event) => { event.currentTarget.style.display = 'none'; }}
+                    onError={(event) => {
+                      const fallbackUrl = getAdminImageUrl(getTeaCategoryImage(product.category));
+                      if (fallbackUrl && event.currentTarget.src !== fallbackUrl) {
+                        event.currentTarget.src = fallbackUrl;
+                      } else {
+                        event.currentTarget.style.display = 'none';
+                      }
+                    }}
                   />
                 ) : (
                   <Package className="w-12 h-12 text-imperial-gold/30" />

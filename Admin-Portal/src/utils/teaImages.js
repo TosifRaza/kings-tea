@@ -46,9 +46,7 @@ export const TEA_CATEGORY_GALLERIES = {
   ],
 };
 
-const defaultPublicSiteUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-  ? 'http://localhost:3000'
-  : 'https://kings-tea-frontend.onrender.com';
+const defaultPublicSiteUrl = 'https://kings-tea-frontend.onrender.com';
 const publicSiteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || defaultPublicSiteUrl).replace(/\/$/, '');
 
 export function getAdminImageUrl(path) {

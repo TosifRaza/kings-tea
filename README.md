@@ -92,6 +92,19 @@ Set `BOOTSTRAP_ADMIN_NAME`, `BOOTSTRAP_ADMIN_EMAIL`, and a unique
 run if a super administrator already exists. Remove those bootstrap values
 after setup. It does not seed demo products or reviews.
 
+### Local demo review data
+
+Public product ratings are calculated from approved reviews. To populate a local
+development database with clearly labeled sample reviews, set `NODE_ENV` to
+`development` and `ENABLE_DEMO_REVIEW_SEED=true`, then run this in `Backend`:
+
+```bash
+npm run seed:reviews:demo
+```
+
+The seed command refuses remote databases; sample reviews must not be used as
+production customer reviews.
+
 ### Optional: add the 50-product catalog batch
 
 The batch is additive and safe to rerun. It requires the six existing catalog

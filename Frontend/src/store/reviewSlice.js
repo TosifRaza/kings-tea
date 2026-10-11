@@ -76,8 +76,6 @@ const reviewSlice = createSlice({
       })
       .addCase(submitReview.fulfilled, (state, action) => {
         state.submitting = false;
-        state.items.unshift(action.payload);
-        state.total += 1;
         state.submitted = true;
       })
       .addCase(submitReview.rejected, (state, action) => {

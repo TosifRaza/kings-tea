@@ -55,7 +55,7 @@ const seedReviews = async () => {
             title: sample.title,
             comment: sample.comment,
             verified: false,
-            approved: false,
+            approved: true,
             isSeeded: true,
             createdAt,
           },

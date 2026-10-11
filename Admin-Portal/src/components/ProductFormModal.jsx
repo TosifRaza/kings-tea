@@ -25,7 +25,6 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
     slug: product?.slug || '',
     price: product?.price || '',
     comparePrice: product?.comparePrice || '',
-    catalogRating: product?.catalogRating ?? '',
     category: product?.category || '',
     categoryId: product?.categoryId || '',
     description: product?.description || '',
@@ -201,7 +200,6 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
     data.append('name', formData.name);
     data.append('slug', formData.slug);
     data.append('price', Number(formData.price));
-    data.append('catalogRating', formData.catalogRating);
     if (formData.comparePrice) data.append('comparePrice', Number(formData.comparePrice));
     data.append('category', formData.categoryId);
     data.append('description', formData.description);
@@ -315,23 +313,6 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                 placeholder="0.00"
               />
             </div>
-          </div>
-
-          {/* Catalog Rating */}
-          <div>
-            <label className="block text-sm font-medium text-deep-walnut/70 mb-1.5">Catalog Rating (1–5)</label>
-            <input
-              type="number"
-              name="catalogRating"
-              value={formData.catalogRating}
-              onChange={handleChange}
-              min="1"
-              max="5"
-              step="0.1"
-              className="w-full px-4 py-2.5 text-sm border border-imperial-gold/20 rounded-lg bg-white text-deep-walnut focus:outline-none focus:ring-2 focus:ring-imperial-gold/30 focus:border-imperial-gold"
-              placeholder="Set manually or leave blank for an automatic score"
-            />
-            <p className="mt-1 text-xs text-deep-walnut/45">Saved to the catalog and shown on collection cards. Customer review averages remain separate.</p>
           </div>
 
           {/* Category */}

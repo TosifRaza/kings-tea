@@ -101,8 +101,11 @@ function ProductCard({ product, variant = 'default' }) {
           </p>
 
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
-            <span className="text-lg font-bold text-[#07553e]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-            {hasDiscount && <span className="rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">Save {discount}%</span>}
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+              <span className="text-lg font-bold text-[#07553e]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+              {hasDiscount && <span className="text-sm text-[#8a918d] line-through">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            </div>
+            {hasDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">{discount}% OFF</span>}
           </div>
         </div>
       </motion.article>

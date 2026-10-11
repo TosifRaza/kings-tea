@@ -159,7 +159,7 @@ function Header() {
       <motion.header
         className={`fixed ${announcement ? 'top-8' : 'top-0'} left-0 right-0 z-50 transition-all duration-500 ${
           isShop
-            ? 'bg-[#faf8ef]/95 backdrop-blur-md shadow-[0_2px_12px_rgba(45,54,38,0.08)] py-1.5'
+            ? 'bg-[#faf8ef]/95 backdrop-blur-md shadow-[0_2px_12px_rgba(45,54,38,0.08)] py-1 sm:py-1.5'
             : isAccountDashboard
             ? 'bg-tea-green shadow-md py-2'
             : scrolled
@@ -179,7 +179,7 @@ function Header() {
               <img
                 src="/images/kings-tea-logo.png"
                 alt="KING'S TEA"
-                className={`transition-all duration-300 ${isShop ? 'h-10 w-10 rounded-md object-cover sm:h-10 sm:w-auto sm:rounded-none' : scrolled || !isHome ? 'h-9 sm:h-10' : 'h-10 sm:h-12'}`}
+                className={`transition-all duration-300 ${isShop ? 'h-9 w-9 rounded-md object-cover sm:h-10 sm:w-auto sm:rounded-none' : scrolled || !isHome ? 'h-9 sm:h-10' : 'h-10 sm:h-12'}`}
               />
               <span
                 className={`hidden flex-col font-[family-name:var(--font-playfair)] font-bold tracking-wider transition-all duration-300 sm:flex ${

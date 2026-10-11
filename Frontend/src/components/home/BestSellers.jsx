@@ -53,7 +53,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex h-[210px] w-full items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:h-[230px] lg:h-[250px]"
+            className="relative flex h-[132px] w-full items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:h-[230px] lg:h-[250px]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img
@@ -71,25 +71,25 @@ function ProductCard({ product, variant = 'default' }) {
               </div>
             )}
           </Link>
-          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/20 bg-[#06412e]/95 px-2.5 py-1 text-[9px] font-semibold text-white shadow-sm"><Crown className="h-3 w-3 text-[#e9c66e]" />Premium</span>
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full border border-white/20 bg-[#06412e]/95 px-2 py-1 text-[8px] font-semibold text-white shadow-sm sm:left-3 sm:top-3 sm:px-2.5 sm:text-[9px]"><Crown className="h-3 w-3 text-[#e9c66e]" />Premium</span>
           <button
             onClick={() => dispatch(toggleWishlist(productId))}
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full border border-black/5 bg-white/95 shadow-md transition-transform hover:scale-105"
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-black/5 bg-white/95 shadow-md transition-transform hover:scale-105 sm:right-3 sm:top-3 sm:h-9 sm:w-9"
           >
-            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
+            <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-1.5 px-3 pb-3 pt-2">
+        <div className="flex flex-1 flex-col gap-1 px-2 pb-2.5 pt-2 sm:gap-1.5 sm:px-3 sm:pb-3">
           <div className="flex min-w-0 items-center justify-between gap-2">
-            <Link to={`/product/${productSlug}`} className="min-w-0 truncate font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#073b2d] hover:text-tea-green" title={product.name}>
+            <Link to={`/product/${productSlug}`} className="min-w-0 truncate font-[family-name:var(--font-playfair)] text-sm font-semibold leading-tight text-[#073b2d] hover:text-tea-green sm:text-base" title={product.name}>
               {product.name}
             </Link>
           </div>
-          <p className="line-clamp-1 text-[11px] leading-4 text-[#52635b]">
+          <p className="line-clamp-1 text-[10px] leading-4 text-[#52635b] sm:text-[11px]">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
           <div className="flex items-center">
@@ -97,19 +97,19 @@ function ProductCard({ product, variant = 'default' }) {
               <span className="flex items-center" aria-hidden="true">
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
               </span>
-              <span className="text-xs font-semibold text-[#34483f]">{rating.toFixed(1)}</span>
+              <span className="text-[10px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)}</span>
             </Link>
           </div>
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-              <span className="text-lg font-bold text-[#07553e]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-              {showCardDiscount && <span className="text-sm text-[#8a918d] line-through">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
+              <span className="text-base font-bold text-[#07553e] sm:text-lg">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+              {showCardDiscount && <span className="text-[10px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
             </div>
-            {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">{cardDiscount}% OFF</span>}
+            {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-1.5 py-1 text-[8px] font-semibold text-[#07553e] sm:px-2.5 sm:text-xs">{cardDiscount}% OFF</span>}
           </div>
-          <div className="mt-auto flex items-center gap-1.5 overflow-hidden pt-1.5 text-[9px] text-[#476354]">
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Leaf className="h-3 w-3" />100% Natural</span>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Sparkles className="h-3 w-3" />Premium Quality</span>
+          <div className="mt-auto flex items-center gap-1 overflow-hidden pt-1.5 text-[8px] text-[#476354] sm:gap-1.5 sm:text-[9px]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-1.5 py-1 sm:px-2"><Leaf className="h-3 w-3" />Natural</span>
+            <span className="hidden shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1 sm:inline-flex"><Sparkles className="h-3 w-3" />Premium Quality</span>
           </div>
         </div>
       </motion.article>

@@ -223,7 +223,7 @@ export default function ShopPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-[#f7f6ef] pb-12 pt-[68px] sm:pt-20"
+      className="min-h-screen bg-[#f7f6ef] pb-12 pt-[60px] sm:pt-20"
     >
       <div className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-8">
         <div className="grid items-start gap-4 lg:grid-cols-[230px_minmax(0,1fr)] xl:gap-5">
@@ -288,12 +288,12 @@ export default function ShopPage() {
           </div>
         )}
 
-        <div className="mb-3 flex items-center gap-3 rounded-xl border border-[#ece9df] bg-[#fffefa] px-4 py-3 text-sm text-[#315d50] shadow-[0_3px_12px_rgba(31,48,38,0.04)] sm:mb-3">
-          <div className="min-w-0 flex-1"><h2 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#123d2d] sm:text-xl">Premium Tea Collection</h2><p className="hidden text-xs text-[#6b7770] sm:block">Handpicked teas for a healthier, happier you.</p></div>
+        <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 rounded-xl border border-[#e7e2d5] bg-[#fffefa] px-3 py-2.5 text-sm text-[#315d50] shadow-[0_5px_18px_rgba(31,48,38,0.06)] sm:flex sm:gap-3 sm:px-4 sm:py-3">
+          <div className="col-span-2 min-w-0 sm:flex-1"><h2 className="truncate font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#123d2d] sm:text-xl">Premium Tea Collection</h2><p className="hidden text-xs text-[#6b7770] sm:block">Handpicked teas for a healthier, happier you.</p></div>
           <div className="relative hidden min-w-[150px] max-w-[220px] flex-1 md:block"><Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#315d50]" /><input value={query} onChange={(e) => { setQuery(e.target.value); setCurrentPage(1); }} placeholder="Search teas..." className="h-9 w-full rounded-lg border border-[#e9e7df] bg-[#fbfaf5] pl-8 pr-2 text-xs outline-none focus:border-[#789482]" /></div>
           <p className="hidden shrink-0 text-xs text-[#64736b] 2xl:block">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
-          <label className="flex h-9 items-center gap-1 rounded-lg border border-[#e9e7df] bg-[#fbfaf5] px-2 text-[10px] text-[#58675e] sm:px-3 sm:text-xs"><span className="hidden sm:inline">Sort by:</span><select value={sortBy} onChange={(e) => setSortBy(e.target.value)} aria-label="Sort products" className="max-w-[108px] appearance-none bg-transparent font-medium text-[#234b3a] outline-none sm:max-w-[130px]"><option value="rating">Popularity</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="newest">Newest First</option><option value="name">Name A-Z</option></select><ChevronDown className="h-3.5 w-3.5" /></label>
-          <button onClick={() => setFiltersOpen(!filtersOpen)} className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#07553e] px-2.5 text-xs font-semibold text-white lg:hidden"><SlidersHorizontal className="h-4 w-4" />Filters{activeFilterCount > 0 && <span>({activeFilterCount})</span>}</button>
+          <label className="flex h-8 min-w-0 items-center justify-center gap-1 rounded-lg border border-[#e9e7df] bg-[#fbfaf5] px-2 text-[10px] text-[#58675e] sm:h-9 sm:px-3 sm:text-xs"><span className="hidden sm:inline">Sort by:</span><select value={sortBy} onChange={(e) => setSortBy(e.target.value)} aria-label="Sort products" className="max-w-[108px] appearance-none bg-transparent font-medium text-[#234b3a] outline-none sm:max-w-[130px]"><option value="rating">Popularity</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="newest">Newest First</option><option value="name">Name A-Z</option></select><ChevronDown className="h-3.5 w-3.5 shrink-0" /></label>
+          <button onClick={() => setFiltersOpen(!filtersOpen)} className="flex h-8 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-b from-[#0b6649] to-[#07553e] px-3 text-[11px] font-semibold text-white shadow-sm lg:hidden sm:h-9 sm:px-3 sm:text-xs"><SlidersHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />Filters{activeFilterCount > 0 && <span>({activeFilterCount})</span>}</button>
         </div>
 
         {loading ? (
@@ -340,7 +340,7 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
                     {paginatedProducts.map((product) => (
                       <ProductCard key={product._id || product.id} product={product} variant="collection" />
                     ))}

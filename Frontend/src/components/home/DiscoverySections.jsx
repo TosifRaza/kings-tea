@@ -206,8 +206,15 @@ export function GiftCollections({ content = {} }) {
 
   return <section className="bg-[#f5f2e8] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Thoughtful gifting'} title={content.heading || 'Tea gifts'} description={description} />
     {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{[0,1,2,3,4,5,6,7].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Tea gift ideas could not be loaded.</p> : products.length ? <>
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter tea gift ideas by style">
-        {giftStyles.filter((style) => style.id === 'all' || products.some(style.matches)).map((style) => <button key={style.id} type="button" aria-pressed={activeStyle === style.id} onClick={() => setActiveStyle(style.id)} className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${activeStyle === style.id ? 'border-tea-green bg-tea-green text-white' : 'border-[#ded9cd] bg-white text-tea-green hover:border-tea-green'}`}>{style.label}<span className="ml-2 text-xs opacity-75">{style.id === 'all' ? products.length : products.filter(style.matches).length}</span></button>)}
+      <div className="mb-6 grid max-w-3xl grid-cols-1 gap-2.5 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap sm:gap-2" role="group" aria-label="Filter tea gift ideas by style">
+        {giftStyles.filter((style) => style.id === 'all' || products.some(style.matches)).map((style) => {
+          const count = style.id === 'all' ? products.length : products.filter(style.matches).length;
+          const isActive = activeStyle === style.id;
+          return <button key={style.id} type="button" aria-pressed={isActive} onClick={() => setActiveStyle(style.id)} className={`flex min-h-12 w-full items-center justify-between gap-2 rounded-2xl border px-3 py-2.5 text-left text-[13px] font-semibold leading-tight transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tea-green focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-full sm:px-4 sm:text-sm ${isActive ? 'border-tea-green bg-tea-green text-white shadow-[0_6px_16px_rgba(31,77,58,0.18)]' : 'border-[#e4dfd4] bg-white text-tea-green hover:border-tea-green hover:bg-[#f8f6ef]'}`}>
+            <span className="min-w-0">{style.label}</span>
+            <span className={`inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] ${isActive ? 'bg-white/15 text-white' : 'bg-[#f2efe7] text-[#68756d]'}`}>{count}</span>
+          </button>;
+        })}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{visibleProducts.map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
     </> : <EmptyState icon={Gift} href="/shop" action="Browse the tea collection">{content.emptyText || 'No in-stock teas are available for gift ideas right now.'}</EmptyState>}

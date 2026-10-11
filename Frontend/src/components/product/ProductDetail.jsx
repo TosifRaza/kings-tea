@@ -1663,26 +1663,30 @@ export default function ProductDetail() {
                 </motion.div>
               </div>
             </div>
-            <section className="mt-5 rounded-2xl border border-[#e4e9e0] bg-white p-4 shadow-[0_6px_20px_rgba(30,55,40,0.06)] sm:p-5" aria-label="Delivery details">
-              <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-[#203d30]"><Truck className="h-5 w-5 text-[#174b35]" />Delivery details</h2>
+            <section className="relative mt-5 overflow-hidden rounded-2xl border border-[#e7ddc7] bg-[linear-gradient(135deg,#fffdf7_0%,#f8f5eb_58%,#edf1e7_100%)] p-4 shadow-[0_10px_28px_rgba(58,40,28,0.08)] sm:p-5" aria-label="Delivery details">
+              <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#174b35] via-[#c9a86a] to-[#174b35]" />
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="flex items-center gap-2 text-lg font-semibold text-[#173e30]"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#174b35] text-[#f5d98d] shadow-sm"><Truck className="h-4 w-4" /></span>Delivery details</h2>
+                <span className="rounded-full border border-[#e8d9ae] bg-[#fffaf0] px-2.5 py-1 text-[10px] font-semibold tracking-wide text-[#8a672c] sm:text-xs">KING'S TEA CARE</span>
+              </div>
               {deliveryPin && !editingDeliveryPin ? (
-                <div className="flex items-center justify-between gap-3 rounded-xl bg-[#eef5fa] px-3 py-3">
-                  <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#334155]"><MapPin className="h-4 w-4 shrink-0 text-[#365f8a]" /><span className="truncate">Delivering to PIN {deliveryPin}</span></p>
-                  <button type="button" onClick={() => { setDeliveryPinDraft(deliveryPin); setEditingDeliveryPin(true); }} className="shrink-0 text-sm font-semibold text-[#1767cf] hover:underline">Change</button>
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-[#dfe5d8] bg-[#f2f3e9] px-3 py-3">
+                  <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#244735]"><MapPin className="h-4 w-4 shrink-0 text-[#a9772f]" /><span className="truncate">Delivering to PIN {deliveryPin}</span></p>
+                  <button type="button" onClick={() => { setDeliveryPinDraft(deliveryPin); setEditingDeliveryPin(true); }} className="shrink-0 text-sm font-semibold text-[#174b35] underline decoration-[#c9a86a] underline-offset-4 hover:text-[#a9772f]">Change</button>
                 </div>
               ) : (
-                <form onSubmit={saveDeliveryPin} className="rounded-xl bg-[#eef5fa] p-3">
-                  <label htmlFor="delivery-pin" className="mb-2 block text-sm font-medium text-[#334155]">Enter your delivery PIN code</label>
+                <form onSubmit={saveDeliveryPin} className="rounded-xl border border-[#e7ddc7] bg-[#f7f4ea] p-3">
+                  <label htmlFor="delivery-pin" className="mb-2 block text-sm font-medium text-[#244735]">Enter your delivery PIN code</label>
                   <div className="flex gap-2">
-                    <input id="delivery-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} value={deliveryPinDraft} onChange={(event) => { setDeliveryPinDraft(event.target.value.replace(/[^0-9]/g, '').slice(0, 6)); setDeliveryPinError(''); }} placeholder="6-digit PIN code" className="h-10 min-w-0 flex-1 rounded-lg border border-[#d4dfeb] bg-white px-3 text-sm outline-none focus:border-[#1767cf]" />
-                    <button type="submit" className="h-10 shrink-0 rounded-lg bg-[#1767cf] px-4 text-sm font-semibold text-white transition hover:bg-[#1259b5]">Check</button>
+                    <input id="delivery-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} value={deliveryPinDraft} onChange={(event) => { setDeliveryPinDraft(event.target.value.replace(/[^0-9]/g, '').slice(0, 6)); setDeliveryPinError(''); }} placeholder="6-digit PIN code" className="h-10 min-w-0 flex-1 rounded-lg border border-[#d9d2c0] bg-white px-3 text-sm text-[#203d30] outline-none focus:border-[#174b35] focus:ring-2 focus:ring-[#174b35]/10" />
+                    <button type="submit" className="h-10 shrink-0 rounded-lg bg-[#174b35] px-4 text-sm font-semibold text-white transition hover:bg-[#103d2c]">Check</button>
                   </div>
                   {deliveryPinError && <p role="alert" className="mt-1.5 text-xs text-red-700">{deliveryPinError}</p>}
                 </form>
               )}
-              <div className="mt-2 space-y-2 rounded-xl bg-[#f7f7f7] px-3 py-3 text-sm text-[#4b5563]">
-                {deliveryPin && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 shrink-0 text-[#174b35]" /><span>Estimated delivery: <strong className="text-[#263b32]">{deliveryWindow}</strong></span></p>}
-                <p className="flex items-center gap-2"><Truck className="h-4 w-4 shrink-0 text-[#174b35]" /><span>Seller: <strong className="text-[#263b32]">{deliveryConfig.sellerName || "King's Tea"}</strong></span></p>
+              <div className="mt-2 space-y-2 rounded-xl border border-[#ebe5d7] bg-white/75 px-3 py-3 text-sm text-[#53645d]">
+                {deliveryPin && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 shrink-0 text-[#a9772f]" /><span>Estimated delivery: <strong className="text-[#173e30]">{deliveryWindow}</strong></span></p>}
+                <p className="flex items-center gap-2"><Truck className="h-4 w-4 shrink-0 text-[#174b35]" /><span>Seller: <strong className="text-[#173e30]">{deliveryConfig.sellerName || "King's Tea"}</strong></span></p>
                 <p className="pl-6 text-xs text-[#68736d]">Free shipping on orders above ₹{Number(deliveryConfig.freeShippingThreshold || 0).toLocaleString('en-IN')}; ₹{Number(deliveryConfig.fee || 0).toLocaleString('en-IN')} below that.</p>
               </div>
             </section>

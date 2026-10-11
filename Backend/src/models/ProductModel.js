@@ -312,6 +312,12 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    catalogRating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: null,
+    },
     reviewCount: {
       type: Number,
       default: 0,

@@ -5,6 +5,14 @@ const Category = require('../models/CategoryModel');
 const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
+const makeRandomCatalogRating = () => (Math.floor(Math.random() * 15) + 35) / 10;
+const parseCatalogRating = (value) => {
+  if (value === '' || value === null) return null;
+  const rating = Number(value);
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) return undefined;
+  return Math.round(rating * 10) / 10;
+};
+
 const withLiveReviewStats = async (products) => {
   const list = (Array.isArray(products) ? products : [products]).filter(Boolean);
   if (list.length === 0) return [];
@@ -35,6 +43,7 @@ const withLiveReviewStats = async (products) => {
       isNew: isNewArrival,
       rating: reviewStats ? Math.round(reviewStats.averageRating * 10) / 10 : 0,
       reviewCount: reviewStats?.reviewCount || 0,
+      catalogRating: record.catalogRating ?? null,
     };
   });
 };
@@ -238,6 +247,12 @@ const getProductBySlug = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    const requestedCatalogRating = productData.catalogRating;
+    const catalogRating = requestedCatalogRating === undefined || requestedCatalogRating === '' || requestedCatalogRating === null
+      ? makeRandomCatalogRating()
+      : parseCatalogRating(requestedCatalogRating);
+    if (catalogRating === undefined) return errorResponse(res, 'Catalog rating must be between 1 and 5.', 400);
+    productData.catalogRating = catalogRating;
     if (productData.isNew !== undefined) {
       productData.newArrival = productData.isNew === true || productData.isNew === 'true';
       delete productData.isNew;
@@ -292,6 +307,11 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    if (productData.catalogRating !== undefined) {
+      const catalogRating = parseCatalogRating(productData.catalogRating);
+      if (catalogRating === undefined) return errorResponse(res, 'Catalog rating must be between 1 and 5.', 400);
+      productData.catalogRating = catalogRating;
+    }
     if (productData.isNew !== undefined) {
       productData.newArrival = productData.isNew === true || productData.isNew === 'true';
       delete productData.isNew;

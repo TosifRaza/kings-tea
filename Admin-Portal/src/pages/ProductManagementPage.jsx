@@ -4,7 +4,7 @@ import { fetchProducts, removeProduct } from '../store/productSlice';
 import { productAPI } from '../services/api';
 import { getAdminImageUrl, getTeaCategoryImage } from '../utils/teaImages';
 import ProductFormModal from '../components/ProductFormModal';
-import { Plus, Search, Edit2, Trash2, Package, Star, ImagePlus } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Star, ImagePlus, Sparkles } from 'lucide-react';
 
 const ProductManagementPage = () => {
   const dispatch = useDispatch();
@@ -14,9 +14,11 @@ const ProductManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [fillingPhotos, setFillingPhotos] = useState(false);
   const [photoStatus, setPhotoStatus] = useState('');
+  const [generatingRatings, setGeneratingRatings] = useState(false);
+  const [ratingStatus, setRatingStatus] = useState('');
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchProducts({ limit: 100 }));
   }, [dispatch]);
 
   const handleAdd = () => {
@@ -61,6 +63,53 @@ const ProductManagementPage = () => {
     setFillingPhotos(false);
   };
 
+  const handleGenerateMissingRatings = async () => {
+    if (generatingRatings) return;
+    setGeneratingRatings(true);
+    setRatingStatus('Assigning and saving catalog scores...');
+    let page = 1;
+    let totalPages = 1;
+    let updated = 0;
+    let failed = 0;
+
+    try {
+      do {
+        const response = await productAPI.getProducts({ page, limit: 100 });
+        const payload = response.data?.data || {};
+        const pageProducts = Array.isArray(payload.products) ? payload.products : [];
+        totalPages = Number(payload.totalPages) || 1;
+
+        for (let index = 0; index < pageProducts.length; index += 10) {
+          const batch = pageProducts.slice(index, index + 10).filter((item) => item.catalogRating === null || item.catalogRating === undefined || item.catalogRating === '');
+          const results = await Promise.all(batch.map(async (item) => {
+            const catalogRating = Number((3.5 + Math.random() * 1.5).toFixed(1));
+            try {
+              await productAPI.updateProduct(item._id, { catalogRating });
+              return true;
+            } catch {
+              return false;
+            }
+          }));
+          updated += results.filter(Boolean).length;
+          failed += results.filter((success) => !success).length;
+          setRatingStatus(`Saved scores for ${updated} products...`);
+        }
+        page += 1;
+      } while (page <= totalPages);
+
+      await dispatch(fetchProducts({ limit: 100 }));
+      setRatingStatus(failed
+        ? `Saved ${updated} random catalog scores. ${failed} products could not be updated.`
+        : updated
+          ? `Saved random catalog scores for ${updated} products. You can adjust each score in Edit Product.`
+          : 'All products already have a saved catalog score.');
+    } catch {
+      setRatingStatus('Could not load products. Check your admin session and try again.');
+    } finally {
+      setGeneratingRatings(false);
+    }
+  };
+
   const handleClose = () => {
     setShowModal(false);
     setEditingProduct(null);
@@ -91,6 +140,14 @@ const ProductManagementPage = () => {
             </button>
           )}
           <button
+            onClick={handleGenerateMissingRatings}
+            disabled={generatingRatings}
+            className="flex items-center gap-2 px-4 py-2.5 border border-tea-green/25 text-tea-green text-sm font-medium rounded-lg hover:bg-tea-green/5 transition-colors disabled:opacity-60"
+          >
+            <Sparkles className="w-4 h-4" />
+            {generatingRatings ? 'Saving scores...' : 'Fill missing ratings'}
+          </button>
+          <button
             onClick={handleAdd}
             className="flex items-center gap-2 px-4 py-2.5 bg-tea-green text-warm-ivory text-sm font-medium rounded-lg hover:bg-tea-green/90 transition-colors"
           >
@@ -100,7 +157,7 @@ const ProductManagementPage = () => {
         </div>
       </div>
 
-      {photoStatus && <p role="status" className="text-sm text-tea-green">{photoStatus}</p>}
+      {(photoStatus || ratingStatus) && <p role="status" className="text-sm text-tea-green">{[photoStatus, ratingStatus].filter(Boolean).join(' ')}</p>}
 
       {/* Search */}
       <div className="relative max-w-md">
@@ -150,7 +207,7 @@ const ProductManagementPage = () => {
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Star className="w-3.5 h-3.5 text-imperial-gold fill-imperial-gold" />
-                    <span className="text-xs font-medium text-deep-walnut">{product.rating || '—'}</span>
+                    <span className="text-xs font-medium text-deep-walnut">{product.catalogRating ?? product.rating ?? '—'}</span>
                   </div>
                 </div>
 

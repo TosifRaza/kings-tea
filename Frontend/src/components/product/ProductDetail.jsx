@@ -1663,7 +1663,7 @@ export default function ProductDetail() {
                 </motion.div>
               </div>
             </div>
-            <section className="relative mt-5 overflow-hidden rounded-2xl border border-[#e7ddc7] bg-[linear-gradient(135deg,#fffdf7_0%,#f8f5eb_58%,#edf1e7_100%)] p-4 shadow-[0_10px_28px_rgba(58,40,28,0.08)] sm:p-5" aria-label="Delivery details">
+            <section className={`relative mt-5 overflow-hidden rounded-2xl border border-[#e7ddc7] bg-[linear-gradient(135deg,#fffdf7_0%,#f8f5eb_58%,#edf1e7_100%)] p-4 shadow-[0_10px_28px_rgba(58,40,28,0.08)] sm:p-5 ${hasRealImages && images.length > 1 ? 'lg:ml-[116px] lg:w-[calc(100%-116px)]' : 'w-full'}`} aria-label="Delivery details">
               <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#174b35] via-[#c9a86a] to-[#174b35]" />
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="flex items-center gap-2 text-lg font-semibold text-[#173e30]"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#174b35] text-[#f5d98d] shadow-sm"><Truck className="h-4 w-4" /></span>Delivery details</h2>

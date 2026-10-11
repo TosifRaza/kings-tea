@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 const { validationResult } = require('express-validator');
 
+const includeSeededReviews = process.env.ENABLE_SEEDED_REVIEWS === 'true'
+  || (process.env.NODE_ENV === 'production' && process.env.ENABLE_SEEDED_REVIEWS !== 'false');
+
 const listReviews = async (req, res) => {
   try {
     const productId = req.params.productId || req.query.productId;
@@ -20,7 +23,9 @@ const listReviews = async (req, res) => {
     }
     const filter = {
       ...(productId ? { productId } : {}),
-      ...(!isModerator ? { approved: true, isSeeded: { $ne: true } } : {}),
+      ...(!isModerator
+        ? { approved: true, ...(!includeSeededReviews ? { isSeeded: { $ne: true } } : {}) }
+        : {}),
     };
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
@@ -111,7 +116,13 @@ const deleteReview = async (req, res) => {
     await Review.findByIdAndDelete(req.params.id);
 
     const [stats] = await Review.aggregate([
-      { $match: { productId: new mongoose.Types.ObjectId(productId.toString()), approved: true, isSeeded: { $ne: true } } },
+      {
+        $match: {
+          productId: new mongoose.Types.ObjectId(productId.toString()),
+          approved: true,
+          ...(!includeSeededReviews ? { isSeeded: { $ne: true } } : {}),
+        },
+      },
       {
         $group: {
           _id: '$productId',
@@ -153,7 +164,13 @@ const moderateReview = async (req, res) => {
     await review.save();
 
     const [stats] = await Review.aggregate([
-      { $match: { productId: review.productId, approved: true, isSeeded: { $ne: true } } },
+      {
+        $match: {
+          productId: review.productId,
+          approved: true,
+          ...(!includeSeededReviews ? { isSeeded: { $ne: true } } : {}),
+        },
+      },
       { $group: { _id: '$productId', average: { $avg: '$rating' }, count: { $sum: 1 } } },
     ]);
     await Product.findByIdAndUpdate(review.productId, {

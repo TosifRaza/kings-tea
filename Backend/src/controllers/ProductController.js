@@ -5,6 +5,9 @@ const Category = require('../models/CategoryModel');
 const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
+const includeSeededReviews = process.env.ENABLE_SEEDED_REVIEWS === 'true'
+  || (process.env.NODE_ENV === 'production' && process.env.ENABLE_SEEDED_REVIEWS !== 'false');
+
 const withLiveReviewStats = async (products) => {
   const list = (Array.isArray(products) ? products : [products]).filter(Boolean);
   if (list.length === 0) return [];
@@ -12,7 +15,13 @@ const withLiveReviewStats = async (products) => {
   const productIds = list.map((product) => product._id).filter(Boolean);
   const stats = productIds.length > 0
     ? await Review.aggregate([
-      { $match: { productId: { $in: productIds }, approved: true, isSeeded: { $ne: true } } },
+      {
+        $match: {
+          productId: { $in: productIds },
+          approved: true,
+          ...(!includeSeededReviews ? { isSeeded: { $ne: true } } : {}),
+        },
+      },
       {
         $group: {
           _id: '$productId',

@@ -66,7 +66,6 @@ export default function ReviewModerationPage() {
                     <strong className="text-deep-walnut">{review.userId?.name || review.reviewerName || 'Customer'}</strong>
                     <span className="flex items-center gap-1 text-sm text-amber-600"><Star className="h-4 w-4 fill-current" /> {review.rating}/5</span>
                     {review.verified && <span className="rounded-full bg-tea-green/10 px-2 py-1 text-xs text-tea-green">Verified purchase</span>}
-                    {review.isSeeded && <span className="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-800">Sample data — cannot publish</span>}
                     <span className={`rounded-full px-2 py-1 text-xs ${review.approved ? 'bg-tea-green/10 text-tea-green' : 'bg-amber-100 text-amber-800'}`}>{review.approved ? 'Published' : 'Pending'}</span>
                   </div>
                   <p className="mt-1 text-xs text-deep-walnut/50">{review.productId?.name || 'Product'} · {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</p>

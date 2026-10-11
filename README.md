@@ -94,20 +94,21 @@ after setup. It does not seed demo products or reviews.
 
 ### Local demo review data
 
-Public product ratings are calculated from approved reviews. To populate a local
-development database with clearly labeled sample reviews, set `NODE_ENV` to
-`development` and `ENABLE_DEMO_REVIEW_SEED=true`, then run this in `Backend`:
+Public product ratings are calculated from approved reviews. To populate a
+development database with sample reviews, set `NODE_ENV` to `development` and
+`ENABLE_DEMO_REVIEW_SEED=true`, then run this in `Backend`:
 
 ```bash
 npm run seed:reviews:demo
 ```
 
-Demo scores are returned separately from customer ratings and shown with a
-demo label. A one-time production demo seed requires both
+Seeded reviews are included in storefront ratings and review lists in production
+unless `ENABLE_SEEDED_REVIEWS=false` is set. In development, set
+`ENABLE_SEEDED_REVIEWS=true` to include them. Turn the production setting off
+and remove seeded records before launch. The production seeding command itself still requires both
 `ALLOW_PRODUCTION_DEMO_REVIEW_SEED=true` and the
 `--confirm-production-demo-seed` command-line flag. It skips products that
-already have approved customer reviews and does not delete data. Use that only
-when you intend the storefront to display clearly labeled sample reviews.
+already have approved customer reviews and does not delete data.
 
 ### Optional: add the 50-product catalog batch
 

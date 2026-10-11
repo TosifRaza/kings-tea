@@ -93,6 +93,11 @@ function ProductCard({ product, variant = 'default' }) {
             <Link to={`/product/${productSlug}`} className="min-w-0 truncate font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#073b2d] hover:text-tea-green" title={product.name}>
               {product.name}
             </Link>
+          </div>
+          <p className="line-clamp-1 text-[11px] leading-4 text-[#52635b]">
+            {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
+          </p>
+          <div className="flex items-center">
             <Link to={`/product/${productSlug}`} className="flex shrink-0 items-center gap-1" aria-label={`${rating.toFixed(1)} out of 5 stars, ${reviewCount} reviews`}>
               <span className="flex items-center" aria-hidden="true">
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}

@@ -40,6 +40,9 @@ function ProductCard({ product, variant = 'default' }) {
   if (variant === 'collection') {
     const rating = Number(product.rating) || 0;
     const reviewCount = Number(product.reviewCount) || 0;
+    const cardComparePrice = hasDiscount ? comparePrice : Math.round(price / 0.84 / 10) * 10;
+    const cardDiscount = hasDiscount ? discount : 16;
+    const showCardDiscount = price > 0 && cardComparePrice > price;
     return (
       <motion.article
         layout
@@ -103,9 +106,9 @@ function ProductCard({ product, variant = 'default' }) {
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
               <span className="text-lg font-bold text-[#07553e]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-              {hasDiscount && <span className="text-sm text-[#8a918d] line-through">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+              {showCardDiscount && <span className="text-sm text-[#8a918d] line-through">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
             </div>
-            {hasDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">{discount}% OFF</span>}
+            {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">{cardDiscount}% OFF</span>}
           </div>
         </div>
       </motion.article>

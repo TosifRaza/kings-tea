@@ -180,11 +180,48 @@ export function ShopByMood({ content = {} }) {
   </div></section>;
 }
 
+const giftStyles = [
+  { id: 'all', label: 'All gift ideas', matches: () => true },
+  { id: 'black', label: 'Black tea', matches: (product) => /black/i.test(product.category || '') },
+  { id: 'green-matcha', label: 'Green tea & matcha', matches: (product) => /green|matcha/i.test(product.category || '') },
+  { id: 'white', label: 'White tea', matches: (product) => /white/i.test(product.category || '') },
+  { id: 'oolong', label: 'Oolong', matches: (product) => /oolong/i.test(product.category || '') },
+  { id: 'puerh', label: 'Pu-erh', matches: (product) => /pu-erh/i.test(product.category || '') },
+];
+
 export function GiftCollections({ content = {} }) {
-  const [products, setProducts] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
-  useEffect(() => { let active = true; productAPI.getProducts({ limit: 100 }).then((r) => { if (!active) return; const all = unwrapList(r, ['products']); const selected = Array.isArray(content.productIds) && content.productIds.length ? all.filter((p) => content.productIds.includes(String(p._id))) : all.filter((p) => /gift|bundle|sampler/i.test(`${p.name || ''} ${p.category || ''} ${p.productType || ''}`)); setProducts(selected.slice(0, 4)); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [JSON.stringify(content.productIds || [])]);
-  return <section className="bg-[#f5f2e8] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Thoughtful gifting'} title={content.heading || 'Tea gifts'} description={content.description || 'Gift selections shown here are drawn from products marked for gifting.'} />
-    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{[0,1,2,3].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Gift products could not be loaded.</p> : products.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{products.map((p) => <ProductTile key={p._id} product={p} />)}</div> : <EmptyState icon={Gift} href="/shop" action="Browse the tea collection">{content.emptyText || 'Gift-ready products have not been published yet. This section will fill automatically when products are marked as gifts.'}</EmptyState>}
+  const [products, setProducts] = useState([]);
+  const [activeStyle, setActiveStyle] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    productAPI.getProducts({ limit: 100, sort: '-createdAt' })
+      .then((response) => {
+        if (!active) return;
+        const all = unwrapList(response, ['products']);
+        const configuredIds = Array.isArray(content.productIds) ? content.productIds.map(String) : [];
+        const selected = configuredIds.length ? all.filter((product) => configuredIds.includes(String(product._id))) : all;
+        setProducts(selected.filter((product) => product.isActive !== false && product.inStock !== false && !(product.stockQuantity !== undefined && product.stockQuantity <= 0)));
+      })
+      .catch(() => { if (active) setError(true); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [JSON.stringify(content.productIds || [])]);
+
+  const selectedStyle = giftStyles.find((style) => style.id === activeStyle) || giftStyles[0];
+  const visibleProducts = useMemo(() => products.filter(selectedStyle.matches), [products, selectedStyle]);
+  const defaultDescription = 'Pick a tea style they already enjoy, or mix a few to make a personal tasting selection. Teas are sold individually.';
+  const configuredDescription = String(content.description || '');
+  const description = /marked for gifting|gift-ready products/i.test(configuredDescription) ? defaultDescription : configuredDescription || defaultDescription;
+
+  return <section className="bg-[#f5f2e8] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Thoughtful gifting'} title={content.heading || 'Tea gifts'} description={description} />
+    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{[0,1,2,3,4,5,6,7].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Tea gift ideas could not be loaded.</p> : products.length ? <>
+      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter tea gift ideas by style">
+        {giftStyles.filter((style) => style.id === 'all' || products.some(style.matches)).map((style) => <button key={style.id} type="button" aria-pressed={activeStyle === style.id} onClick={() => setActiveStyle(style.id)} className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${activeStyle === style.id ? 'border-tea-green bg-tea-green text-white' : 'border-[#ded9cd] bg-white text-tea-green hover:border-tea-green'}`}>{style.label}<span className="ml-2 text-xs opacity-75">{style.id === 'all' ? products.length : products.filter(style.matches).length}</span></button>)}
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{visibleProducts.map((product) => <ProductTile key={product._id || product.slug} product={product} />)}</div>
+    </> : <EmptyState icon={Gift} href="/shop" action="Browse the tea collection">{content.emptyText || 'No in-stock teas are available for gift ideas right now.'}</EmptyState>}
   </div></section>;
 }
 

@@ -157,7 +157,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
 
 
   const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files).slice(0, Math.max(0, 4 - imageItems.length));
+    const files = Array.from(e.target.files).slice(0, Math.max(0, 5 - imageItems.length));
     e.target.value = '';
     if (files.length === 0) return;
 
@@ -527,7 +527,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
                 multiple
-                disabled={imageItems.length >= 4}
+                disabled={imageItems.length >= 5}
                 onChange={handleImageUpload}
                 className="hidden"
                 id="image-upload"
@@ -538,9 +538,9 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
               >
                 <Upload className="w-8 h-8 text-imperial-gold/40 mb-2" />
                 <span className="text-sm font-medium text-deep-walnut/60">
-                  {uploading ? 'Uploading...' : imageItems.length >= 4 ? 'Four images selected' : 'Click to upload images'}
+                  {uploading ? 'Uploading...' : imageItems.length >= 5 ? 'Five images selected' : 'Click to upload images'}
                 </span>
-                <span className="text-xs text-deep-walnut/40 mt-1">Choose up to {4 - imageItems.length} more · PNG, JPG, WebP up to 5MB</span>
+                <span className="text-xs text-deep-walnut/40 mt-1">Choose up to {5 - imageItems.length} more · PNG, JPG, WebP up to 5MB</span>
               </label>
             </div>
 

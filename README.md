@@ -92,6 +92,28 @@ Set `BOOTSTRAP_ADMIN_NAME`, `BOOTSTRAP_ADMIN_EMAIL`, and a unique
 run if a super administrator already exists. Remove those bootstrap values
 after setup. It does not seed demo products or reviews.
 
+### Optional: add the 50-product catalog batch
+
+The batch is additive and safe to rerun. It requires the six existing catalog
+categories and writes 50 unique products plus their five gallery references
+and media metadata. The packet illustrations are original SVG mockups; the
+other four images are the existing licensed category photographs. Confirm the
+real product names, prices, packaging, and inventory before making products
+available for purchase. The batch starts with zero stock, no ratings or
+reviews, and no bestseller claims.
+
+```bash
+cd Backend
+npm run catalog:generate-packet-art
+# Point MONGODB_URI at the intended database, then:
+# PowerShell: $env:CONFIRM_CATALOG_BATCH_50='true'; npm run catalog:seed-50
+# POSIX shell: CONFIRM_CATALOG_BATCH_50=true npm run catalog:seed-50
+```
+
+The production backend runs this additive import once after connecting to MongoDB
+when `NODE_ENV=production`; a database marker prevents subsequent restarts from
+repeating it. Do not copy production connection strings into source control.
+
 ### 3. Start the backend (Port 5001)
 ```bash
 npm run dev

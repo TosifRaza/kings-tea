@@ -32,6 +32,7 @@ const { authorize } = require('./middleware/AuthorizationMiddleware');
 // Import models for seeding
 const Category = require('./models/CategoryModel');
 const Product = require('./models/ProductModel');
+const seedCatalogBatch50 = require('./scripts/seedCatalogBatch50');
 
 const TEA_CATEGORY_IMAGES = {
   'Black Tea': '/images/tea-products/black-tea.jpg',
@@ -624,8 +625,15 @@ const PORT = process.env.PORT || 5001;
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI, {
   dbName: process.env.MONGODB_DATABASE || 'kings-tea'
 })
-  .then(() => {
+  .then(async () => {
     console.log('✅ Connected to MongoDB Atlas');
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        await seedCatalogBatch50({ confirmed: true, connected: true });
+      } catch (error) {
+        console.error('Initial 50-product catalog import failed:', error.message);
+      }
+    }
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`📍 API: http://localhost:${PORT}/api`);

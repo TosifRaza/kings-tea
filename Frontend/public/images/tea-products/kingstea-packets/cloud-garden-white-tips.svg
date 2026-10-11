@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1100" viewBox="0 0 900 1100" role="img" aria-labelledby="title desc">
+  <title id="title">King's Tea Cloud Garden White Tips premium tea packet</title>
+  <desc id="desc">Original illustrated King's Tea premium WHITE TEA 100 gram packet mockup for Cloud Garden White Tips.</desc>
+  <defs>
+    <linearGradient id="pouch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183b2d"/><stop offset=".55" stop-color="#557641"/><stop offset="1" stop-color="#183b2d"/></linearGradient>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c7a75b"/><stop offset=".5" stop-color="#f1dda0"/><stop offset="1" stop-color="#9b742e"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="24" stdDeviation="22" flood-color="#1a2c20" flood-opacity=".28"/></filter>
+    <pattern id="grain" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M0 8h32M0 25h32" stroke="#fff" stroke-opacity=".035"/><circle cx="8" cy="17" r="1" fill="#fff" fill-opacity=".07"/></pattern>
+  </defs>
+  <rect width="900" height="1100" rx="45" fill="#f7f3e8"/>
+  <ellipse cx="456" cy="1008" rx="275" ry="36" fill="#18271f" opacity=".14"/>
+  <g filter="url(#shadow)">
+    <path d="M200 118 Q210 92 248 92 H652 Q690 92 700 118 L726 190 L712 910 Q710 955 672 968 Q450 1000 228 968 Q190 955 188 910 L174 190 Z" fill="url(#pouch)" stroke="url(#foil)" stroke-width="7"/>
+    <path d="M188 193 H712 M194 212 H706" stroke="#e7cf85" stroke-opacity=".67" stroke-width="5"/>
+    <path d="M198 232 H702 V903 Q450 930 198 903 Z" fill="url(#grain)"/>
+    <path d="M260 287 Q450 243 640 287 L640 297 Q450 265 260 297Z" fill="url(#foil)" opacity=".9"/>
+    <circle cx="450" cy="365" r="64" fill="none" stroke="url(#foil)" stroke-width="4"/>
+    <path d="M450 318 C421 350 425 386 450 403 C475 386 479 350 450 318Z" fill="none" stroke="#faf4df" stroke-width="5"/>
+    <path d="M450 337 V397 M450 365 Q430 350 425 341 M450 375 Q470 357 475 346" fill="none" stroke="#faf4df" stroke-width="4" stroke-linecap="round"/>
+    <text x="450" y="472" text-anchor="middle" font-family="Georgia,serif" font-size="33" letter-spacing="8" fill="#faf4df">KING'S TEA</text>
+    <path d="M310 497 H590" stroke="url(#foil)" stroke-width="3"/>
+    <text x="450" y="545" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" letter-spacing="5" fill="#f5e4b1">PURE TEA · TIMELESS TASTE</text>
+    <text x="450" y="645" text-anchor="middle" font-family="Georgia,serif" font-size="49" font-weight="bold" fill="#faf4df">Cloud Garden White Tips</text>
+    <text x="450" y="700" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">WHITE TEA</text>
+    <path d="M295 733 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
+    <text x="450" y="781" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#faf4df">fresh · silky · bright</text>
+    <g transform="translate(450 846)" fill="none" stroke="#e8d58f" stroke-width="4">
+      <path d="M-62 0 Q0 -38 62 0 Q0 38 -62 0Z"/><path d="M-43 0 Q0 -22 43 0 Q0 22 -43 0Z"/>
+      <path d="M-7 0 Q-2 -19 15 -25 Q14 -5 0 2 M0 0 Q-1 14 10 22"/>
+    </g>
+    <text x="450" y="922" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" letter-spacing="4" fill="#faf4df">NET WT. 100g  ·  ₹7,462</text>
+  </g>
+</svg>

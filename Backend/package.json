@@ -7,6 +7,8 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "admin:bootstrap": "node src/scripts/bootstrapAdmin.js",
+    "catalog:generate-packet-art": "node src/scripts/generateCatalogPacketArt.js",
+    "catalog:seed-50": "node src/scripts/seedCatalogBatch50.js",
     "migrate:product-arrival": "node src/scripts/migrateProductArrival.js",
     "migrate:media": "node src/scripts/migrateMediaAssets.js"
   },

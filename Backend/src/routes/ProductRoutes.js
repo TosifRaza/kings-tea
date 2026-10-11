@@ -44,10 +44,10 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: multer.memoryStorage(),
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024, files: 4, fields: 50, parts: 60 },
+  limits: { fileSize: 5 * 1024 * 1024, files: 5, fields: 50, parts: 60 },
 });
 
-const uploadProductImages = [upload.array('images', 4), async (req, res, next) => {
+const uploadProductImages = [upload.array('images', 5), async (req, res, next) => {
   if (!req.files?.length) return next();
   const uploadedPublicIds = [];
   try {

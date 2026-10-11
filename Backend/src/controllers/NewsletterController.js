@@ -1,6 +1,9 @@
 const Newsletter = require('../models/NewsletterModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 const { validationResult } = require('express-validator');
+const crypto = require('crypto');
+
+const tokenHash = (token) => crypto.createHash('sha256').update(token).digest('hex');
 
 const subscribe = async (req, res) => {
   const errors = validationResult(req);
@@ -9,26 +12,31 @@ const subscribe = async (req, res) => {
   }
 
   try {
-    const { email, name } = req.body;
+    const { email, name, consent } = req.body;
+    if (consent !== true) return errorResponse(res, 'Marketing consent is required to subscribe', 400);
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const unsubscribeToken = crypto.randomBytes(32).toString('hex');
 
-    const existing = await Newsletter.findOne({ email });
+    const existing = await Newsletter.findOne({ email: normalizedEmail }).select('+unsubscribeTokenHash');
     if (existing) {
-      if (!existing.active) {
-        existing.active = true;
-        existing.name = name || existing.name;
-        await existing.save();
-        return successResponse(res, existing, 'Re-subscribed successfully');
-      }
-      return errorResponse(res, 'Email already subscribed', 400);
+      if (existing.active) return successResponse(res, { subscribed: true }, 'Subscription confirmed');
+      existing.active = true;
+      existing.name = name || existing.name;
+      existing.marketingConsentAt = new Date();
+      existing.unsubscribeTokenHash = tokenHash(unsubscribeToken);
+      await existing.save();
+      return successResponse(res, { subscribed: true, unsubscribeToken }, 'Subscription confirmed');
     }
 
     const subscription = await Newsletter.create({
-      email,
+      email: normalizedEmail,
       name: name || '',
-      active: true
+      active: true,
+      marketingConsentAt: new Date(),
+      unsubscribeTokenHash: tokenHash(unsubscribeToken),
     });
 
-    return successResponse(res, subscription, 'Subscribed successfully', 201);
+    return successResponse(res, { subscribed: true, unsubscribeToken }, 'Subscription confirmed', 201);
   } catch (error) {
     if (error.code === 11000) {
       return errorResponse(res, 'Email already subscribed', 400);
@@ -39,18 +47,12 @@ const subscribe = async (req, res) => {
 
 const unsubscribe = async (req, res) => {
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      return errorResponse(res, 'Email is required', 400);
-    }
-
-    const subscription = await Newsletter.findOne({ email });
-    if (!subscription) {
-      return errorResponse(res, 'Email not found', 404);
-    }
-
+    const { token } = req.body;
+    if (!/^[a-f0-9]{64}$/i.test(String(token || ''))) return errorResponse(res, 'A valid unsubscribe token is required', 400);
+    const subscription = await Newsletter.findOne({ unsubscribeTokenHash: tokenHash(token), active: true }).select('+unsubscribeTokenHash');
+    if (!subscription) return errorResponse(res, 'This unsubscribe link is invalid or has already been used', 400);
     subscription.active = false;
+    subscription.unsubscribeTokenHash = null;
     await subscription.save();
 
     return successResponse(res, null, 'Unsubscribed successfully');
@@ -73,7 +75,7 @@ const listSubscribers = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     const total = await Newsletter.countDocuments(filter);
-    const subscribers = await Newsletter.find(filter)
+    const subscribers = await Newsletter.find(filter).select('-unsubscribeTokenHash')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum);
@@ -92,8 +94,23 @@ const listSubscribers = async (req, res) => {
   }
 };
 
+const exportSubscribers = async (_req, res) => {
+  try {
+    const subscribers = await Newsletter.find({ active: true }).select('email name marketingConsentAt createdAt').sort({ createdAt: -1 }).lean();
+    const quote = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const csv = ['email,name,consent_at,subscribed_at', ...subscribers.map((subscriber) => [
+      quote(subscriber.email), quote(subscriber.name), quote(subscriber.marketingConsentAt?.toISOString()), quote(subscriber.createdAt?.toISOString()),
+    ].join(','))].join('\r\n');
+    res.set({ 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="newsletter-subscribers.csv"', 'Cache-Control': 'no-store' });
+    return res.send(csv);
+  } catch {
+    return errorResponse(res, 'Unable to export subscribers', 500);
+  }
+};
+
 module.exports = {
   subscribe,
   unsubscribe,
-  listSubscribers
+  listSubscribers,
+  exportSubscribers,
 };

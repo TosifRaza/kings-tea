@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/AuthenticationMiddleware');
+const { authorize } = require('../middleware/AuthorizationMiddleware');
 const {
   getTestimonials,
   getTestimonialById,
@@ -14,8 +15,8 @@ router.get('/', getTestimonials);
 router.get('/:id', getTestimonialById);
 
 // Protected admin routes
-router.post('/', protect, createTestimonial);
-router.put('/:id', protect, updateTestimonial);
-router.delete('/:id', protect, deleteTestimonial);
+router.post('/', protect, authorize('super_admin', 'admin', 'manager'), createTestimonial);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager'), updateTestimonial);
+router.delete('/:id', protect, authorize('super_admin', 'admin'), deleteTestimonial);
 
 module.exports = router;

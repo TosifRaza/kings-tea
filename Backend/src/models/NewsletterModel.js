@@ -17,7 +17,9 @@ const NewsletterSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true
-  }
+  },
+  marketingConsentAt: { type: Date, required: true, default: Date.now },
+  unsubscribeTokenHash: { type: String, select: false, default: null },
 }, {
   timestamps: true
 });

@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { listReviews, createReview, deleteReview } = require('../controllers/ReviewController');
+const { listReviews, createReview, deleteReview, moderateReview } = require('../controllers/ReviewController');
 const { protect } = require('../middleware/AuthenticationMiddleware');
 const { authorize } = require('../middleware/AuthorizationMiddleware');
 
+router.get('/moderation', protect, authorize('super_admin', 'admin', 'manager'), listReviews);
+router.get('/:productId', listReviews);
 router.get('/', listReviews);
 
 router.post(
@@ -24,5 +26,7 @@ router.delete(
   protect,
   deleteReview
 );
+
+router.patch('/:id/approval', protect, authorize('super_admin', 'admin', 'manager'), moderateReview);
 
 module.exports = router;

@@ -71,10 +71,13 @@ const updateUser = async (req, res) => {
       return errorResponse(res, 'Not authorized to update this user', 403);
     }
 
-    const allowedFields = ['name', 'image', 'phone', 'address', 'city', 'state', 'zip', 'country', 'emailVerified'];
-    if (req.user.role === 'super_admin' || req.user.role === 'admin') {
-      allowedFields.push('role', 'email');
+    if (req.body.role !== undefined && req.user.role !== 'super_admin') {
+      return errorResponse(res, 'Only a super administrator can change user roles', 403);
     }
+
+    const allowedFields = ['name', 'image', 'phone', 'address', 'city', 'state', 'zip', 'country'];
+    if (req.user.role === 'super_admin' || req.user.role === 'admin') allowedFields.push('email');
+    if (req.user.role === 'super_admin') allowedFields.push('role', 'emailVerified');
 
     const updateData = {};
     for (const field of allowedFields) {
@@ -104,10 +107,19 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    if (req.params.id === req.user.userId) {
+      return errorResponse(res, 'Administrators cannot delete their own account', 400);
+    }
+    const user = await User.findById(req.params.id);
     if (!user) {
       return errorResponse(res, 'User not found', 404);
     }
+
+    if (user.role === 'super_admin' && req.user.role !== 'super_admin') {
+      return errorResponse(res, 'Only a super administrator can delete this account', 403);
+    }
+
+    await User.findByIdAndDelete(req.params.id);
 
     return successResponse(res, null, 'User deleted successfully');
   } catch (error) {

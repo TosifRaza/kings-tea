@@ -84,6 +84,7 @@ const {
   deleteCategory,
 } = require('../controllers/CategoryController');
 const { protect } = require('../middleware/AuthenticationMiddleware');
+const { authorize } = require('../middleware/AuthorizationMiddleware');
 
 const router = express.Router();
 
@@ -95,13 +96,14 @@ router.get('/:id', getCategoryById);
 router.post(
   '/',
   protect,
+  authorize('super_admin', 'admin', 'manager'),
   [
     body('name').trim().notEmpty().withMessage('Category name is required'),
   ],
   createCategory
 );
 
-router.put('/:id', protect, updateCategory);
-router.delete('/:id', protect, deleteCategory);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager'), updateCategory);
+router.delete('/:id', protect, authorize('super_admin', 'admin'), deleteCategory);
 
 module.exports = router;

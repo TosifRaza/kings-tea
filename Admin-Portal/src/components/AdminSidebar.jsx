@@ -11,8 +11,13 @@ import {
   CreditCard,
   Mail,
   MessageSquare,
+  Star,
   LogOut,
-  Crown
+  Crown,
+  PanelsTopLeft,
+  Image,
+  Files,
+  Repeat2,
 } from 'lucide-react';
 
 const navItems = [
@@ -25,6 +30,11 @@ const navItems = [
   { to: '/subscriptions', icon: CreditCard, label: 'Subscriptions' },
   { to: '/newsletter', icon: Mail, label: 'Newsletter' },
   { to: '/contact', icon: MessageSquare, label: 'Contact Messages' },
+  { to: '/reviews', icon: Star, label: 'Review Moderation' },
+  { to: '/homepage', icon: PanelsTopLeft, label: 'Homepage Content' },
+  { to: '/site-content', icon: Files, label: 'Site Content' },
+  { to: '/media', icon: Image, label: 'Media Library' },
+  { to: '/subscription-plans', icon: Repeat2, label: 'Subscription Plans' },
 ];
 
 const AdminSidebar = () => {

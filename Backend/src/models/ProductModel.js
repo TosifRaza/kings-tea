@@ -304,7 +304,7 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isNew: {
+    newArrival: {
       type: Boolean,
       default: false,
     },

@@ -23,11 +23,8 @@ const seedReviews = async () => {
   if (!uriMatch) throw new Error('MONGODB_URI or MONGO_URI is not a valid MongoDB connection string.');
   const databaseHosts = uriMatch[1].split(',').map((entry) => entry.replace(/:\d+$/, '').replace(/^\[|\]$/g, '').toLowerCase());
   const isLocalDatabase = databaseHosts.every((host) => ['localhost', '127.0.0.1', '::1'].includes(host));
-  if (!isLocalDatabase && process.env.ALLOW_REMOTE_REVIEW_SEED !== 'true') {
-    throw new Error('This URI points to a remote database. Set ALLOW_REMOTE_REVIEW_SEED=true only when you intend to add sample reviews there.');
-  }
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DEMO_REVIEW_SEED !== 'true') {
-    throw new Error('Refusing to add sample reviews in production. Set ALLOW_DEMO_REVIEW_SEED=true only when this is intentional.');
+  if (process.env.NODE_ENV !== 'development' || process.env.ENABLE_DEMO_REVIEW_SEED !== 'true' || !isLocalDatabase) {
+    throw new Error('Sample reviews are limited to an explicitly enabled local development database.');
   }
 
   await mongoose.connect(mongoUri, {
@@ -58,6 +55,7 @@ const seedReviews = async () => {
             title: sample.title,
             comment: sample.comment,
             verified: false,
+            approved: false,
             isSeeded: true,
             createdAt,
           },
@@ -69,7 +67,7 @@ const seedReviews = async () => {
     }
 
     const [stats] = await Review.aggregate([
-      { $match: { productId: product._id } },
+      { $match: { productId: product._id, approved: true } },
       { $group: { _id: '$productId', average: { $avg: '$rating' }, count: { $sum: 1 } } },
     ]);
 

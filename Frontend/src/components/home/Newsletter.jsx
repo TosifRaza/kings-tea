@@ -1,19 +1,39 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react';
+import { newsletterAPI } from '../../services/api';
 
 export default function Newsletter() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [unsubscribeToken, setUnsubscribeToken] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email.trim()) {
+    setBusy(true); setError('');
+    try {
+      const { data } = await newsletterAPI.subscribe({ email: email.trim(), consent });
       setSubmitted(true);
       setEmail('');
-      setTimeout(() => setSubmitted(false), 4000);
+      setUnsubscribeToken(data?.data?.unsubscribeToken || '');
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Could not subscribe right now. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const unsubscribe = async () => {
+    try {
+      await newsletterAPI.unsubscribe({ token: unsubscribeToken });
+      setSubmitted(false); setUnsubscribeToken(''); setConsent(false);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || 'Unable to unsubscribe with this link.');
     }
   };
 
@@ -45,6 +65,7 @@ export default function Newsletter() {
           </p>
 
           {submitted ? (
+            <>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -52,11 +73,14 @@ export default function Newsletter() {
             >
               <CheckCircle className="h-5 w-5" />
               <span className="font-[family-name:var(--font-inter)] text-sm font-medium">
-                Welcome to the Royal Tea Circle!
+                Subscription saved. Thank you for opting in.
               </span>
             </motion.div>
+            {unsubscribeToken && <button type="button" onClick={unsubscribe} className="mt-3 text-xs text-tea-green underline">Unsubscribe from this browser</button>}
+            </>
           ) : (
-            <form onSubmit={handleSubmit} className="flex gap-2 max-w-md mx-auto">
+            <form onSubmit={handleSubmit} className="mx-auto max-w-md">
+              <div className="flex gap-2">
               <input
                 type="email"
                 placeholder="Your email address"
@@ -67,17 +91,17 @@ export default function Newsletter() {
               />
               <button
                 type="submit"
-                className="btn-luxury bg-tea-green hover:bg-tea-green-light text-warm-ivory px-6 h-11 text-xs font-semibold uppercase tracking-wider rounded-none transition-colors"
+                disabled={busy || !consent}
+                className="btn-luxury h-11 rounded-none bg-tea-green px-6 text-xs font-semibold uppercase tracking-wider text-warm-ivory transition-colors hover:bg-tea-green-light disabled:opacity-50"
               >
-                Subscribe
+                {busy ? 'Saving…' : 'Subscribe'}
               </button>
+              </div>
+              <label className="mt-3 flex items-start gap-2 text-left text-xs text-deep-walnut/65"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} required className="mt-0.5 accent-tea-green" /><span>I agree to receive marketing emails. I can unsubscribe at any time.</span></label>
             </form>
           )}
 
-          <p className="text-deep-walnut/30 text-[10px] font-[family-name:var(--font-inter)] mt-3">
-            By subscribing, you agree to our Privacy Policy. Unsubscribe at any
-            time.
-          </p>
+          {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
         </motion.div>
       </div>
     </section>

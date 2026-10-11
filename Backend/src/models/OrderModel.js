@@ -62,10 +62,17 @@ const OrderSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  currency: {
+    type: String,
+    enum: ['INR'],
+    default: 'INR'
+  },
   shippingName: {
     type: String,
     default: ''
   },
+  shippingPhone: { type: String, default: '' },
+  customerEmail: { type: String, default: '' },
   shippingAddress: {
     type: String,
     default: ''
@@ -88,8 +95,24 @@ const OrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    default: 'card'
+    // Keep legacy historical values readable/updatable; new customer checkout
+    // can only create Razorpay orders through PaymentController.
+    enum: ['razorpay', 'card'],
+    default: 'razorpay'
   },
+  razorpayOrderId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  paymentId: {
+    type: String,
+    default: ''
+  },
+  checkoutKey: {
+    type: String,
+  },
+  refundId: { type: String, default: '' },
   paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'failed', 'refunded'],
@@ -107,5 +130,10 @@ const OrderSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+OrderSchema.index(
+  { userId: 1, checkoutKey: 1 },
+  { unique: true, partialFilterExpression: { checkoutKey: { $type: 'string' } } },
+);
 
 module.exports = mongoose.model('Order', OrderSchema);

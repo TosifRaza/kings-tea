@@ -82,6 +82,11 @@ export const collectionAPI = {
   getCollectionById: (id) => api.get(`/collections/${id}`),
 };
 
+export const siteContentAPI = {
+  getHomepage: () => api.get('/site-content/homepage'),
+  getContent: (key) => api.get(`/site-content/public/${encodeURIComponent(key)}`),
+};
+
 // ============ TESTIMONIAL API ============
 export const testimonialAPI = {
   getTestimonials: (params) => api.get('/testimonials', { params }),
@@ -117,6 +122,13 @@ export const orderAPI = {
   getOrderById: (id) => api.get(`/orders/${id}`),
 };
 
+// ============ PAYMENT API ============
+export const paymentAPI = {
+  getConfig: () => api.get('/payments/config'),
+  createPaymentOrder: (data, idempotencyKey) => api.post('/payments/create-order', data, { headers: { 'Idempotency-Key': idempotencyKey } }),
+  verifyPayment: (data) => api.post('/payments/verify', data),
+};
+
 // ============ USER API ============
 export const userAPI = {
   getProfile: () => api.get('/users/profile'),
@@ -148,6 +160,7 @@ export const reviewAPI = {
 // ============ NEWSLETTER API ============
 export const newsletterAPI = {
   subscribe: (data) => api.post('/newsletter', data),
+  unsubscribe: (data) => api.post('/newsletter/unsubscribe', data),
 };
 
 // ============ CONTACT API ============

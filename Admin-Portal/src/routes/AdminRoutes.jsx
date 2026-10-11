@@ -11,6 +11,11 @@ import BlogManagementPage from '../pages/BlogManagementPage';
 import SubscriptionManagementPage from '../pages/SubscriptionManagementPage';
 import NewsletterManagementPage from '../pages/NewsletterManagementPage';
 import ContactMessagesPage from '../pages/ContactMessagesPage';
+import ReviewModerationPage from '../pages/ReviewModerationPage';
+import HomepageContentPage from '../pages/HomepageContentPage';
+import MediaLibraryPage from '../pages/MediaLibraryPage';
+import SiteContentManagementPage from '../pages/SiteContentManagementPage';
+import SubscriptionPlansPage from '../pages/SubscriptionPlansPage';
 // import ProductsPage from './pages/ProductsPage';
 const AdminRoutes = () => {
   return (
@@ -36,6 +41,11 @@ const AdminRoutes = () => {
         <Route path="/subscriptions" element={<SubscriptionManagementPage />} />
         <Route path="/newsletter" element={<NewsletterManagementPage />} />
         <Route path="/contact" element={<ContactMessagesPage />} />
+        <Route path="/reviews" element={<ReviewModerationPage />} />
+        <Route path="/homepage" element={<HomepageContentPage />} />
+        <Route path="/site-content" element={<SiteContentManagementPage />} />
+        <Route path="/media" element={<MediaLibraryPage />} />
+        <Route path="/subscription-plans" element={<SubscriptionPlansPage />} />
       </Route>
 
       {/* Default redirect */}

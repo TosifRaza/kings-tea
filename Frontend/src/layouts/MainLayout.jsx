@@ -30,6 +30,8 @@ import {
 import CartDrawer from '../components/cart/CartDrawer';
 import CartNotification from '../components/cart/CartNotification';
 import AuthModal from '../components/auth/AuthModal';
+import { siteContentAPI } from '../services/api';
+import { newsletterAPI } from '../services/api';
 
 const navItems = [
   { label: 'Home', path: '/' },
@@ -41,10 +43,7 @@ const navItems = [
 ];
 
 const socialLinks = [
-  { icon: 'Instagram', href: '#', label: 'Instagram' },
-  { icon: 'Facebook', href: '#', label: 'Facebook' },
-  { icon: 'Twitter', href: '#', label: 'Twitter' },
-  { icon: 'YouTube', href: '#', label: 'YouTube' },
+  // Published social links are loaded from the footer content record.
 ];
 
 const quickLinks = [
@@ -88,11 +87,23 @@ function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState(null);
+  const [configuredNav, setConfiguredNav] = useState(null);
 
   const wishlistCount = wishlistItems.length;
   const isHome = location.pathname === '/';
   const isAccountDashboard = location.pathname === '/dashboard';
   const isShop = location.pathname.startsWith('/shop');
+  const visibleNavItems = configuredNav?.length ? configuredNav : navItems;
+
+  useEffect(() => {
+    let alive = true;
+    siteContentAPI.getContent('navigation').then(({ data }) => {
+      const links = data?.data?.links;
+      if (alive && Array.isArray(links)) setConfiguredNav(links.filter((link) => link.enabled !== false && typeof link.label === 'string' && typeof link.href === 'string' && link.href.startsWith('/')).map((link) => ({ label: link.label, path: link.href })));
+    }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   // useEffect(() => {
   //   dispatch(getMe());
@@ -101,6 +112,17 @@ function Header() {
   dispatch(getMe());
   dispatch(loadWishlist());
 }, [dispatch]);
+
+  useEffect(() => {
+    let active = true;
+    siteContentAPI.getHomepage().then(({ data }) => {
+      if (!active) return;
+      const item = data?.data?.announcement;
+      const now = Date.now();
+      if (item?.enabled && item.text && (!item.startAt || new Date(item.startAt).getTime() <= now) && (!item.endAt || new Date(item.endAt).getTime() >= now)) setAnnouncement(item);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -129,8 +151,13 @@ function Header() {
 
   return (
     <>
+      {announcement && <div className="fixed inset-x-0 top-0 z-[60] flex min-h-8 items-center justify-center px-3 py-1 text-center text-xs font-medium" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(announcement.backgroundColor || '') ? announcement.backgroundColor : '#173e30', color: /^#[0-9a-f]{6}$/i.test(announcement.textColor || '') ? announcement.textColor : '#fff' }}>
+        {announcement.href && /^\/(?!\/)|^https:\/\//.test(announcement.href)
+          ? <a href={announcement.href} className="underline underline-offset-2">{announcement.text}</a>
+          : <span>{announcement.text}</span>}
+      </div>}
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed ${announcement ? 'top-8' : 'top-0'} left-0 right-0 z-50 transition-all duration-500 ${
           isShop
             ? 'bg-[#faf8ef]/95 backdrop-blur-md shadow-[0_2px_12px_rgba(45,54,38,0.08)] py-1.5'
             : isAccountDashboard
@@ -166,7 +193,7 @@ function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
-              {navItems.map((item) => (
+              {visibleNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -387,7 +414,7 @@ function Header() {
               className="lg:hidden bg-warm-ivory border-t border-imperial-gold/10 overflow-hidden"
             >
               <nav className="flex flex-col gap-1 p-4">
-                {navItems.map((item) => (
+                {visibleNavItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
@@ -457,14 +484,38 @@ function Header() {
 function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
+  const [unsubscribeToken, setUnsubscribeToken] = useState('');
+  const [footerContent, setFooterContent] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    siteContentAPI.getContent('footer').then(({ data }) => { if (alive) setFooterContent(data?.data || null); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  const configuredExplore = footerContent?.columns?.find((column) => column.key === 'explore')?.links;
+  const configuredCare = footerContent?.columns?.find((column) => column.key === 'customer-care')?.links;
+  const exploreLinks = Array.isArray(configuredExplore) ? configuredExplore.filter((link) => link.enabled !== false && link.label && typeof link.href === 'string' && link.href.startsWith('/')).map((link) => ({ label: link.label, path: link.href })) : mobileExploreLinks;
+  const careLinks = Array.isArray(configuredCare) ? configuredCare.filter((link) => link.enabled !== false && link.label && typeof link.href === 'string' && link.href.startsWith('/')).map((link) => ({ label: link.label, path: link.href })) : mobileCustomerLinks.map((label) => ({ label, path: label === 'Contact Us' ? '/contact' : label === 'FAQs' ? '/faq' : label === 'Track Order' ? '/dashboard?tab=orders' : '/policies/shipping-returns' }));
+  const desktopCareLinks = Array.isArray(configuredCare) ? careLinks : customerLinks.map((label) => ({ label, path: label === 'FAQ' ? '/faq' : label === 'Privacy Policy' ? '/policies/privacy-policy' : label === 'Terms of Service' ? '/policies/terms' : label === 'Shipping & Delivery' ? '/policies/shipping' : label === 'Returns & Exchanges' ? '/policies/returns' : '/contact' }));
 
-  const handleNewsletter = (e) => {
+  const handleNewsletter = async (e) => {
     e.preventDefault();
-    if (email.trim()) {
+    setNewsletterError('');
+    try {
+      const { data } = await newsletterAPI.subscribe({ email: email.trim(), consent });
       setSubscribed(true);
+      setUnsubscribeToken(data?.data?.unsubscribeToken || '');
       setEmail('');
-      setTimeout(() => setSubscribed(false), 3000);
-    }
+      setConsent(false);
+    } catch (error) { setNewsletterError(error.response?.data?.message || 'Could not subscribe. Please try again.'); }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await newsletterAPI.unsubscribe({ token: unsubscribeToken });
+      setSubscribed(false); setUnsubscribeToken(''); setConsent(false);
+    } catch (error) { setNewsletterError(error.response?.data?.message || 'Could not unsubscribe with this link.'); }
   };
 
   const SocialIcon = ({ name, className }) => {
@@ -515,12 +566,10 @@ function Footer() {
               </div>
             </div>
             <p className="mb-3 font-[family-name:var(--font-cormorant)] text-sm leading-[1.35] text-warm-ivory/85 sm:mb-4 sm:font-[family-name:var(--font-inter)] sm:text-sm sm:leading-relaxed sm:text-warm-ivory/60">
-              Experience centuries of tea heritage in every cup. Premium luxury
-              teas sourced from the world&apos;s finest gardens, crafted for
-              connoisseurs.
+              Discover tea varieties, brewing inspiration, and product details from King&apos;s Tea.
             </p>
             <div className="flex gap-3 sm:gap-3">
-              {socialLinks.map((social) => (
+              {(Array.isArray(footerContent?.socials) ? footerContent.socials.filter((social) => social.enabled !== false && /^https:\/\//i.test(social.href || '')).map((social) => ({ icon: social.icon, href: social.href, label: social.label })) : socialLinks).map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
@@ -539,7 +588,7 @@ function Footer() {
               <span className="sm:hidden">Explore<span className="mt-1 block h-1 w-10 bg-imperial-gold" /></span><span className="hidden sm:inline">Quick Links</span>
             </h3>
             <ul className="space-y-2 sm:hidden">
-              {mobileExploreLinks.map((link) => (
+              {exploreLinks.map((link) => (
                 <li key={link.path}>
                   <Link to={link.path} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[15px] text-warm-ivory/85 hover:text-imperial-gold">
                     {link.label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
@@ -548,7 +597,7 @@ function Footer() {
               ))}
             </ul>
             <ul className="hidden space-y-2.5 sm:block">
-              {quickLinks.map((link) => (
+              {(Array.isArray(configuredExplore) ? exploreLinks : quickLinks).map((link) => (
                 <li key={link.path}>
                   <Link
                     to={link.path}
@@ -567,20 +616,20 @@ function Footer() {
               <span className="sm:hidden">Customer Care<span className="mt-1 block h-1 w-10 bg-imperial-gold" /></span><span className="hidden sm:inline">Customer Service</span>
             </h3>
             <ul className="space-y-2 sm:hidden">
-              {mobileCustomerLinks.map((label) => (
-                <li key={label}>
-                  <Link to={label === 'Contact Us' ? '/contact' : label === 'Track Order' ? '/dashboard?tab=orders' : '/contact'} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[15px] text-warm-ivory/85 hover:text-imperial-gold">
-                    {label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
+              {careLinks.map((link) => (
+                <li key={link.path}>
+                  <Link to={link.path} className="flex items-center justify-between gap-2 font-[family-name:var(--font-cormorant)] text-[15px] text-warm-ivory/85 hover:text-imperial-gold">
+                    {link.label}<ChevronDown className="h-4 w-4 -rotate-90 text-imperial-gold" />
                   </Link>
                 </li>
               ))}
             </ul>
             <ul className="hidden space-y-2.5 sm:block">
-              {customerLinks.map((link) => (
-                <li key={link}>
-                  <button className="text-warm-ivory/60 hover:text-imperial-gold transition-colors text-sm">
-                    {link}
-                  </button>
+              {desktopCareLinks.map((link) => (
+                <li key={link.path}>
+                  <Link to={link.path} className="text-warm-ivory/60 hover:text-imperial-gold transition-colors text-sm">
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -594,11 +643,11 @@ function Footer() {
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-2 text-warm-ivory/60 text-sm">
                 <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                <span>razatosif206@gmail.com</span>
+                <span>{footerContent?.contactEmail || ''}</span>
               </div>
               <div className="flex items-center gap-2 text-warm-ivory/60 text-sm">
                 <svg className="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                <span>+91 7047389630</span>
+                <span>{footerContent?.phone || ''}</span>
               </div>
               <div className="flex items-start gap-2 text-warm-ivory/60 text-sm">
                 <svg className="h-4 w-4 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -613,13 +662,17 @@ function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-9 w-full bg-warm-ivory/10 border border-warm-ivory/20 text-warm-ivory placeholder:text-warm-ivory/40 text-sm px-3 focus:outline-none focus:border-imperial-gold"
               />
+              <label className="flex items-start gap-2 text-[10px] text-warm-ivory/70"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required className="mt-0.5 accent-imperial-gold" /><span>I agree to receive marketing emails. Unsubscribe anytime.</span></label>
               <button
                 type="submit"
+                disabled={!consent}
                 className="w-full h-9 bg-imperial-gold hover:bg-imperial-gold-light text-deep-walnut text-xs font-semibold uppercase tracking-wider transition-colors"
               >
                 {subscribed ? 'Subscribed!' : 'Subscribe'}
               </button>
+              {newsletterError && <p role="alert" className="text-xs text-red-200">{newsletterError}</p>}
             </form>
+            {subscribed && <p className="mt-2 text-xs text-warm-ivory/80">Subscription saved.{unsubscribeToken && <button type="button" onClick={handleUnsubscribe} className="ml-2 underline">Unsubscribe from this browser</button>}</p>}
           </div>
         </div>
       </div>
@@ -632,19 +685,10 @@ function Footer() {
             <span className="hidden sm:inline">&copy; {new Date().getFullYear()} KING&apos;S TEA. All rights reserved.</span>
           </p>
           <div className="hidden items-center gap-4 sm:flex">
-            <span className="text-warm-ivory/40 text-xs">
-              Accepted Payments:
+              <span className="text-warm-ivory/40 text-xs">
+              Payments:
             </span>
-            <div className="flex gap-2">
-              {['Visa', 'MC', 'Amex', 'PayPal'].map((p) => (
-                <span
-                  key={p}
-                  className="text-[10px] px-1.5 py-0.5 border border-warm-ivory/20 rounded text-warm-ivory/50"
-                >
-                  {p}
-                </span>
-              ))}
-            </div>
+            <span className="text-xs text-warm-ivory/50">Available methods shown at checkout</span>
           </div>
           <div className="flex items-center gap-2 font-[family-name:var(--font-cormorant)] text-xs text-warm-ivory/80 sm:hidden">
             <button type="button" className="hover:text-imperial-gold">Privacy</button>

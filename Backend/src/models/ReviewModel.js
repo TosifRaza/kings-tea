@@ -39,6 +39,11 @@ const ReviewSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  approved: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
   isSeeded: {
     type: Boolean,
     default: false

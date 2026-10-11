@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/AuthenticationMiddleware');
+const { authorize } = require('../middleware/AuthorizationMiddleware');
 const {
   getCollections,
   getCollectionById,
@@ -14,8 +15,8 @@ router.get('/', getCollections);
 router.get('/:id', getCollectionById);
 
 // Protected admin routes
-router.post('/', protect, createCollection);
-router.put('/:id', protect, updateCollection);
-router.delete('/:id', protect, deleteCollection);
+router.post('/', protect, authorize('super_admin', 'admin', 'manager'), createCollection);
+router.put('/:id', protect, authorize('super_admin', 'admin', 'manager'), updateCollection);
+router.delete('/:id', protect, authorize('super_admin', 'admin'), deleteCollection);
 
 module.exports = router;

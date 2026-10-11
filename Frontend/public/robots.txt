@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+
+Sitemap: https://kings-tea-backend.onrender.com/api/seo/sitemap.xml

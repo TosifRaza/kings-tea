@@ -1,17 +1,27 @@
 const Review = require('../models/ReviewModel');
 const Product = require('../models/ProductModel');
+const Order = require('../models/OrderModel');
+const mongoose = require('mongoose');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 const { validationResult } = require('express-validator');
 
 const listReviews = async (req, res) => {
   try {
-    const { productId, page = 1, limit = 10 } = req.query;
+    const productId = req.params.productId || req.query.productId;
+    const { page = 1, limit = 10 } = req.query;
+    const isModerator = req.path === '/moderation' && ['super_admin', 'admin', 'manager'].includes(req.user?.role);
 
-    if (!productId) {
+    if (!productId && !isModerator) {
       return errorResponse(res, 'Product ID is required', 400);
     }
 
-    const filter = { productId };
+    if (productId && !mongoose.Types.ObjectId.isValid(productId)) {
+      return errorResponse(res, 'Product ID is invalid', 400);
+    }
+    const filter = {
+      ...(productId ? { productId } : {}),
+      ...(!isModerator ? { approved: true } : {}),
+    };
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
     const skip = (pageNum - 1) * limitNum;
@@ -19,6 +29,7 @@ const listReviews = async (req, res) => {
     const total = await Review.countDocuments(filter);
     const reviews = await Review.find(filter)
       .populate('userId', 'name image')
+      .populate('productId', 'name slug')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum);
@@ -60,32 +71,22 @@ const createReview = async (req, res) => {
       return errorResponse(res, 'You have already reviewed this product', 400);
     }
 
+    const eligiblePurchase = await Order.exists({
+      userId: req.user.userId,
+      status: 'delivered',
+      paymentStatus: 'paid',
+      'items.productId': productId,
+    });
+
     const review = await Review.create({
       userId: req.user.userId,
       productId,
       rating,
       title: title || '',
       comment: comment || '',
-      verified: false
+      verified: Boolean(eligiblePurchase),
+      approved: false
     });
-
-    const stats = await Review.aggregate([
-      { $match: { productId: new (require('mongoose').Types.ObjectId)(productId) } },
-      {
-        $group: {
-          _id: '$productId',
-          avgRating: { $avg: '$rating' },
-          count: { $sum: 1 }
-        }
-      }
-    ]);
-
-    if (stats.length > 0) {
-      await Product.findByIdAndUpdate(productId, {
-        rating: Math.round(stats[0].avgRating * 10) / 10,
-        reviewCount: stats[0].count
-      });
-    }
 
     const populatedReview = await Review.findById(review._id).populate('userId', 'name image');
 
@@ -109,8 +110,8 @@ const deleteReview = async (req, res) => {
     const productId = review.productId;
     await Review.findByIdAndDelete(req.params.id);
 
-    const stats = await Review.aggregate([
-      { $match: { productId: new (require('mongoose').Types.ObjectId)(productId.toString()) } },
+    const [stats] = await Review.aggregate([
+      { $match: { productId: new mongoose.Types.ObjectId(productId.toString()), approved: true } },
       {
         $group: {
           _id: '$productId',
@@ -120,10 +121,10 @@ const deleteReview = async (req, res) => {
       }
     ]);
 
-    if (stats.length > 0) {
+    if (stats) {
       await Product.findByIdAndUpdate(productId, {
-        rating: Math.round(stats[0].avgRating * 10) / 10,
-        reviewCount: stats[0].count
+        rating: Math.round(stats.avgRating * 10) / 10,
+        reviewCount: stats.count
       });
     } else {
       await Product.findByIdAndUpdate(productId, {
@@ -138,8 +139,36 @@ const deleteReview = async (req, res) => {
   }
 };
 
+const moderateReview = async (req, res) => {
+  const { approved } = req.body;
+  if (typeof approved !== 'boolean') return errorResponse(res, 'approved must be a boolean', 400);
+
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) return errorResponse(res, 'Review not found', 404);
+    if (review.isSeeded && approved) {
+      return errorResponse(res, 'Sample reviews cannot be published as customer reviews', 409);
+    }
+    review.approved = approved;
+    await review.save();
+
+    const [stats] = await Review.aggregate([
+      { $match: { productId: review.productId, approved: true } },
+      { $group: { _id: '$productId', average: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ]);
+    await Product.findByIdAndUpdate(review.productId, {
+      $set: { rating: stats ? Math.round(stats.average * 10) / 10 : 0, reviewCount: stats?.count || 0 },
+    });
+
+    return successResponse(res, review, approved ? 'Review approved' : 'Review hidden');
+  } catch (error) {
+    return errorResponse(res, error.message || 'Failed to moderate review', 500);
+  }
+};
+
 module.exports = {
   listReviews,
   createReview,
-  deleteReview
+  deleteReview,
+  moderateReview
 };

@@ -1,179 +1,63 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock, Send, MessageCircle } from 'lucide-react';
-import { contactAPI } from '../../services/api';
+import { Mail, Phone, MapPin, Send, MessageCircle } from 'lucide-react';
+import { contactAPI, siteContentAPI } from '../../services/api';
 
-const contactInfo = [
-  {
-    icon: Mail,
-    title: 'Email',
-    detail: 'razatosif206@gmail.com',
-    sub: 'We respond within 24 hours'
-  },
-  {
-    icon: Phone,
-    title: 'Phone',
-    detail: '+91 70474389630',
-    sub: 'Mon–Sat, 9am–6pm IST'
-  },
-  {
-    icon: MapPin,
-    title: 'Location',
-    detail: 'Siliguri, Darjeeling',
-    sub: 'West Bengal, India'
-  },
-  {
-    icon: Clock,
-    title: 'Business Hours',
-    detail: 'Mon–Sat: 9am–7pm',
-    sub: 'Sunday: Closed'
-  },
-];
-
-const faqs = [
-  {
-    question: 'How should I store my tea?',
-    answer: 'Store tea in an airtight container away from moisture, sunlight, and strong odors.'
-  },
-  {
-    question: 'Do you deliver across India?',
-    answer: 'Yes, we deliver our tea products across India through trusted courier partners.'
-  },
-  {
-    question: 'How long does shipping take?',
-    answer: 'Most orders are delivered within 3–7 business days depending on your location.'
-  },
-  {
-    question: 'Are your teas freshly packed?',
-    answer: 'Yes, all teas are packed carefully to preserve freshness, aroma, and flavor.'
-  },
-  {
-    question: 'How can I contact customer support?',
-    answer: 'You can reach us through email, phone, or the contact form on this page.'
-  },
-];
+const icons = { Email: Mail, Phone, Location: MapPin };
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [settings, setSettings] = useState(null);
+  const [faqs, setFaqs] = useState([]);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    let active = true;
+    Promise.allSettled([siteContentAPI.getContent('store-settings'), siteContentAPI.getContent('faq')]).then(([store, faq]) => {
+      if (!active) return;
+      if (store.status === 'fulfilled') setSettings(store.value.data?.data || null);
+      if (faq.status === 'fulfilled') setFaqs((faq.value.data?.data?.items || []).filter((item) => item.enabled !== false).sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0)));
+    });
+    return () => { active = false; };
+  }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  const contactInfo = (settings?.contactMethods || [
+    settings?.contactEmail && { title: 'Email', detail: settings.contactEmail },
+    settings?.phone && { title: 'Phone', detail: settings.phone },
+    settings?.address && { title: 'Location', detail: settings.address },
+  ]).filter(Boolean).map((item) => ({ ...item, icon: icons[item.title] || Mail }));
+  const handleChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
+  const handleSubmit = async (event) => {
+    event.preventDefault(); setSubmitting(true); setSubmitError('');
     try {
       await contactAPI.sendMessage(form);
       setSubmitted(true);
       setForm({ name: '', email: '', phone: '', subject: '', message: '' });
-      setTimeout(() => setSubmitted(false), 4000);
-    } catch {
-      // Handle error silently - could add toast later
-    }
-    setSubmitting(false);
+      window.setTimeout(() => setSubmitted(false), 4000);
+    } catch (error) {
+      setSubmitError(error.response?.data?.message || 'Could not send your message. Please try again.');
+    } finally { setSubmitting(false); }
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="pt-20 pb-12 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">Get In Touch</span>
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-deep-walnut mt-3">Contact Us</h1>
-          <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mt-3 max-w-lg mx-auto">Have questions about our premium teas? We are here to help with product inquiries, orders, and customer support.</p>
-          <div className="section-divider mt-6" />
-        </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="min-h-screen pb-12 pt-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="mb-10 text-center"><span className="font-[family-name:var(--font-inter)] text-xs font-semibold uppercase tracking-[0.2em] text-imperial-gold">Get in touch</span><h1 className="mt-3 font-[family-name:var(--font-playfair)] text-3xl font-bold text-deep-walnut sm:text-4xl">Contact Us</h1><p className="mx-auto mt-3 max-w-lg font-[family-name:var(--font-inter)] text-sm text-deep-walnut/60">Send us a message about products, orders, or other questions.</p><div className="section-divider mt-6" /></header>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {contactInfo.map((info, i) => (
-            <motion.div key={info.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="bg-white p-5 rounded-sm border border-imperial-gold/10 text-center">
-              <div className="w-10 h-10 rounded-full bg-tea-green/10 flex items-center justify-center mx-auto mb-3">
-                <info.icon className="h-5 w-5 text-tea-green" />
-              </div>
-              <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-sm mb-1">{info.title}</h3>
-              <p className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)]">{info.detail}</p>
-              <p className="text-deep-walnut/40 text-[10px] font-[family-name:var(--font-inter)] mt-0.5">{info.sub}</p>
-            </motion.div>
-          ))}
-        </div>
+        {contactInfo.length > 0 && <div className="mb-12 grid grid-cols-1 gap-3 sm:grid-cols-3">{contactInfo.map(({ icon: Icon, title, detail, sub }) => <article key={`${title}-${detail}`} className="rounded-sm border border-imperial-gold/10 bg-white p-5 text-center"><Icon className="mx-auto mb-3 h-5 w-5 text-tea-green" /><h2 className="mb-1 font-[family-name:var(--font-playfair)] text-sm font-semibold">{title}</h2><p className="text-xs text-deep-walnut/70">{detail}</p>{sub && <p className="mt-1 text-[10px] text-deep-walnut/45">{sub}</p>}</article>)}</div>}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-deep-walnut mb-6">Send Us a Message</h2>
-            {submitted ? (
-              <div className="bg-tea-green/10 p-8 text-center rounded-sm border border-tea-green/20">
-                <p className="text-tea-green font-[family-name:var(--font-inter)] font-medium">Message sent successfully!</p>
-                <p className="text-deep-walnut/60 text-xs font-[family-name:var(--font-inter)] mt-2">Our concierge team will respond within 24 hours.</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Full Name *</label>
-                    <input name="name" value={form.name} onChange={handleChange} required className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="Your name" />
-                  </div>
-                  <div>
-                    <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Email *</label>
-                    <input name="email" type="email" value={form.email} onChange={handleChange} required className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="your@email.com" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Phone</label>
-                    <input name="phone" value={form.phone} onChange={handleChange} className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="+1 (555) 000-0000" />
-                  </div>
-                  <div>
-                    <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Subject *</label>
-                    <input name="subject" value={form.subject} onChange={handleChange} required className="h-10 border border-imperial-gold/20 text-sm w-full px-3 focus:outline-none focus:border-imperial-gold" placeholder="How can we help?" />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] mb-1 block">Message *</label>
-                  <textarea name="message" value={form.message} onChange={handleChange} required rows={5} className="border border-imperial-gold/20 text-sm resize-none w-full px-3 py-2 focus:outline-none focus:border-imperial-gold" placeholder="Tell us more about your inquiry..." />
-                </div>
-                <button type="submit" disabled={submitting} className="btn-luxury bg-tea-green hover:bg-tea-green-light text-warm-ivory px-8 py-5 text-xs font-semibold uppercase tracking-widest rounded-none flex items-center gap-2 transition-colors">
-                  <Send className="h-4 w-4" />
-                  {submitting ? 'Sending...' : 'Send Message'}
-                </button>
-              </form>
-            )}
-          </div>
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 lg:grid-cols-2">
+          <section><h2 className="mb-6 font-[family-name:var(--font-playfair)] text-xl font-bold text-deep-walnut">Send us a message</h2>{submitted ? <div role="status" className="rounded-sm border border-tea-green/20 bg-tea-green/10 p-8 text-center text-sm text-tea-green">Your message was received.</div> : <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2"><label className="text-xs text-deep-walnut/70">Full name *<input name="name" value={form.name} onChange={handleChange} required maxLength={100} className="mt-1 h-10 w-full border border-imperial-gold/20 px-3 text-sm focus:border-imperial-gold focus:outline-none" /></label><label className="text-xs text-deep-walnut/70">Email *<input name="email" type="email" value={form.email} onChange={handleChange} required maxLength={254} className="mt-1 h-10 w-full border border-imperial-gold/20 px-3 text-sm focus:border-imperial-gold focus:outline-none" /></label></div>
+            <div className="grid gap-4 sm:grid-cols-2"><label className="text-xs text-deep-walnut/70">Phone<input name="phone" value={form.phone} onChange={handleChange} maxLength={32} className="mt-1 h-10 w-full border border-imperial-gold/20 px-3 text-sm focus:border-imperial-gold focus:outline-none" /></label><label className="text-xs text-deep-walnut/70">Subject *<input name="subject" value={form.subject} onChange={handleChange} required maxLength={150} className="mt-1 h-10 w-full border border-imperial-gold/20 px-3 text-sm focus:border-imperial-gold focus:outline-none" /></label></div>
+            <label className="block text-xs text-deep-walnut/70">Message *<textarea name="message" value={form.message} onChange={handleChange} required maxLength={5000} rows={5} className="mt-1 w-full resize-y border border-imperial-gold/20 px-3 py-2 text-sm focus:border-imperial-gold focus:outline-none" /></label>
+            {submitError && <p role="alert" className="text-sm text-red-700">{submitError}</p>}<button type="submit" disabled={submitting} className="inline-flex min-h-12 items-center gap-2 bg-tea-green px-8 text-xs font-semibold uppercase tracking-widest text-warm-ivory disabled:opacity-60"><Send className="h-4 w-4" />{submitting ? 'Sending…' : 'Send message'}</button>
+          </form>}</section>
 
-          <div>
-            <div className="bg-warm-ivory-dark rounded-sm h-48 flex items-center justify-center mb-8 border border-imperial-gold/10">
-              <div className="text-center">
-                <MapPin className="h-8 w-8 text-imperial-gold mx-auto mb-2" />
-                <p className="text-deep-walnut/50 text-sm font-[family-name:var(--font-inter)]">Siliguri, Darjeeling, West Bengal, India</p>
-                <p className="text-deep-walnut/30 text-xs font-[family-name:var(--font-inter)]">Serving tea lovers across India</p>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-deep-walnut mb-4 flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-imperial-gold" />
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-2">
-                {faqs.map((faq, i) => (
-                  <div key={i} className="bg-white border border-imperial-gold/10 rounded-sm px-4">
-                    <button
-                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                      className="w-full text-left font-[family-name:var(--font-inter)] text-xs font-medium text-deep-walnut hover:text-tea-green py-3 flex justify-between items-center"
-                    >
-                      {faq.question}
-                      <span className={`transition-transform ${openFaq === i ? 'rotate-180' : ''}`}>▾</span>
-                    </button>
-                    {openFaq === i && (
-                      <p className="text-deep-walnut/60 text-xs font-[family-name:var(--font-inter)] leading-relaxed pb-3">{faq.answer}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <section><h2 className="mb-4 flex items-center gap-2 font-[family-name:var(--font-playfair)] text-xl font-bold text-deep-walnut"><MessageCircle className="h-5 w-5 text-imperial-gold" />Frequently Asked Questions</h2>{faqs.length ? <div className="space-y-2">{faqs.map((faq, index) => <details key={`${faq.question}-${index}`} className="rounded-sm border border-imperial-gold/10 bg-white px-4 py-3"><summary className="cursor-pointer text-sm font-medium text-deep-walnut">{faq.question}</summary><p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-deep-walnut/65">{faq.answer}</p></details>)}</div> : <p className="text-sm text-deep-walnut/60">No FAQs have been published yet.</p>}{settings?.address && <div className="mt-6 flex items-start gap-3 rounded-sm bg-warm-ivory-dark p-4"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-imperial-gold" /><p className="text-sm text-deep-walnut/70">{settings.address}</p></div>}</section>
         </div>
       </div>
     </motion.div>

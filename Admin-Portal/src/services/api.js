@@ -106,11 +106,11 @@ export const blogAPI = {
 };
 
 export const subscriptionAPI = {
-  getSubscriptionPlans: (params) => api.get('/subscriptions', { params }),
-  getSubscriptionPlanById: (id) => api.get(`/subscriptions/${id}`),
-  createSubscriptionPlan: (data) => api.post('/subscriptions', data),
-  updateSubscriptionPlan: (id, data) => api.put(`/subscriptions/${id}`, data),
-  deleteSubscriptionPlan: (id) => api.delete(`/subscriptions/${id}`),
+  getSubscriptionPlans: (params) => api.get('/subscriptions/admin/plans', { params }),
+  getSubscriptionPlanById: (id) => api.get(`/subscriptions/plans/${id}`),
+  createSubscriptionPlan: (data) => api.post('/subscriptions/admin/plans', data),
+  updateSubscriptionPlan: (id, data) => api.put(`/subscriptions/admin/plans/${id}`, data),
+  deleteSubscriptionPlan: (id) => api.delete(`/subscriptions/admin/plans/${id}`),
   cancelSubscription: (id) => api.put(`/subscriptions/${id}/cancel`),
   getSubscriptions: (params) => api.get('/subscriptions', { params }),
 };
@@ -142,6 +142,7 @@ export const newsletterAPI = {
   getNewsletterSubscribers: (params) => api.get('/newsletter', { params }),
   deleteSubscriber: (id) => api.delete(`/newsletter/${id}`),
   sendNewsletter: (data) => api.post('/newsletter/send', data),
+  exportSubscribers: () => api.get('/newsletter/export', { responseType: 'blob' }),
 };
 
 export const contactAPI = {
@@ -153,8 +154,8 @@ export const contactAPI = {
 };
 
 export const reviewAPI = {
-  getReviews: (params) => api.get('/reviews', { params }),
-  approveReview: (id) => api.put(`/reviews/${id}/approve`),
+  getReviews: (params) => api.get('/reviews/moderation', { params }),
+  approveReview: (id, approved = true) => api.patch(`/reviews/${id}/approval`, { approved }),
   deleteReview: (id) => api.delete(`/reviews/${id}`),
 };
 
@@ -234,6 +235,7 @@ export const getSubscriptions = (params) => api.get('/subscriptions', { params }
 
 // --- Newsletter (NewsletterManagementPage) ---
 export const getSubscribers = (params) => api.get('/newsletter', { params });
+export const exportNewsletterSubscribers = () => api.get('/newsletter/export', { responseType: 'blob' });
 export const getNewsletterSubscribers = (params) => api.get('/newsletter', { params });
 export const deleteSubscriber = (id) => api.delete(`/newsletter/${id}`);
 export const sendNewsletter = (data) => api.post('/newsletter/send', data);
@@ -246,8 +248,8 @@ export const markMessageRead = (id) => api.put(`/contact/${id}/read`);
 export const markContactRead = (id) => api.put(`/contact/${id}/read`);
 
 // --- Reviews ---
-export const getReviews = (params) => api.get('/reviews', { params });
-export const approveReview = (id) => api.put(`/reviews/${id}/approve`);
+export const getReviews = (params) => api.get('/reviews/moderation', { params });
+export const approveReview = (id, approved = true) => api.patch(`/reviews/${id}/approval`, { approved });
 export const deleteReview = (id) => api.delete(`/reviews/${id}`);
 
 // ============================================================

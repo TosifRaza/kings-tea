@@ -21,7 +21,7 @@ const heroSlides = [
   },
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ content = {} }) {
   const ref = useRef(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -32,22 +32,24 @@ export default function HeroSection() {
   });
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '24%']);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const currentSlide = heroSlides[activeSlide];
+  const slides = Array.isArray(content.slides) && content.slides.length ? content.slides : heroSlides;
+  const slideIndex = activeSlide % slides.length;
+  const currentSlide = slides[slideIndex];
 
   useEffect(() => {
     if (prefersReducedMotion || isPaused) return undefined;
 
     const timer = window.setInterval(() => {
-      setActiveSlide((current) => (current + 1) % heroSlides.length);
+      setActiveSlide((current) => (current + 1) % slides.length);
     }, 4000);
 
     return () => window.clearInterval(timer);
-  }, [isPaused, prefersReducedMotion]);
+  }, [isPaused, prefersReducedMotion, slides.length]);
 
   useEffect(() => {
     const nextImage = new window.Image();
-    nextImage.src = heroSlides[(activeSlide + 1) % heroSlides.length].image;
-  }, [activeSlide]);
+    nextImage.src = slides[(slideIndex + 1) % slides.length].image;
+  }, [slideIndex, slides]);
 
   const pauseOnFocus = () => setIsPaused(true);
   const resumeAfterFocus = (event) => {
@@ -109,7 +111,7 @@ export default function HeroSection() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="mb-5 max-w-5xl font-[family-name:var(--font-playfair)] text-4xl font-bold leading-[1.08] tracking-wide text-white drop-shadow-[0_3px_16px_rgba(0,0,0,0.3)] sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          THE ART OF ROYAL TEA
+          {content.heading || 'THE ART OF ROYAL TEA'}
         </motion.h1>
 
         <motion.p
@@ -118,7 +120,7 @@ export default function HeroSection() {
           transition={{ duration: 0.8, delay: 0.7 }}
           className="mb-7 max-w-xl font-[family-name:var(--font-cormorant)] text-xl tracking-wide text-warm-ivory/90 drop-shadow sm:mb-8 sm:text-2xl"
         >
-          Experience centuries of tea heritage in every cup.
+          {content.description || 'Discover carefully selected teas for your everyday rituals.'}
         </motion.p>
 
         <motion.div
@@ -128,16 +130,16 @@ export default function HeroSection() {
           className="flex w-full max-w-[360px] flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4"
         >
           <Link
-            to="/shop"
+            to={content.primaryHref || '/shop'}
             className="btn-luxury inline-block rounded-none bg-imperial-gold px-7 py-4 text-center text-sm font-semibold uppercase tracking-widest text-deep-walnut hover:bg-imperial-gold-light"
           >
-            Explore Collection
+            {content.primaryLabel || 'Explore Collection'}
           </Link>
           <Link
-            to="/culture"
+            to={content.secondaryHref || '/culture'}
             className="btn-luxury inline-block rounded-none border border-warm-ivory/65 bg-black/10 px-7 py-4 text-center text-sm font-semibold uppercase tracking-widest text-warm-ivory backdrop-blur-sm hover:bg-white/10"
           >
-            Discover Heritage
+            {content.secondaryLabel || 'Discover Heritage'}
           </Link>
         </motion.div>
       </motion.div>
@@ -158,14 +160,14 @@ export default function HeroSection() {
         <span className="mr-1 hidden text-[10px] font-medium uppercase tracking-[0.16em] text-white/75 sm:inline">{currentSlide.location}</span>
         <span className="text-[10px] tabular-nums text-white/65">{String(activeSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}</span>
         <div className="flex items-center gap-1.5" role="group" aria-label="Choose hero image">
-          {heroSlides.map((slide, index) => (
+          {slides.map((slide, index) => (
             <button
               key={slide.image}
               type="button"
               onClick={() => setActiveSlide(index)}
               aria-label={`Show ${slide.location} tea garden`}
-              aria-pressed={activeSlide === index}
-              className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d28b] ${activeSlide === index ? 'w-6 bg-[#f2d28b]' : 'w-2 bg-white/55 hover:bg-white'}`}
+              aria-pressed={slideIndex === index}
+              className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f2d28b] ${slideIndex === index ? 'w-6 bg-[#f2d28b]' : 'w-2 bg-white/55 hover:bg-white'}`}
             />
           ))}
         </div>

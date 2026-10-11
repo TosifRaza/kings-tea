@@ -4,13 +4,13 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const heritagePoints = [
-  { icon: Leaf, title: '150+ YEARS', detail: 'Of Heritage' },
-  { icon: Mountain, title: 'PREMIUM TEA GARDENS', detail: 'From the Finest Regions' },
-  { icon: Sprout, title: 'TRUSTED BY GENERATIONS', detail: 'A Family Tradition' },
-  { icon: CupSoda, title: 'PURE & NATURAL', detail: 'No Artificial Flavors' },
+  { icon: Leaf, title: 'TEA SELECTION', detail: 'Selected with care' },
+  { icon: Mountain, title: 'ORIGINS', detail: 'From tea-growing regions' },
+  { icon: Sprout, title: 'CRAFT', detail: 'Made for daily rituals' },
+  { icon: CupSoda, title: 'TEA MOMENTS', detail: 'A cup for every day' },
 ];
 
-export default function BrandStory() {
+export default function BrandStory({ content = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -32,8 +32,8 @@ export default function BrandStory() {
             style={{ clipPath: 'polygon(9% 3%, 22% 1%, 35% 3%, 47% 0%, 58% 2%, 69% 0%, 82% 3%, 96% 1%, 94% 10%, 99% 18%, 96% 28%, 100% 39%, 96% 49%, 99% 59%, 95% 70%, 98% 80%, 92% 89%, 94% 97%, 82% 95%, 70% 100%, 59% 96%, 47% 100%, 36% 96%, 23% 99%, 12% 95%, 5% 98%, 7% 88%, 1% 80%, 5% 70%, 0% 59%, 4% 48%, 1% 38%, 5% 27%, 2% 17%, 8% 10%)' }}
           >
             <img
-              src="/images/tea-craftsmanship.png"
-              alt="Experienced tea maker carefully hand-picking fresh tea leaves"
+              src={content.image || '/images/tea-craftsmanship.png'}
+              alt={content.imageAlt || 'Tea leaves and tea craftsmanship'}
               className="h-full w-full object-cover object-center"
               loading="lazy"
             />
@@ -54,20 +54,16 @@ export default function BrandStory() {
             <span className="h-px w-12 bg-imperial-gold sm:w-16" />
           </div>
           <p className="mb-2 text-center font-[family-name:var(--font-playfair)] text-[11px] font-semibold uppercase tracking-[0.24em] text-tea-green/75 sm:text-left">
-            Our Heritage
+            {content.eyebrow || 'Our Heritage'}
           </p>
           <h2 className="mb-5 text-center font-[family-name:var(--font-playfair)] text-[2.25rem] font-bold leading-[1.08] tracking-tight text-tea-green sm:text-left sm:text-5xl lg:text-[3.5rem]">
-            A Legacy Brewed
+            {content.heading || 'A Legacy Brewed'}
             <br className="hidden sm:block" />
-            <span className="text-imperial-gold sm:italic">Through Generations</span>
+            <span className="text-imperial-gold sm:italic">{content.highlight || 'Through Generations'}</span>
           </h2>
           <div className="space-y-3 font-[family-name:var(--font-playfair)] text-[15px] leading-[1.7] text-deep-walnut/80 sm:text-[17px]">
-            <p>
-              For over 150 years, KING&apos;S TEA has journeyed to the world&apos;s most revered tea gardens, forging relationships with master growers who share our unwavering commitment to excellence.
-            </p>
-            <p>
-              Every leaf in our collection tells a story of terroir, tradition, and timeless craftsmanship.
-            </p>
+            <p>{content.paragraphOne || 'Explore teas selected for their distinctive origins, aromas, and character.'}</p>
+            <p>{content.paragraphTwo || 'Every tea offers its own way to slow down and enjoy the moment.'}</p>
           </div>
           <div className="mt-6 flex flex-col items-center gap-5 sm:flex-row sm:justify-between sm:gap-4 lg:mt-8">
             <p className="rotate-[-4deg] text-center font-[family-name:var(--font-playfair)] text-xl italic leading-tight text-tea-green/85 sm:text-left sm:text-2xl">
@@ -75,10 +71,10 @@ export default function BrandStory() {
               <span className="block text-base">— It&apos;s Our Legacy —</span>
             </p>
             <Link
-              to="/about"
+              to={content.ctaHref || '/about'}
               className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-imperial-gold bg-tea-green px-7 py-3 font-[family-name:var(--font-playfair)] text-xs font-semibold uppercase tracking-[0.12em] text-warm-ivory shadow-sm transition hover:bg-tea-green/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tea-green"
             >
-              Explore Our Story <ArrowRight size={18} className="text-imperial-gold" />
+              {content.ctaLabel || 'Explore Our Story'} <ArrowRight size={18} className="text-imperial-gold" />
             </Link>
           </div>
         </motion.div>

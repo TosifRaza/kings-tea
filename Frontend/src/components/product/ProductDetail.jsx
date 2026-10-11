@@ -1331,6 +1331,25 @@ export default function ProductDetail() {
   const hasRealImages = images.length > 0;
   const activeImage = hasRealImages ? images[activeImageIndex] || images[0] : '';
 
+  useEffect(() => {
+    if (!product) return undefined;
+    const title = `${product.name} | King's Tea`;
+    const description = String(product.shortDescription || product.description || 'Explore this tea from King’s Tea.').replace(/\s+/g, ' ').slice(0, 155);
+    document.title = title;
+    let descriptionTag = document.querySelector('meta[name="description"]');
+    if (!descriptionTag) { descriptionTag = document.createElement('meta'); descriptionTag.name = 'description'; document.head.appendChild(descriptionTag); }
+    descriptionTag.content = description;
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = `${window.location.origin}/product/${encodeURIComponent(product.slug || slug)}`;
+    let structuredData = document.getElementById('product-structured-data');
+    if (!structuredData) { structuredData = document.createElement('script'); structuredData.id = 'product-structured-data'; structuredData.type = 'application/ld+json'; document.head.appendChild(structuredData); }
+    const productSchema = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description, image: images.map((image) => image.startsWith('http') ? image : `${window.location.origin}${image}`), offers: { '@type': 'Offer', priceCurrency: 'INR', price: Number(product.price), availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canonical.href } };
+    if (Number(product.rating) > 0 && Number(product.reviewCount) > 0) productSchema.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(product.rating), reviewCount: Number(product.reviewCount) };
+    structuredData.textContent = JSON.stringify(productSchema);
+    return () => { document.getElementById('product-structured-data')?.remove(); };
+  }, [product, slug, images]);
+
   // ===== THUMBNAIL NAVIGATION (NEW) =====
   const goToImage = (index) => {
     if (index < 0 || index >= images.length) return;

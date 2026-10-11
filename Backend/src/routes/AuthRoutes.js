@@ -29,22 +29,17 @@
 // router.get('/me', protect, getMe);
 
 // module.exports = router;
-console.log('AUTH ROUTES FILE LOADED');
-
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const { register, login, logout, getMe } = require('../controllers/AuthController');
 const { protect } = require('../middleware/AuthenticationMiddleware');
-
-// Debug middleware
-router.use((req, res, next) => {
-  console.log('AUTH ROUTE HIT:', req.method, req.originalUrl);
-  next();
-});
+const { rateLimit } = require('express-rate-limit');
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-8', legacyHeaders: false, message: { success: false, message: 'Too many authentication attempts. Try again later.' } });
 
 router.post(
   '/register',
+  authLimiter,
   [
     body('email').isEmail().withMessage('Please provide a valid email'),
     body('name').trim().isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
@@ -55,23 +50,13 @@ router.post(
 
 router.post(
   '/login',
+  authLimiter,
   [
     body('email').isEmail().withMessage('Please provide a valid email'),
     body('password').notEmpty().withMessage('Password is required')
   ],
-  (req, res, next) => {
-    console.log('LOGIN ROUTE HIT');
-    console.log('Request Body:', req.body);
-    next();
-  },
   login
 );
-router.get('/login', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Login route working'
-  });
-});
 router.post('/logout', logout);
 
 router.get('/me', protect, getMe);

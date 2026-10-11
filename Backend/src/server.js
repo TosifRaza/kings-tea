@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
@@ -21,6 +22,12 @@ const contactRoutes = require('./routes/ContactRoutes');
 const newsletterRoutes = require('./routes/NewsletterRoutes');
 const userRoutes = require('./routes/UserRoutes');
 const statsRoutes = require('./routes/StatsRoutes');
+const paymentRoutes = require('./routes/PaymentRoutes');
+const { paymentWebhook } = require('./controllers/PaymentController');
+const siteContentRoutes = require('./routes/SiteContentRoutes');
+const mediaRoutes = require('./routes/MediaRoutes');
+const { protect } = require('./middleware/AuthenticationMiddleware');
+const { authorize } = require('./middleware/AuthorizationMiddleware');
 
 // Import models for seeding
 const Category = require('./models/CategoryModel');
@@ -70,8 +77,11 @@ app.use(cors({
   ],
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+// Razorpay signs the exact request bytes, so parse the webhook before JSON middleware.
+app.post('/api/payments/webhook', express.raw({ type: 'application/json', limit: '1mb' }), paymentWebhook);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
@@ -92,9 +102,16 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/site-content', siteContentRoutes);
+app.use('/api/admin/media', mediaRoutes);
 
 // Seed route
-app.get('/api/seed', async (req, res) => {
+app.get('/api/seed', protect, authorize('super_admin', 'admin'), async (req, res) => {
+  if (process.env.NODE_ENV === 'production' || process.env.ENABLE_CATALOG_SEED !== 'true') {
+    return res.status(404).json({ success: false, message: 'Not found' });
+  }
+
   try {
     // This endpoint only adds missing tea catalog records. It must never clear
     // collections because the MongoDB cluster may be shared with other apps.
@@ -191,7 +208,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 50,
         featured: true,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.8,
         reviewCount: 124,
         gradientColor: 'from-amber-800 to-amber-600',
@@ -223,7 +240,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 30,
         featured: true,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.9,
         reviewCount: 89,
         gradientColor: 'from-emerald-700 to-emerald-500',
@@ -255,7 +272,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 25,
         featured: true,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.7,
         reviewCount: 156,
         gradientColor: 'from-amber-700 to-yellow-600',
@@ -287,7 +304,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 15,
         featured: true,
         bestSeller: false,
-        isNew: true,
+        newArrival: true,
         rating: 4.9,
         reviewCount: 67,
         gradientColor: 'from-gray-300 to-gray-100',
@@ -319,7 +336,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 10,
         featured: true,
         bestSeller: false,
-        isNew: false,
+        newArrival: false,
         rating: 4.8,
         reviewCount: 45,
         gradientColor: 'from-red-900 to-red-700',
@@ -351,7 +368,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 20,
         featured: true,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.9,
         reviewCount: 203,
         gradientColor: 'from-green-600 to-green-400',
@@ -383,7 +400,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 40,
         featured: false,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.6,
         reviewCount: 178,
         gradientColor: 'from-amber-900 to-amber-700',
@@ -415,7 +432,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 35,
         featured: false,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.5,
         reviewCount: 245,
         gradientColor: 'from-green-700 to-green-500',
@@ -447,7 +464,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 12,
         featured: true,
         bestSeller: false,
-        isNew: true,
+        newArrival: true,
         rating: 4.8,
         reviewCount: 34,
         gradientColor: 'from-orange-600 to-amber-400',
@@ -479,7 +496,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 28,
         featured: false,
         bestSeller: false,
-        isNew: false,
+        newArrival: false,
         rating: 4.4,
         reviewCount: 92,
         gradientColor: 'from-pink-100 to-white',
@@ -511,7 +528,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 8,
         featured: false,
         bestSeller: false,
-        isNew: false,
+        newArrival: false,
         rating: 4.6,
         reviewCount: 28,
         gradientColor: 'from-green-800 to-green-600',
@@ -543,7 +560,7 @@ app.get('/api/seed', async (req, res) => {
         stockQuantity: 45,
         featured: false,
         bestSeller: true,
-        isNew: false,
+        newArrival: false,
         rating: 4.3,
         reviewCount: 312,
         gradientColor: 'from-green-500 to-green-300',
@@ -586,8 +603,19 @@ app.get('/api/seed', async (req, res) => {
 });
 
 // Health check
+app.get('/api/seo/sitemap.xml', async (_req, res) => {
+  try {
+    const products = await Product.find({ isActive: { $ne: false } }).select('slug updatedAt').lean();
+    const frontend = (process.env.CLIENT_URL || 'https://kings-tea-frontend.onrender.com').replace(/\/$/, '');
+    const fixed = ['/', '/shop', '/culture', '/about', '/contact'];
+    const entries = [...fixed.map((route) => ({ loc: `${frontend}${route}` })), ...products.filter((product) => product.slug).map((product) => ({ loc: `${frontend}/product/${encodeURIComponent(product.slug)}`, lastmod: product.updatedAt }))];
+    const xmlEscape = (value) => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entries.map(({ loc, lastmod }) => `<url><loc>${xmlEscape(loc)}</loc>${lastmod ? `<lastmod>${new Date(lastmod).toISOString()}</lastmod>` : ''}</url>`).join('')}</urlset>`;
+    res.type('application/xml').send(xml);
+  } catch { res.status(500).type('text/plain').send('Sitemap unavailable'); }
+});
 app.get('/api/health', (req, res) => {
-  res.json({ success: true, message: 'King\'s Tea API is running' });
+  res.json({ success: true, message: 'King\'s Tea API is running', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
 // Connect to MongoDB and start server

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, RefreshCw, Download } from 'lucide-react';
 import DataTable from '../components/DataTable';
-import { getNewsletterSubscribers } from '../services/api';
+import { exportNewsletterSubscribers, getNewsletterSubscribers } from '../services/api';
 
 const NewsletterManagementPage = () => {
   const [subscribers, setSubscribers] = useState([]);
@@ -16,9 +16,9 @@ const NewsletterManagementPage = () => {
     setLoading(true);
     try {
       const res = await getNewsletterSubscribers();
-      const data = res.data;
+      const data = res.data?.data;
       setSubscribers(
-        Array.isArray(data) ? data : data.subscribers || data.items || []
+        Array.isArray(data) ? data : data?.docs || data?.subscribers || data?.items || []
       );
     } catch {
       setSubscribers([]);
@@ -27,20 +27,18 @@ const NewsletterManagementPage = () => {
     }
   };
 
-  const handleExport = () => {
-    const csvContent = [
-      ['Email', 'Subscribed Date'].join(','),
-      ...subscribers.map((s) =>
-        [s.email, s.createdAt ? new Date(s.createdAt).toISOString() : ''].join(',')
-      ),
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'newsletter-subscribers.csv';
-    link.click();
-    URL.revokeObjectURL(link.href);
+  const handleExport = async () => {
+    try {
+      const response = await exportNewsletterSubscribers();
+      const link = document.createElement('a');
+      const objectUrl = URL.createObjectURL(response.data);
+      link.href = objectUrl;
+      link.download = 'newsletter-subscribers.csv';
+      link.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error('Newsletter export failed:', error.response?.data?.message || error.message);
+    }
   };
 
   const columns = [

@@ -12,6 +12,7 @@ router.get('/:id', protect, getUser);
 router.put(
   '/:id',
   protect,
+  // Customers may edit only their own profile; the controller limits fields.
   [
     body('name').optional().trim().isLength({ min: 2 }).withMessage('Name must be at least 2 characters'),
     body('email').optional().isEmail().withMessage('Please provide a valid email')

@@ -1,6 +1,6 @@
 const Subscription = require('../models/SubscriptionModel');
+const SubscriptionPlan = require('../models/SubscriptionPlanModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
-const { validationResult } = require('express-validator');
 
 const getNextBillingDate = (plan) => {
   const now = new Date();
@@ -22,13 +22,9 @@ const getNextBillingDate = (plan) => {
 // ============================================================
 const getSubscriptionPlans = async (req, res) => {
   try {
-    const plans = await Subscription.find({ isActive: { $ne: false } })
-      .sort({ sortOrder: 1 });
-
-    return successResponse(res, { plans }, 'Subscription plans fetched successfully');
-  } catch (error) {
-    return errorResponse(res, error.message || 'Failed to fetch subscription plans', 500);
-  }
+    const plans = await SubscriptionPlan.find({ active: true }).sort({ sortOrder: 1, name: 1 }).lean();
+    return successResponse(res, { plans }, 'Published subscription plans fetched');
+  } catch { return errorResponse(res, 'Unable to load subscription plans', 500); }
 };
 
 // ============================================================
@@ -36,14 +32,39 @@ const getSubscriptionPlans = async (req, res) => {
 // ============================================================
 const getSubscriptionPlanById = async (req, res) => {
   try {
-    const plan = await Subscription.findById(req.params.id);
-    if (!plan) {
-      return errorResponse(res, 'Subscription plan not found', 404);
-    }
-    return successResponse(res, { plan }, 'Subscription plan fetched successfully');
-  } catch (error) {
-    return errorResponse(res, error.message || 'Failed to fetch subscription plan', 500);
+    const plan = await SubscriptionPlan.findOne({ _id: req.params.id, active: true }).lean();
+    return plan ? successResponse(res, plan) : errorResponse(res, 'Subscription plan not found', 404);
+  } catch { return errorResponse(res, 'Subscription plan not found', 404); }
+};
+
+const listAdminPlans = async (_req, res) => {
+  try { return successResponse(res, await SubscriptionPlan.find().sort({ sortOrder: 1, name: 1 }).lean()); }
+  catch { return errorResponse(res, 'Unable to load subscription plans', 500); }
+};
+
+const savePlan = async (req, res) => {
+  const { id } = req.params;
+  const { name, slug, description = '', price, currency = 'INR', interval, benefits = [], active = false, sortOrder = 0 } = req.body || {};
+  if (typeof name !== 'string' || !name.trim() || typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !Number.isFinite(Number(price)) || Number(price) < 0 || !['month', 'quarter', 'year'].includes(interval) || !Array.isArray(benefits) || benefits.length > 20 || benefits.some((item) => typeof item !== 'string' || item.length > 200)) {
+    return errorResponse(res, 'Provide a valid name, slug, price, billing interval, and benefits list', 400);
   }
+  try {
+    const data = { name: name.trim(), slug, description: String(description).slice(0, 2000), price: Number(price), currency: String(currency).toUpperCase(), interval, benefits, active: active === true, sortOrder: Number(sortOrder) || 0 };
+    const plan = id
+      ? await SubscriptionPlan.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true })
+      : await SubscriptionPlan.create(data);
+    if (!plan) return errorResponse(res, 'Subscription plan not found', 404);
+    return successResponse(res, plan, id ? 'Plan updated' : 'Plan created', id ? 200 : 201);
+  } catch (error) {
+    return errorResponse(res, error.code === 11000 ? 'A plan already uses that slug' : 'Unable to save subscription plan', error.code === 11000 ? 409 : 400);
+  }
+};
+
+const deletePlan = async (req, res) => {
+  try {
+    const plan = await SubscriptionPlan.findByIdAndDelete(req.params.id);
+    return plan ? successResponse(res, null, 'Plan deleted') : errorResponse(res, 'Subscription plan not found', 404);
+  } catch { return errorResponse(res, 'Unable to delete subscription plan', 500); }
 };
 
 // ============================================================
@@ -88,36 +109,8 @@ const listSubscriptions = async (req, res) => {
 };
 
 const createSubscription = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return errorResponse(res, errors.array()[0].msg, 400);
-  }
-
-  try {
-    const { plan, price } = req.body;
-
-    const activeSubscription = await Subscription.findOne({
-      userId: req.user.userId,
-      status: 'active'
-    });
-
-    if (activeSubscription) {
-      return errorResponse(res, 'You already have an active subscription', 400);
-    }
-
-    const subscription = await Subscription.create({
-      userId: req.user.userId,
-      plan,
-      status: 'active',
-      startDate: new Date(),
-      nextBillingDate: getNextBillingDate(plan),
-      price
-    });
-
-    return successResponse(res, subscription, 'Subscription created successfully', 201);
-  } catch (error) {
-    return errorResponse(res, error.message || 'Failed to create subscription', 500);
-  }
+  // Enrollment must be wired to published plan definitions and a verified payment flow.
+  return errorResponse(res, 'Subscriptions are temporarily unavailable until plans and payment processing are configured', 503);
 };
 
 const getSubscription = async (req, res) => {
@@ -190,6 +183,9 @@ const cancelSubscription = async (req, res) => {
 module.exports = {
   getSubscriptionPlans,
   getSubscriptionPlanById,
+  listAdminPlans,
+  savePlan,
+  deletePlan,
   listSubscriptions,
   createSubscription,
   getSubscription,

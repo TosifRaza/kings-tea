@@ -9,6 +9,7 @@ import AboutPage from '../pages/AboutPage';
 import ContactPage from '../pages/ContactPage';
 import DashboardPage from '../pages/DashboardPage';
 import CheckoutPage from '../pages/CheckoutPage';
+import { FAQPage, PolicyPage } from '../pages/SiteContentPage';
 
 export default function AppRoutes() {
   useScrollTop();
@@ -22,6 +23,8 @@ export default function AppRoutes() {
       <Route path="/subscription" element={<SubscriptionPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/faq" element={<FAQPage />} />
+      <Route path="/policies/:slug" element={<PolicyPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
     </Routes>

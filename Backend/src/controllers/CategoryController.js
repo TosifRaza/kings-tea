@@ -182,6 +182,7 @@
 //   }
 // };
 const Category = require('../models/CategoryModel');
+const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
 // Get all categories
@@ -222,6 +223,7 @@ const createCategory = async (req, res) => {
       slug: categorySlug,
       image,
     });
+    if (image) await MediaAsset.updateMany({ url: image }, { $addToSet: { categoryIds: category._id }, $set: { usage: 'category' } });
 
     return successResponse(res, { category }, 'Category created successfully', 201);
   } catch (error) {
@@ -254,6 +256,11 @@ const updateCategory = async (req, res) => {
       return errorResponse(res, 'Category not found', 404);
     }
 
+    if (image !== undefined) {
+      await MediaAsset.updateMany({ categoryIds: category._id }, { $pull: { categoryIds: category._id } });
+      if (image) await MediaAsset.updateMany({ url: image }, { $addToSet: { categoryIds: category._id }, $set: { usage: 'category' } });
+    }
+
     return successResponse(res, { category }, 'Category updated successfully');
   } catch (error) {
     return errorResponse(res, error.message);
@@ -268,6 +275,8 @@ const deleteCategory = async (req, res) => {
     if (!category) {
       return errorResponse(res, 'Category not found', 404);
     }
+
+    await MediaAsset.updateMany({ categoryIds: category._id }, { $pull: { categoryIds: category._id } });
 
     return successResponse(res, null, 'Category deleted successfully');
   } catch (error) {

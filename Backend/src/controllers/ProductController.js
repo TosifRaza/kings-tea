@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/ProductModel');
 const Review = require('../models/ReviewModel');
 const Category = require('../models/CategoryModel');
+const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
 const withLiveReviewStats = async (products) => {
@@ -11,7 +12,7 @@ const withLiveReviewStats = async (products) => {
   const productIds = list.map((product) => product._id).filter(Boolean);
   const stats = productIds.length > 0
     ? await Review.aggregate([
-      { $match: { productId: { $in: productIds } } },
+      { $match: { productId: { $in: productIds }, approved: true } },
       {
         $group: {
           _id: '$productId',
@@ -26,8 +27,12 @@ const withLiveReviewStats = async (products) => {
   return list.map((product) => {
     const record = typeof product.toObject === 'function' ? product.toObject() : { ...product };
     const reviewStats = statsByProductId.get(String(record._id));
+    const isNewArrival = record.newArrival ?? record.isNew ?? false;
+    delete record.newArrival;
+    delete record.isNew;
     return {
       ...record,
+      isNew: isNewArrival,
       rating: reviewStats ? Math.round(reviewStats.averageRating * 10) / 10 : 0,
       reviewCount: reviewStats?.reviewCount || 0,
     };
@@ -75,15 +80,20 @@ const validateRelatedProducts = async (value, currentProductId) => {
 const relatedProductsPopulate = {
   path: 'relatedProducts',
   match: { isActive: true },
-  select: 'name slug price comparePrice images category origin rating reviewCount featured bestSeller isNew gradientColor',
+  select: 'name slug price comparePrice images category origin rating reviewCount featured bestSeller newArrival gradientColor',
 };
-console.log('🎯 ProductController.js LOADED at', new Date().toISOString());
 // Get all products
 const getProducts = async (req, res) => {
   try {
     const { category, search, page = 1, limit = 50, sort = '-createdAt' } = req.query;
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const sortFields = new Set(['createdAt', '-createdAt', 'price', '-price', 'name', '-name', 'rating', '-rating']);
+    if (!Number.isInteger(pageNum) || pageNum < 1 || !Number.isInteger(limitNum) || limitNum < 1 || limitNum > 100 || !sortFields.has(String(sort)) || String(search || '').length > 100) {
+      return errorResponse(res, 'Invalid page, limit, sort, or search value', 400);
+    }
 
-    let query = {};
+    const query = { isActive: { $ne: false } };
 
     if (category) {
       query.$or = [
@@ -93,13 +103,17 @@ const getProducts = async (req, res) => {
     }
 
     if (search) {
-      query.name = { $regex: search, $options: 'i' };
+      const safeSearch = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const filters = [{ name: { $regex: safeSearch, $options: 'i' } }, { description: { $regex: safeSearch, $options: 'i' } }, { origin: { $regex: safeSearch, $options: 'i' } }];
+      const categoryFilter = query.$or ? { $or: query.$or } : null;
+      delete query.$or;
+      query.$and = [categoryFilter, { $or: filters }].filter(Boolean);
     }
 
     const products = await Product.find(query)
       .sort(sort)
-      .limit(Number(limit))
-      .skip((Number(page) - 1) * Number(limit))
+      .limit(limitNum)
+      .skip((pageNum - 1) * limitNum)
       .exec();
 
     const count = await Product.countDocuments(query);
@@ -109,8 +123,8 @@ const getProducts = async (req, res) => {
     return successResponse(res, {
       products: productsWithReviewStats,
       totalProducts: count,
-      currentPage: Number(page),
-      totalPages: Math.ceil(count / Number(limit)),
+      currentPage: pageNum,
+      totalPages: Math.ceil(count / limitNum),
     }, 'Products fetched successfully');
   } catch (error) {
     console.error('getProducts error:', error.message);
@@ -121,7 +135,7 @@ const getProducts = async (req, res) => {
 // Get product by ID
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate(relatedProductsPopulate);
+    const product = await Product.findOne({ _id: req.params.id, isActive: { $ne: false } }).populate(relatedProductsPopulate);
 
     if (!product) {
       return errorResponse(res, 'Product not found', 404);
@@ -141,7 +155,7 @@ const getProductById = async (req, res) => {
 // ============================================================
 const getProductBySlug = async (req, res) => {
   try {
-    const product = await Product.findOne({ slug: req.params.slug }).populate(relatedProductsPopulate);
+    const product = await Product.findOne({ slug: req.params.slug, isActive: { $ne: false } }).populate(relatedProductsPopulate);
 
     if (!product) {
       return errorResponse(res, 'Product not found', 404);
@@ -224,27 +238,14 @@ const getProductBySlug = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    if (productData.isNew !== undefined) {
+      productData.newArrival = productData.isNew === true || productData.isNew === 'true';
+      delete productData.isNew;
+    }
 
     const related = await validateRelatedProducts(productData.relatedProducts);
     if (related.error) return errorResponse(res, related.error, 400);
     if (related.ids !== undefined) productData.relatedProducts = related.ids;
-
-    // 🔍 DEBUG BLOCK
-    console.log('========================================');
-    console.log('📦 CREATE PRODUCT DEBUG');
-    console.log('Body keys:', Object.keys(req.body));
-    console.log('Files count:', req.files ? req.files.length : 'NO req.files');
-    if (req.files && req.files.length > 0) {
-      console.log('First file object:', JSON.stringify({
-        fieldname: req.files[0].fieldname,
-        originalname: req.files[0].originalname,
-        path: req.files[0].path,
-        filename: req.files[0].filename,
-        mimetype: req.files[0].mimetype,
-      }, null, 2));
-    }
-    console.log('========================================');
-    // 🔍 END DEBUG BLOCK
 
     const galleryPaths = getGalleryPaths(req.body.galleryImages);
     const uploadedPaths = (req.files || []).map((file) => file.path);
@@ -277,8 +278,10 @@ const createProduct = async (req, res) => {
     }
 
     const product = await Product.create(productData);
+    await MediaAsset.updateMany({ url: { $in: productData.images || [] } }, { $addToSet: { productIds: product._id }, $set: { usage: 'product' } });
+    const [responseProduct] = await withLiveReviewStats(product);
 
-    return successResponse(res, { product }, 'Product created successfully', 201);
+    return successResponse(res, { product: responseProduct }, 'Product created successfully', 201);
   } catch (error) {
     console.error('createProduct error:', error.message);
     return errorResponse(res, error.message);
@@ -289,6 +292,10 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    if (productData.isNew !== undefined) {
+      productData.newArrival = productData.isNew === true || productData.isNew === 'true';
+      delete productData.isNew;
+    }
 
     const related = await validateRelatedProducts(productData.relatedProducts, req.params.id);
     if (related.error) return errorResponse(res, related.error, 400);
@@ -338,7 +345,14 @@ const updateProduct = async (req, res) => {
       return errorResponse(res, 'Product not found', 404);
     }
 
-    return successResponse(res, { product }, 'Product updated successfully');
+    if (productData.images) {
+      await MediaAsset.updateMany({ productIds: product._id }, { $pull: { productIds: product._id } });
+      await MediaAsset.updateMany({ url: { $in: productData.images } }, { $addToSet: { productIds: product._id }, $set: { usage: 'product' } });
+    }
+
+    const [responseProduct] = await withLiveReviewStats(product);
+
+    return successResponse(res, { product: responseProduct }, 'Product updated successfully');
   } catch (error) {
     console.error('updateProduct error:', error.message);
     return errorResponse(res, error.message);
@@ -353,6 +367,8 @@ const deleteProduct = async (req, res) => {
     if (!product) {
       return errorResponse(res, 'Product not found', 404);
     }
+
+    await MediaAsset.updateMany({ productIds: product._id }, { $pull: { productIds: product._id } });
 
     return successResponse(res, null, 'Product deleted successfully');
   } catch (error) {

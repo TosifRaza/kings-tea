@@ -73,33 +73,31 @@ kings-tea/
 - MongoDB (local or Atlas)
 - npm or bun
 
-### 1. Start MongoDB
-```bash
-# Local MongoDB
-mongod
-
-# Or use MongoDB Atlas connection string in Backend/.env
-```
-
-### 2. Start Backend (Port 5000)
+### 1. Configure the backend
 ```bash
 cd Backend
+copy .env.example .env
+# Set MONGODB_URI and a long random JWT_SECRET in Backend/.env.
+# Add Cloudinary credentials to enable product image uploads.
+```
+
+### 2. Create the first administrator (one time)
+```bash
 npm install
+npm run admin:bootstrap
+```
+
+Set `BOOTSTRAP_ADMIN_NAME`, `BOOTSTRAP_ADMIN_EMAIL`, and a unique
+`BOOTSTRAP_ADMIN_PASSWORD` in `Backend/.env` first. The command refuses to
+run if a super administrator already exists. Remove those bootstrap values
+after setup. It does not seed demo products or reviews.
+
+### 3. Start the backend (Port 5001)
+```bash
 npm run dev
 ```
 
-### 3. Seed the Database
-```bash
-# Visit in browser or use curl:
-curl http://localhost:5000/api/seed
-```
-
-This creates:
-- 6 categories
-- 12 premium tea products
-- 1 admin user (admin@kingstea.com / admin123)
-
-### 4. Start Frontend (Port 3000)
+### 4. Start the storefront (Port 3000)
 ```bash
 cd Frontend
 npm install
@@ -108,7 +106,7 @@ npm run dev
 
 Visit: http://localhost:3000
 
-### 5. Start Admin Portal (Port 3001)
+### 5. Start the admin portal (Port 3001)
 ```bash
 cd Admin-Portal
 npm install
@@ -116,6 +114,18 @@ npm run dev
 ```
 
 Visit: http://localhost:3001
+
+Add products and categories from the admin portal. The catalog seed endpoint
+is disabled in production and requires both `ENABLE_CATALOG_SEED=true` and an
+administrator session in non-production environments.
+
+### Product arrival-field migration
+The product model stores the new-arrival flag as `newArrival`; the API continues
+to expose `isNew` for compatibility with both existing frontends. To migrate
+existing MongoDB documents, back up the database, run
+`npm run migrate:product-arrival` to inspect the count, then run
+`npm run migrate:product-arrival -- --apply` to apply the field rename. Production requires
+`CONFIRM_PRODUCT_ARRIVAL_MIGRATION=true` in the command environment.
 
 ## API Endpoints
 
@@ -131,9 +141,54 @@ Visit: http://localhost:3001
 - `POST /api/products` — Create product (admin)
 - `PUT /api/products/:id` — Update product (admin)
 - `DELETE /api/products/:id` — Delete product (admin)
+- `GET /api/site-content/homepage` — Published home section order and settings.
+- `GET /api/site-content/public/:key` — Published FAQ, policy, navigation, footer, and other supported content records.
+- `GET /api/subscriptions/plans` — Published subscription plan details. Enrollment remains disabled without a recurring payment integration.
+- `GET /api/admin/media` — Paginated protected media library.
+- `POST /api/admin/media` — Upload an image and metadata to Cloudinary (multipart field `image`).
+- `PATCH /api/admin/media/:id` — Edit media source, licensing, attribution, alt text, and usage.
+- `GET /api/seo/sitemap.xml` — Product and public page sitemap.
+- `GET /api/health` — API and database readiness.
 
-### Categories, Orders, Users, Cart, Wishlist, Reviews, Blog, Subscriptions, Newsletter, Contact, Stats
-All have full CRUD endpoints — see Backend/src/routes/ for details.
+### Checkout and payments
+- `GET /api/payments/config` — public payment readiness and public Razorpay key ID.
+- `POST /api/payments/create-order` — authenticated server-priced checkout; requires an `Idempotency-Key` header.
+- `POST /api/payments/verify` — authenticated payment signature and captured-payment verification.
+- `POST /api/payments/webhook` — Razorpay webhook signature verification.
+
+See `Backend/src/routes/` for other endpoints and role requirements. Checkout is enabled only when all payment credentials are configured. The server calculates prices, validates stock, verifies captured payments, and decrements inventory in a database transaction. Card details are handled by Razorpay Checkout and are never stored by this application.
+
+Order amounts are in INR. Configure `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in the backend environment and configure the Razorpay webhook URL as `https://<backend-host>/api/payments/webhook` for `payment.captured` events. Keep secrets server-side. Configure the same values in Render's backend environment before checkout can be used.
+
+### Media metadata migration
+Product uploads now go to Cloudinary and create durable database metadata records;
+new product and category associations are tracked by their model controllers.
+Before production changes, take a database backup. Run `npm run migrate:media`
+to inspect existing catalog and published/draft site-content image URLs. Apply
+only after review with `npm run migrate:media -- --apply`; in production also
+set `CONFIRM_MEDIA_MIGRATION=true` for that command. Static project assets are
+registered as references, not copied to Cloudinary; use the published
+`Frontend/public/images/**/ATTRIBUTION*` records to verify their rights. Existing
+media URLs without verifiable licensing remain marked for manual rights review.
+
+### Admin content
+The admin portal has Homepage Content (section settings/order), Site Content
+(FAQ, policies, navigation, footer, brand story, brewing guides, store settings),
+Media Library, Review Moderation, and Subscription Plans pages. These editors
+save drafts and publish to MongoDB-backed APIs. Subscription enrollment stays
+disabled because no recurring billing provider is configured. Newsletter consent
+and subscriber records work; transactional confirmation and unsubscribe email
+delivery still require a mail provider integration.
+
+### Production deployment
+The frontend and admin are independent Vite static builds; the API is the Node
+service. Set the environment variables from each `.env.example` in the matching
+hosting service, configure Cloudinary and Razorpay only with real account keys,
+and connect each Render service to this GitHub repository/branch. A successful
+push triggers Render only if its GitHub auto-deploy setting is enabled. After a
+deploy, check `/api/health`, `/api/seo/sitemap.xml`, the storefront, and the
+admin build. The product arrival and media metadata scripts are explicit,
+backup-first operations and are not run automatically on server startup.
 
 ## Roles
 

@@ -54,11 +54,11 @@ function ProductCard({ product, variant = 'default' }) {
         aria-label={`View ${product.name}`}
         className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e9e6da] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.09)] transition-shadow duration-200 hover:shadow-[0_14px_32px_rgba(58,40,28,0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35]"
       >
-        <div className="relative p-2.5 pb-0">
+        <div className="relative p-0">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex aspect-[2.1/1] items-center justify-center overflow-hidden rounded-lg bg-[#e9eadb]"
+            className="relative flex aspect-[1.9/1] min-h-[120px] items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:min-h-[160px]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img

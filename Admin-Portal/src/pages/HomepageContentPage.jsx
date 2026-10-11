@@ -31,7 +31,7 @@ const mergeHomepageDefaults = (content = {}) => {
   const byKey = new Map(configured.map((section) => [section.key, section]));
   const maxOrder = configured.reduce((max, section) => Math.max(max, Number(section.sortOrder) || 0), -1);
   const missing = starter.sections.filter((section) => !byKey.has(section.key)).map((section, index) => ({ ...section, sortOrder: maxOrder + index + 1 }));
-  return { ...starter, ...content, announcement: { ...starter.announcement, ...(content.announcement || {}) }, sections: [...configured, ...missing] };
+  return { ...starter, ...content, announcement: { ...starter.announcement, ...(content.announcement || {}) }, sections: [...configured, ...missing].sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder)) };
 };
 
 export default function HomepageContentPage() {

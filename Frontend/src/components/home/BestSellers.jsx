@@ -396,7 +396,7 @@ export default function BestSellers({ content = {} }) {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <ProductCard product={product} variant="cherished" />
+              <ProductCard product={product} variant="collection" />
             </motion.div>
           ))}
           </div>

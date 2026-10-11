@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, CheckCircle2, CircleHelp, Gift, Leaf, MapPin, Shi
 import { Link } from 'react-router-dom';
 import { categoryAPI, productAPI, reviewAPI, siteContentAPI } from '../../services/api';
 import { IMAGE_URL } from '../../utils/image';
+import { ProductCard } from './BestSellers';
 
 const unwrapList = (response, keys) => {
   const data = response?.data?.data ?? response?.data;
@@ -70,18 +71,6 @@ export function ShopByCategory({ content = {} }) {
   </div></section>;
 }
 
-function ProductTile({ product }) {
-  const slug = product.slug || product._id;
-  const image = getImage(product.images);
-  const price = Number(product.price || 0).toLocaleString('en-IN');
-  const compare = Number(product.comparePrice || 0);
-  const discount = compare > Number(product.price || 0) ? Math.round((compare - Number(product.price || 0)) / compare * 100) : 0;
-  return <Link to={`/product/${slug}`} className="group overflow-hidden rounded-2xl border border-[#e9e4d9] bg-white shadow-[0_8px_22px_rgba(36,48,39,.06)] transition hover:-translate-y-1 hover:shadow-lg">
-    <div className="relative aspect-[1.12/1] overflow-hidden bg-[#edf0e5]">{image ? <img src={image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" /> : <div className="grid h-full place-items-center text-4xl text-tea-green/50">{product.name?.[0]}</div>}{discount > 0 && <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-semibold text-tea-green">Save {discount}%</span>}</div>
-    <div className="p-3.5 sm:p-4"><p className="truncate text-[10px] font-semibold uppercase tracking-[.12em] text-tea-green/75">{product.origin || product.category || 'King’s Tea'}</p><h3 className="mt-1 line-clamp-2 min-h-12 font-[family-name:var(--font-playfair)] text-lg font-semibold leading-6 text-tea-green sm:text-xl">{product.name}</h3><p className="mt-1 line-clamp-2 min-h-10 text-xs leading-5 text-deep-walnut/65 sm:text-sm">{product.shortDescription || product.description}</p><div className="mt-3 flex items-baseline gap-2"><span className="font-semibold text-tea-green">₹{price}</span>{compare > Number(product.price || 0) && <span className="text-xs text-deep-walnut/45 line-through">₹{compare.toLocaleString('en-IN')}</span>}</div></div>
-  </Link>;
-}
-
 export function NewArrivals({ content = {} }) {
   const [products, setProducts] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
   useEffect(() => {
@@ -117,7 +106,7 @@ export function NewArrivals({ content = {} }) {
     return () => { active = false; };
   }, []);
   return <section className="bg-[#f7f5ee] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Recently added'} title={content.heading || 'Fresh to the collection'} description={content.description || 'Explore all teas added to our catalog in the last month.'} action={{ href: '/shop?sort=newest', label: 'Shop all teas' }} />
-    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">New teas could not be loaded.</p> : products.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{products.map((product) => <ProductTile key={product._id} product={product} />)}</div> : <EmptyState>{content.emptyText || 'No teas have been added in the last month.'}</EmptyState>}
+    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="h-[360px] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">New teas could not be loaded.</p> : products.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{products.map((product) => <ProductCard key={product._id} product={product} variant="collection" />)}</div> : <EmptyState>{content.emptyText || 'No teas have been added in the last month.'}</EmptyState>}
   </div></section>;
 }
 

@@ -59,6 +59,20 @@ const getGalleryPaths = (value) => {
   }
 };
 
+const getProductImages = (galleryPaths, uploadedPaths, body = {}) => {
+  const images = [...galleryPaths, ...uploadedPaths];
+  const fileIndex = Number.parseInt(body.thumbnailImageFileIndex, 10);
+  const thumbnailPath = body.thumbnailImagePath;
+  const thumbnail = thumbnailPath && images.includes(thumbnailPath)
+    ? thumbnailPath
+    : Number.isInteger(fileIndex) && fileIndex >= 0
+      ? uploadedPaths[fileIndex]
+      : null;
+
+  if (!thumbnail || !images.includes(thumbnail)) return images.slice(0, 4);
+  return [thumbnail, ...images.filter((image) => image !== thumbnail)].slice(0, 4);
+};
+
 const getRelatedProductIds = (value) => {
   if (value === undefined) return undefined;
   if (Array.isArray(value)) return value;
@@ -249,6 +263,8 @@ const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
     delete productData.catalogRating;
+    delete productData.thumbnailImagePath;
+    delete productData.thumbnailImageFileIndex;
     if (productData.isNew !== undefined) {
       productData.newArrival = productData.isNew === true || productData.isNew === 'true';
       delete productData.isNew;
@@ -261,7 +277,7 @@ const createProduct = async (req, res) => {
     const galleryPaths = getGalleryPaths(req.body.galleryImages);
     const uploadedPaths = (req.files || []).map((file) => file.path);
     if (galleryPaths !== undefined || uploadedPaths.length > 0) {
-      productData.images = [...(galleryPaths || []), ...uploadedPaths].slice(0, 4);
+      productData.images = getProductImages(galleryPaths || [], uploadedPaths, req.body);
     }
     delete productData.galleryImages;
 
@@ -304,6 +320,8 @@ const updateProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
     delete productData.catalogRating;
+    delete productData.thumbnailImagePath;
+    delete productData.thumbnailImageFileIndex;
     if (productData.isNew !== undefined) {
       productData.newArrival = productData.isNew === true || productData.isNew === 'true';
       delete productData.isNew;
@@ -320,7 +338,7 @@ const updateProduct = async (req, res) => {
     const galleryPaths = getGalleryPaths(req.body.galleryImages);
     const uploadedPaths = (req.files || []).map((file) => file.path);
     if (galleryPaths !== undefined || uploadedPaths.length > 0) {
-      productData.images = [...(galleryPaths || []), ...uploadedPaths].slice(0, 4);
+      productData.images = getProductImages(galleryPaths || [], uploadedPaths, req.body);
     }
     delete productData.galleryImages;
 

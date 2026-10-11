@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../store/productSlice';
 import { getCategories } from '../services/api';
 import { getAdminImageUrl, getTeaCategoryGallery } from '../utils/teaImages';
-import { X, Upload, Image as ImageIcon, Link2, Search } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Link2, Search, Check } from 'lucide-react';
 
 const ProductFormModal = ({ product, products = [], onClose }) => {
   const dispatch = useDispatch();
@@ -20,6 +20,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
   const [imageItems, setImageItems] = useState(
     (product?.images || []).map((path) => ({ path, preview: path }))
   );
+  const [thumbnailIndex, setThumbnailIndex] = useState(0);
   const [formData, setFormData] = useState({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -171,12 +172,17 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
 
   const removeImage = (index) => {
     setImageItems((prev) => prev.filter((_, i) => i !== index));
+    setThumbnailIndex((current) => {
+      if (current === index) return 0;
+      return current > index ? current - 1 : current;
+    });
   };
 
   const useCategoryGallery = () => {
     const gallery = getTeaCategoryGallery(formData.category);
     if (gallery.length === 0) return;
     setImageItems(gallery.map((path) => ({ path, preview: path })));
+    setThumbnailIndex(0);
   };
 
   const toggleRelatedProduct = (id) => {
@@ -224,6 +230,16 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
     data.append('galleryImages', JSON.stringify(
       imageItems.filter((item) => item.path).map((item) => item.path)
     ));
+
+    const thumbnailItem = imageItems[thumbnailIndex];
+    if (thumbnailItem?.path) {
+      data.append('thumbnailImagePath', thumbnailItem.path);
+    } else if (thumbnailItem?.file) {
+      const uploadedFileIndex = imageItems
+        .slice(0, thumbnailIndex)
+        .filter((item) => item.file).length;
+      data.append('thumbnailImageFileIndex', String(uploadedFileIndex));
+    }
 
     // Append uploaded files alongside any selected existing image paths.
     imageItems.filter((item) => item.file).forEach((item) => {
@@ -525,7 +541,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
             <div className="border-2 border-dashed border-imperial-gold/20 rounded-lg p-6 text-center hover:border-imperial-gold/40 transition-colors">
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/png,image/jpeg,image/webp,image/gif"
                 multiple
                 disabled={imageItems.length >= 5}
                 onChange={handleImageUpload}
@@ -544,6 +560,8 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
               </label>
             </div>
 
+            <p className="mt-2 text-xs text-deep-walnut/50">Select an image below to use it as the product thumbnail.</p>
+
             {getTeaCategoryGallery(formData.category).length === 4 && (
               <button
                 type="button"
@@ -558,10 +576,10 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
             {imageItems.length > 0 && (
               <div className="mt-3 grid grid-cols-4 gap-2">
                 {imageItems.map((item, index) => (
-                  <div key={index} className="relative group rounded-lg overflow-hidden border border-imperial-gold/10">
+                  <div key={index} className={`relative group rounded-lg overflow-hidden border ${index === thumbnailIndex ? 'border-tea-green ring-2 ring-tea-green/20' : 'border-imperial-gold/10'}`}>
                     <img
                       src={getAdminImageUrl(item.preview)}
-                      alt={`Preview ${index + 1}`}
+                      alt={index === thumbnailIndex ? 'Product thumbnail preview' : `Product image preview ${index + 1}`}
                       className="w-full h-20 object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -571,8 +589,18 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                     />
                     <button
                       type="button"
+                      onClick={() => setThumbnailIndex(index)}
+                      aria-pressed={index === thumbnailIndex}
+                      className={`absolute inset-x-1 bottom-1 flex items-center justify-center gap-1 rounded px-1 py-1 text-[10px] font-semibold transition-colors ${index === thumbnailIndex ? 'bg-tea-green text-white' : 'bg-white/90 text-deep-walnut hover:bg-white'}`}
+                    >
+                      {index === thumbnailIndex && <Check className="h-3 w-3" />}
+                      {index === thumbnailIndex ? 'Thumbnail' : 'Set as thumbnail'}
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                      aria-label={`Remove image ${index + 1}`}
+                      className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-xs"
                     >
                       ×
                     </button>

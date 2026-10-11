@@ -22,7 +22,8 @@ function ProductCard({ product, variant = 'default' }) {
   const comparePrice = Number(product.comparePrice || 0);
   const hasDiscount = comparePrice > price;
   const discount = hasDiscount ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0;
-  const isOutOfStock = product.inStock === false;
+  const isOutOfStock = product.inStock === false
+    || (product.stockQuantity !== undefined && Number(product.stockQuantity) <= 0);
   const openProduct = (event) => {
     if (event.target.closest('a, button')) return;
     navigate(`/product/${productSlug}`);
@@ -125,14 +126,17 @@ function ProductCard({ product, variant = 'default' }) {
           <div className="mt-auto flex min-w-0 flex-nowrap items-center gap-1 pt-1.5 text-[10px] text-[#476354] sm:gap-1.5 sm:text-[11px]">
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Leaf className="h-3 w-3" />Natural</span>
             <span className="hidden shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1 sm:inline-flex"><Sparkles className="h-3 w-3" />Premium Quality</span>
-            <button
-              type="button"
-              onClick={addProductToCart}
-              disabled={isOutOfStock}
-              aria-label={isOutOfStock ? `${product.name} is unavailable` : `Add ${product.name} to cart`}
-              title={isOutOfStock ? 'Unavailable' : 'Add to cart'}
-              className="ml-auto inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#07553e] text-white shadow-sm transition hover:bg-[#06412e] disabled:cursor-not-allowed disabled:bg-[#78847c]"
-            ><span className="relative inline-flex"><ShoppingCart className="h-4 w-4" /><Plus className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-[#07553e] text-white" /></span></button>
+            {isOutOfStock ? (
+              <span role="status" className="ml-auto inline-flex h-8 shrink-0 items-center justify-center rounded-full border border-[#e8d9ce] bg-[#f7ece6] px-2 text-[9px] font-semibold text-[#9b503a] sm:text-[10px]">Unavailable</span>
+            ) : (
+              <button
+                type="button"
+                onClick={addProductToCart}
+                aria-label={`Add ${product.name} to cart`}
+                title="Add to cart"
+                className="ml-auto inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#07553e] text-white shadow-sm transition hover:bg-[#06412e]"
+              ><span className="relative inline-flex"><ShoppingCart className="h-4 w-4" /><Plus className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-[#07553e] text-white" /></span></button>
+            )}
           </div>
         </div>
       </motion.article>

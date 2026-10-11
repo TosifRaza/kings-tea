@@ -88,8 +88,9 @@ module.exports = products.map(([name, category, tastingNotes], index) => {
       instructions: 'Warm the cup, add tea, pour freshly heated water at the listed temperature, steep, and adjust to taste.',
     },
     images: [
-      `/images/tea-products/kingstea-packets/${slug}.svg`,
       ...categoryAssets[category].map((filename) => `/images/tea-products/${filename}`),
+      `/images/tea-products/kingstea-packets/${slug}.svg`,
     ],
+    newArrival: true,
   };
 });

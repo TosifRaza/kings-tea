@@ -21,10 +21,10 @@
     <text x="450" y="472" text-anchor="middle" font-family="Georgia,serif" font-size="33" letter-spacing="8" fill="#fff5db">KING'S TEA</text>
     <path d="M310 497 H590" stroke="url(#foil)" stroke-width="3"/>
     <text x="450" y="545" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" letter-spacing="5" fill="#f5e4b1">PURE TEA · TIMELESS TASTE</text>
-    <text x="450" y="645" text-anchor="middle" font-family="Georgia,serif" font-size="49" font-weight="bold" fill="#fff5db">Kyoto Matcha Tradition</text>
-    <text x="450" y="700" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">MATCHA</text>
-    <path d="M295 733 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
-    <text x="450" y="781" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#fff5db">deep · creamy · rounded</text>
+    <text text-anchor="middle" font-family="Georgia,serif" font-size="49" font-weight="bold" fill="#fff5db"><tspan x="450" y="622">Kyoto Matcha</tspan><tspan x="450" y="671">Tradition</tspan></text>
+    <text x="450" y="710" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">MATCHA</text>
+    <path d="M295 741 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
+    <text x="450" y="789" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#fff5db">deep · creamy · rounded</text>
     <g transform="translate(450 846)" fill="none" stroke="#e8d58f" stroke-width="4">
       <path d="M-62 0 Q0 -38 62 0 Q0 38 -62 0Z"/><path d="M-43 0 Q0 -22 43 0 Q0 22 -43 0Z"/>
       <path d="M-7 0 Q-2 -19 15 -25 Q14 -5 0 2 M0 0 Q-1 14 10 22"/>

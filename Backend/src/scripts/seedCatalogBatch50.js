@@ -91,7 +91,23 @@ async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 ==
   try {
     const markerKey = 'catalog-batch-50-v1';
     if (await SiteContent.exists({ key: markerKey })) {
-      console.log('Catalog batch 50 was already imported; leaving the database unchanged.');
+      const existing = await Product.find({ slug: { $in: products.map((product) => product.slug) } }).select('_id slug').lean();
+      const productBySlug = new Map(existing.map((product) => [product.slug, product]));
+      const galleryUpdates = products.filter((product) => productBySlug.has(product.slug)).map((product) => ({
+        updateOne: { filter: { slug: product.slug }, update: { $set: { images: product.images, newArrival: true } } },
+      }));
+      await Product.bulkWrite(galleryUpdates, { ordered: true });
+      const assets = [];
+      for (const product of products) {
+        const savedProduct = productBySlug.get(product.slug);
+        if (!savedProduct) continue;
+        for (const image of product.images) {
+          const metadata = getAssetMetadata(product, image);
+          assets.push({ updateOne: { filter: { publicId: metadata.publicId }, update: { $set: { ...metadata, productIds: [savedProduct._id] } }, upsert: true } });
+        }
+      }
+      if (assets.length) await MediaAsset.bulkWrite(assets, { ordered: false });
+      console.log('Catalog batch 50 exists; restored photo-first galleries and New Arrival labels.');
       return;
     }
 
@@ -115,7 +131,7 @@ async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 ==
           inStock: false,
           featured: false,
           bestSeller: false,
-          newArrival: false,
+          newArrival: true,
           rating: 0,
           reviewCount: 0,
           isActive: true,

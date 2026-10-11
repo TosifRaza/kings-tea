@@ -13,6 +13,17 @@ const palettes = [
 
 const createArtwork = (product, index) => {
   const [dark, light, gold, paper] = palettes[index % palettes.length];
+  const words = product.name.split(/\s+/);
+  const nameLines = [];
+  let line = '';
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (candidate.length > 20 && line) {
+      nameLines.push(line);
+      line = word;
+    } else line = candidate;
+  }
+  if (line) nameLines.push(line);
   const name = escapeXml(product.name);
   const category = escapeXml(product.category.toUpperCase());
   const notes = escapeXml(product.tastingNotes.slice(0, 3).join(' · '));
@@ -41,10 +52,10 @@ const createArtwork = (product, index) => {
     <text x="450" y="472" text-anchor="middle" font-family="Georgia,serif" font-size="33" letter-spacing="8" fill="${paper}">KING'S TEA</text>
     <path d="M310 497 H590" stroke="url(#foil)" stroke-width="3"/>
     <text x="450" y="545" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" letter-spacing="5" fill="#f5e4b1">PURE TEA · TIMELESS TASTE</text>
-    <text x="450" y="645" text-anchor="middle" font-family="Georgia,serif" font-size="${titleFontSize}" font-weight="bold" fill="${paper}">${name}</text>
-    <text x="450" y="700" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">${category}</text>
-    <path d="M295 733 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
-    <text x="450" y="781" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="${paper}">${notes}</text>
+    <text text-anchor="middle" font-family="Georgia,serif" font-size="${titleFontSize}" font-weight="bold" fill="${paper}">${nameLines.map((part, lineIndex) => `<tspan x="450" y="${nameLines.length === 1 ? 645 : 622 + lineIndex * 49}">${escapeXml(part)}</tspan>`).join('')}</text>
+    <text x="450" y="710" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">${category}</text>
+    <path d="M295 741 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
+    <text x="450" y="789" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="${paper}">${notes}</text>
     <g transform="translate(450 846)" fill="none" stroke="#e8d58f" stroke-width="4">
       <path d="M-62 0 Q0 -38 62 0 Q0 38 -62 0Z"/><path d="M-43 0 Q0 -22 43 0 Q0 22 -43 0Z"/>
       <path d="M-7 0 Q-2 -19 15 -25 Q14 -5 0 2 M0 0 Q-1 14 10 22"/>

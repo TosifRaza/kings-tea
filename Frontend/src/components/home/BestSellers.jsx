@@ -58,7 +58,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-[#e9eadb]"
+            className="relative flex aspect-[2.1/1] items-center justify-center overflow-hidden rounded-lg bg-[#e9eadb]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img
@@ -76,6 +76,7 @@ function ProductCard({ product, variant = 'default' }) {
               </div>
             )}
           </Link>
+          <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/20 bg-[#06412e]/95 px-2.5 py-1 text-[9px] font-semibold text-white shadow-sm"><Crown className="h-3 w-3 text-[#e9c66e]" />Premium</span>
           <button
             onClick={() => dispatch(toggleWishlist(productId))}
             type="button"
@@ -87,9 +88,9 @@ function ProductCard({ product, variant = 'default' }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-2.5 px-3.5 pb-3.5 pt-3">
+        <div className="flex flex-1 flex-col gap-1.5 px-3 pb-3 pt-2">
           <div className="flex min-w-0 items-center justify-between gap-2">
-            <Link to={`/product/${productSlug}`} className="min-w-0 truncate font-[family-name:var(--font-playfair)] text-lg font-semibold leading-tight text-[#073b2d] hover:text-tea-green" title={product.name}>
+            <Link to={`/product/${productSlug}`} className="min-w-0 truncate font-[family-name:var(--font-playfair)] text-base font-semibold leading-tight text-[#073b2d] hover:text-tea-green" title={product.name}>
               {product.name}
             </Link>
             <Link to={`/product/${productSlug}`} className="flex shrink-0 items-center gap-1" aria-label={`${rating.toFixed(1)} out of 5 stars, ${reviewCount} reviews`}>
@@ -99,7 +100,7 @@ function ProductCard({ product, variant = 'default' }) {
               <span className="text-xs font-semibold text-[#34483f]">{rating.toFixed(1)}</span>
             </Link>
           </div>
-          <p className="line-clamp-1 text-sm leading-5 text-[#52635b]">
+          <p className="line-clamp-2 min-h-8 text-[11px] leading-4 text-[#52635b]">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
@@ -109,6 +110,10 @@ function ProductCard({ product, variant = 'default' }) {
               {showCardDiscount && <span className="text-sm text-[#8a918d] line-through">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
             </div>
             {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-2.5 py-1 text-xs font-semibold text-[#07553e]">{cardDiscount}% OFF</span>}
+          </div>
+          <div className="mt-auto flex items-center gap-1.5 overflow-hidden pt-1.5 text-[9px] text-[#476354]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Leaf className="h-3 w-3" />100% Natural</span>
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Sparkles className="h-3 w-3" />Premium Quality</span>
           </div>
         </div>
       </motion.article>

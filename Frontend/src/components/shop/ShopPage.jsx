@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Leaf, LayoutGrid, Package, IndianRupee, MapPin } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Leaf, Package, IndianRupee, MapPin, ChevronDown, ShieldCheck, Heart } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts } from '../../store/productSlice';
@@ -41,6 +41,7 @@ function FilterSidebar({
 
   return (
     <div className="space-y-5 rounded-xl border border-[#e9e7dc] bg-[#fffefa] p-4 shadow-[0_5px_18px_rgba(31,48,38,0.06)] sm:p-5">
+      <h2 className="flex items-center gap-2 border-b border-[#eeece4] pb-4 font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#123d2d]"><SlidersHorizontal className="h-4 w-4" />Filter Products</h2>
       <div className="border-b border-[#eeece4] pb-4">
         {sectionHeading(Leaf, 'Category')}
         <div className="space-y-2.5">
@@ -114,7 +115,7 @@ export default function ShopPage() {
 
   const { products, loading } = useSelector((state) => state.products);
   const { categories } = useSelector((state) => state.categories);
-  const bannerImage = products.find((product) => product.images?.[0])?.images?.[0] || '';
+  const bannerImage = products.find((product) => product.images?.[0] && !product.images[0].includes('/kingstea-packets/'))?.images?.[0] || '';
   const bannerImageUrl = bannerImage.startsWith('/uploads/') ? `${IMAGE_URL}${bannerImage}` : bannerImage;
 
   const [query, setQuery] = useState(initialSearch);
@@ -125,7 +126,7 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState('rating');
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const perPage = 9;
+  const perPage = 12;
 
   // Fetch products and categories from API
   useEffect(() => {
@@ -222,66 +223,31 @@ export default function ShopPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-[#fbfaf5] pb-12 pt-[68px] sm:pt-20"
+      className="min-h-screen bg-[#f7f6ef] pb-12 pt-[68px] sm:pt-20"
     >
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-        <section className="relative -mx-2 mb-4 flex min-h-[112px] items-center justify-between overflow-hidden bg-[#062a20] px-5 py-4 text-white sm:mx-0 sm:mb-6 sm:min-h-[100px] sm:rounded-xl sm:px-7">
-          {bannerImageUrl && <img src={bannerImageUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-30" />}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#041c17]/95 via-[#06392b]/80 to-[#062a20]/55" />
-          <div className="relative z-10">
-            <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold leading-tight sm:text-[28px]">Our Premium Tea Collection</h1>
-            <p className="mt-1 text-[11px] tracking-wide text-white/80 sm:text-xs">Pure leaves&nbsp; · &nbsp;Rich aroma&nbsp; · &nbsp;Timeless taste</p>
+      <div className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-8">
+        <div className="grid items-start gap-4 lg:grid-cols-[230px_minmax(0,1fr)] xl:gap-5">
+        <aside className="hidden lg:block">
+          <FilterSidebar {...filterProps} />
+          <div className="relative mt-4 min-h-[120px] overflow-hidden rounded-xl bg-[#06412e] p-4 text-white shadow-sm">
+            <Leaf className="h-6 w-6" />
+            <p className="mt-2 font-[family-name:var(--font-playfair)] text-lg font-semibold">Premium Quality</p>
+            <p className="text-[11px] text-white/80">Authentic teas. Pure experience.</p>
+            <div className="pointer-events-none absolute -bottom-8 -right-4 h-24 w-24 rotate-[-25deg] text-[#b2bd63]/30"><Leaf className="h-full w-full" /></div>
           </div>
-          <p className="relative z-10 hidden items-center gap-2 text-xs text-white/90 sm:flex" aria-label="Breadcrumb">⌂ <span>Home</span><span className="text-white/50">/</span><span>Shop</span></p>
+        </aside>
+        <main className="min-w-0">
+        <section className="relative mb-3 flex min-h-[205px] items-center overflow-hidden rounded-xl bg-[#052d21] px-6 py-6 text-white shadow-sm sm:min-h-[236px] sm:px-10">
+          <img src={bannerImageUrl || '/images/hero-tea-plantation.png'} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center opacity-45" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#03271e]/95 via-[#063a2b]/80 to-[#062a20]/30" />
+          <div className="relative z-10 max-w-[58%] sm:max-w-[53%]">
+            <p className="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.22em] text-[#ecd077] sm:text-xs"><Leaf className="h-4 w-4 fill-[#d3b84d]" />Premium Tea Collection <span className="hidden h-px w-10 bg-[#d3b84d] sm:block" /></p>
+            <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold leading-[1.03] sm:text-5xl">Nature’s Finest in<br />Every Cup</h1>
+            <p className="mt-2 max-w-md text-[11px] leading-relaxed text-white/90 sm:text-sm">Discover authentic flavors, fresh aromas and a healthier you with our handpicked premium teas.</p>
+            <div className="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-[10px] text-white/90 sm:flex"><span className="flex items-center gap-1.5"><Leaf className="h-4 w-4 text-[#e6cb73]" />100% Natural</span><span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-[#e6cb73]" />No Added Preservatives</span><span className="flex items-center gap-1.5"><Heart className="h-4 w-4 text-[#e6cb73]" />Rich in Antioxidants</span></div>
+          </div>
+          <p className="absolute bottom-5 right-5 z-10 hidden rotate-[-8deg] font-[family-name:var(--font-playfair)] text-xl italic leading-tight text-[#efd583] sm:block">Pure goodness<br />in every sip</p>
         </section>
-
-        {/* Search & Sort Bar */}
-        <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#143b2d]" />
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search teas, origins..."
-              className="h-12 w-full rounded-full border border-[#dddcd3] bg-white/80 pl-12 pr-4 text-sm text-[#263b32] shadow-[0_2px_8px_rgba(32,45,35,0.05)] outline-none transition focus:border-[#8d9d87] sm:h-14 sm:text-base"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 sm:flex">
-            <label className="flex h-11 min-w-0 items-center rounded-xl border border-[#dcdace] bg-white/65 px-3 text-xs font-medium text-[#26332d] sm:h-12 sm:px-5 sm:text-sm">
-              <span className="shrink-0">Sort:&nbsp;</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
-                className="min-w-0 flex-1 appearance-none bg-transparent text-xs outline-none sm:text-sm"
-              >
-                <option value="rating">Top rated</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="newest">Newest First</option>
-                <option value="name">Name A-Z</option>
-              </select>
-              <span className="ml-1 text-base leading-none text-[#12382a]">⌄</span>
-            </label>
-
-            <button
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0b4b35] to-[#073c2b] px-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:h-12 sm:px-6 lg:hidden"
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-              Filters
-              {activeFilterCount > 0 && (
-                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#38ad69] px-1 text-xs font-bold text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
 
         {/* Active Filters */}
         {hasFilters && (
@@ -322,11 +288,12 @@ export default function ShopPage() {
           </div>
         )}
 
-        <div className="mb-4 flex items-center gap-3 text-sm text-[#315d50] sm:mb-6">
-          <p className="shrink-0 font-medium sm:hidden">{filteredProducts.length} teas</p>
-          <p className="hidden shrink-0 font-[family-name:var(--font-inter)] text-xs text-deep-walnut/50 sm:block">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
-          <span className="h-px flex-1 bg-[#dcdace]" />
-          <LayoutGrid className="h-5 w-5 shrink-0 text-[#174b35]" aria-hidden="true" />
+        <div className="mb-3 flex items-center gap-3 rounded-xl border border-[#ece9df] bg-[#fffefa] px-4 py-3 text-sm text-[#315d50] shadow-[0_3px_12px_rgba(31,48,38,0.04)] sm:mb-3">
+          <div className="min-w-0 flex-1"><h2 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-[#123d2d] sm:text-xl">Premium Tea Collection</h2><p className="hidden text-xs text-[#6b7770] sm:block">Handpicked teas for a healthier, happier you.</p></div>
+          <div className="relative hidden min-w-[150px] max-w-[220px] flex-1 md:block"><Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#315d50]" /><input value={query} onChange={(e) => { setQuery(e.target.value); setCurrentPage(1); }} placeholder="Search teas..." className="h-9 w-full rounded-lg border border-[#e9e7df] bg-[#fbfaf5] pl-8 pr-2 text-xs outline-none focus:border-[#789482]" /></div>
+          <p className="hidden shrink-0 text-xs text-[#64736b] 2xl:block">Showing {paginatedProducts.length} of {filteredProducts.length} teas</p>
+          <label className="flex h-9 items-center gap-1 rounded-lg border border-[#e9e7df] bg-[#fbfaf5] px-2 text-[10px] text-[#58675e] sm:px-3 sm:text-xs"><span className="hidden sm:inline">Sort by:</span><select value={sortBy} onChange={(e) => setSortBy(e.target.value)} aria-label="Sort products" className="max-w-[108px] appearance-none bg-transparent font-medium text-[#234b3a] outline-none sm:max-w-[130px]"><option value="rating">Popularity</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="newest">Newest First</option><option value="name">Name A-Z</option></select><ChevronDown className="h-3.5 w-3.5" /></label>
+          <button onClick={() => setFiltersOpen(!filtersOpen)} className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#07553e] px-2.5 text-xs font-semibold text-white lg:hidden"><SlidersHorizontal className="h-4 w-4" />Filters{activeFilterCount > 0 && <span>({activeFilterCount})</span>}</button>
         </div>
 
         {loading ? (
@@ -336,11 +303,6 @@ export default function ShopPage() {
           </div>
         ) : (
           <div className="flex gap-8">
-            {/* Desktop Sidebar */}
-            <div className="hidden lg:block w-56 flex-shrink-0">
-              <FilterSidebar {...filterProps} />
-            </div>
-
             {/* Mobile Filters */}
             {filtersOpen && (
               <div className="lg:hidden fixed inset-0 z-50 bg-warm-ivory p-6 overflow-y-auto">
@@ -378,7 +340,7 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {paginatedProducts.map((product) => (
                       <ProductCard key={product._id || product.id} product={product} variant="collection" />
                     ))}
@@ -420,6 +382,8 @@ export default function ShopPage() {
             </div>
           </div>
         )}
+        </main>
+        </div>
       </div>
     </motion.div>
   );

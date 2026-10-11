@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin, Leaf } from 'lucide-react';
+import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, Plus, MapPin, Leaf } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
@@ -122,7 +122,7 @@ function ProductCard({ product, variant = 'default' }) {
             </div>
             {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-1 py-1 text-[7px] font-semibold text-[#07553e] sm:px-2.5 sm:text-xs">{cardDiscount}% OFF</span>}
           </div>
-          <div className="mt-auto flex min-w-0 flex-wrap items-center gap-1 pt-1.5 text-[10px] text-[#476354] sm:gap-1.5 sm:text-[11px]">
+          <div className="mt-auto flex min-w-0 flex-nowrap items-center gap-1 pt-1.5 text-[10px] text-[#476354] sm:gap-1.5 sm:text-[11px]">
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1"><Leaf className="h-3 w-3" />Natural</span>
             <span className="hidden shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1 sm:inline-flex"><Sparkles className="h-3 w-3" />Premium Quality</span>
             <button
@@ -130,8 +130,9 @@ function ProductCard({ product, variant = 'default' }) {
               onClick={addProductToCart}
               disabled={isOutOfStock}
               aria-label={isOutOfStock ? `${product.name} is unavailable` : `Add ${product.name} to cart`}
-              className="ml-auto inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-full bg-[#07553e] px-2.5 text-[10px] font-semibold text-white shadow-sm transition hover:bg-[#06412e] disabled:cursor-not-allowed disabled:bg-[#78847c] sm:text-[11px]"
-            ><ShoppingCart className="h-3.5 w-3.5" />{isOutOfStock ? 'Unavailable' : 'Add to Cart'}</button>
+              title={isOutOfStock ? 'Unavailable' : 'Add to cart'}
+              className="ml-auto inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#07553e] text-white shadow-sm transition hover:bg-[#06412e] disabled:cursor-not-allowed disabled:bg-[#78847c]"
+            ><span className="relative inline-flex"><ShoppingCart className="h-4 w-4" /><Plus className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-[#07553e] text-white" /></span></button>
           </div>
         </div>
       </motion.article>

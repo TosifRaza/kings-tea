@@ -63,7 +63,7 @@ Audit baseline: 2026-10-11. This tracks repository work only; it does not includ
 - [~] P1 homepage section draft/publish/order workflow and newsletter consent/export implemented. Full CMS/editorial workflows remain outstanding.
 - [ ] P2 media/SEO/accessibility/responsive hardening.
 - [x] Production builds for storefront and admin portal; backend JavaScript syntax check.
-- [ ] API integration/browser checks and live deployment verification.
+- [~] Public production API smoke checks and live deployment verification passed after commit `feb37cb`; full authenticated checkout/media/CMS workflows and browser viewport checks still need credentials/browser tooling.
 
 ### Verification notes
 
@@ -74,5 +74,7 @@ Audit baseline: 2026-10-11. This tracks repository work only; it does not includ
 - No API/browser test suite is configured. No database integration, payment sandbox, viewport/browser, or live-deployment check was run. Never claim those checks passed.
 - Razorpay requires `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`, a `payment.captured` webhook pointed at `/api/payments/webhook`, and a MongoDB deployment that supports transactions (such as Atlas replica set).
 - Image attribution is documented in `Frontend/public/images/tea-products/ATTRIBUTION.md` and `Frontend/public/images/hero-slides/credits.txt`. These are still static assets; the required database-backed media workflow and production media library are not implemented.
-- No production code was pushed/deployed in this pass. Credentials, API availability, and safe deployment verification are prerequisites before enabling live checkout.
-- Subscription plan administration, site-content CMS endpoints/public FAQ and policy pages, media upload/library and asset metadata, product search validation, SEO sitemap/robots, and the Tea Finder have since been implemented in the local working tree. Do not run the migration scripts against production without a current backup.
+- Commit `feb37cb` was pushed to `main`; Render deployed the storefront and backend. Verified storefront `/` and `/robots.txt` return HTTP 200; backend `/api/health`, `/api/products?limit=1`, `/api/subscriptions/plans`, `/api/site-content/public/faq`, `/api/payments/config`, and `/api/seo/sitemap.xml` return HTTP 200. The media admin route returns HTTP 401 unauthenticated. Backend health reports the database connected.
+- Production payment readiness is false because Razorpay credentials/webhook configuration are absent. No homepage content document is published yet, so the homepage uses the built-in layout until an administrator publishes a config. The product-arrival and media metadata migrations were not run; create a backup and follow the documented production confirmation steps.
+- Subscription plan administration, site-content CMS endpoints/public FAQ and policy pages, media upload/library and asset metadata, product search validation, SEO sitemap/robots, Tea Finder, auth/newsletter rate limits, and factual contact-page rendering are deployed. Do not run the migration scripts against production without a current backup.
+- Browser viewport checks at the requested mobile sizes, authenticated admin end-to-end flows, payment sandbox flow, and mail-provider confirmation email were not verified here. No browser test runner is configured.

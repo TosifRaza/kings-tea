@@ -282,6 +282,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    weightOptions: {
+      type: [{ type: Number, min: 1, max: 10000 }],
+      default: [],
+    },
     caffeine: {
       type: String,
       enum: ['low', 'medium', 'high', ''],

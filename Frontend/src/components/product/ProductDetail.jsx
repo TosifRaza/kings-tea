@@ -1227,6 +1227,7 @@ import { fetchProductBySlug, fetchProducts } from '../../store/productSlice';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { getProductImage } from "../../utils/image";
+import { formatWeight, getPriceForWeight, getProductWeightOptions, parseWeightGrams } from '../../utils/weight';
 import { ProductCard } from '../home/BestSellers';
 // Add to existing imports
 import { fetchProductReviews, submitReview, clearReviewState } from '../../store/reviewSlice';
@@ -1255,6 +1256,8 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
+  const [selectedWeightOption, setSelectedWeightOption] = useState(100);
+  const [customWeightInput, setCustomWeightInput] = useState('');
   const [activeTab, setActiveTab] = useState('description');
 
   // ===== IMAGE GALLERY STATE (NEW) =====
@@ -1264,6 +1267,18 @@ export default function ProductDetail() {
 
   // ===== ALL HOOKS AT THE TOP — BEFORE ANY CONDITIONAL RETURNS =====
   const { currentProduct: product, products: allProducts, loading, error } = useSelector((state) => state.products);
+  const baseWeightGrams = parseWeightGrams(product?.weight) || 100;
+  const availableWeightOptions = getProductWeightOptions(product);
+  const customWeightGrams = Number(customWeightInput);
+  const weightSelectionValid = !customWeightInput || (Number.isInteger(customWeightGrams) && customWeightGrams >= 1 && customWeightGrams <= 10000);
+  const selectedWeightGrams = customWeightInput
+    ? (weightSelectionValid ? customWeightGrams : 0)
+    : (selectedWeightOption || baseWeightGrams);
+  const selectedWeightLabel = selectedWeightGrams ? formatWeight(selectedWeightGrams) : 'Choose a valid weight';
+  const selectedPrice = selectedWeightGrams ? getPriceForWeight(product?.price, baseWeightGrams, selectedWeightGrams) : Number(product?.price) || 0;
+  const selectedComparePrice = selectedWeightGrams && product?.comparePrice
+    ? getPriceForWeight(product.comparePrice, baseWeightGrams, selectedWeightGrams)
+    : 0;
 
   // Get productId for wishlist (safe even if product is null)
   const productId = product?._id || product?.id || '';
@@ -1299,6 +1314,14 @@ export default function ProductDetail() {
     setReviewRatingFilter('all');
     setReviewSort('newest');
   }, [slug]);
+
+  useEffect(() => {
+    if (!product) return;
+    const base = parseWeightGrams(product.weight) || 100;
+    const options = getProductWeightOptions(product);
+    setSelectedWeightOption(options.includes(base) ? base : options[0] || base);
+    setCustomWeightInput('');
+  }, [product?._id, product?.weight, JSON.stringify(product?.weightOptions || [])]);
 
   // ===== FETCH REVIEWS WHEN PRODUCT LOADS (NEW) =====
   useEffect(() => {
@@ -1351,11 +1374,11 @@ export default function ProductDetail() {
     canonical.href = `${window.location.origin}/product/${encodeURIComponent(product.slug || slug)}`;
     let structuredData = document.getElementById('product-structured-data');
     if (!structuredData) { structuredData = document.createElement('script'); structuredData.id = 'product-structured-data'; structuredData.type = 'application/ld+json'; document.head.appendChild(structuredData); }
-    const productSchema = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description, image: images.map((image) => image.startsWith('http') ? image : `${window.location.origin}${image}`), offers: { '@type': 'Offer', priceCurrency: 'INR', price: Number(product.price), availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canonical.href } };
+    const productSchema = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description, image: images.map((image) => image.startsWith('http') ? image : `${window.location.origin}${image}`), offers: { '@type': 'Offer', priceCurrency: 'INR', price: Number(selectedPrice), availability: product.stockQuantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock', url: canonical.href } };
     if (Number(product.rating) > 0 && Number(product.reviewCount) > 0) productSchema.aggregateRating = { '@type': 'AggregateRating', ratingValue: Number(product.rating), reviewCount: Number(product.reviewCount) };
     structuredData.textContent = JSON.stringify(productSchema);
     return () => { document.getElementById('product-structured-data')?.remove(); };
-  }, [product, slug, images]);
+  }, [product, slug, images, selectedPrice]);
 
   // ===== THUMBNAIL NAVIGATION (NEW) =====
   const goToImage = (index) => {
@@ -1390,7 +1413,8 @@ export default function ProductDetail() {
 
   // ===== CART HANDLER =====
   const handleAddToCart = () => {
-    dispatch(addToCart({ productId, productName: product.name, price: product.price, image: images[0] || product.images?.[0], weight: product.weight, quantity }));
+    if (!weightSelectionValid || !selectedWeightGrams) return;
+    dispatch(addToCart({ productId, productName: product.name, price: selectedPrice, image: images[0] || product.images?.[0], weight: selectedWeightLabel, weightGrams: selectedWeightGrams, quantity }));
   };
 
   const handleBuyNow = () => {
@@ -1624,18 +1648,41 @@ export default function ProductDetail() {
             <div className="mb-4">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <span className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-[#123b2d] sm:text-4xl">
-                  ₹{product.price?.toLocaleString()}
+                  ₹{selectedPrice.toLocaleString('en-IN')}
                 </span>
-                {product.comparePrice && product.comparePrice > product.price && (
+                {selectedComparePrice > selectedPrice && (
                   <span className="text-lg text-[#78827d] line-through">
-                    ₹{product.comparePrice?.toLocaleString()}
+                    ₹{selectedComparePrice.toLocaleString('en-IN')}
                   </span>
                 )}
-                {product.comparePrice > product.price && (
+                {selectedComparePrice > selectedPrice && (
                   <span className="rounded-full bg-[#f5ead4] px-3 py-1 text-xs font-semibold text-[#8a6128]">
-                    Save {Math.round(((product.comparePrice - product.price) / product.comparePrice) * 100)}%
+                    Save {Math.round(((selectedComparePrice - selectedPrice) / selectedComparePrice) * 100)}%
                   </span>
                 )}
+              </div>
+              <div className="mt-5 rounded-xl border border-[#e5e1d5] bg-[#fbfaf6] p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[#203d30]">Choose weight</p>
+                    <p className="mt-0.5 text-xs text-[#748078]">Price updates with your selection</p>
+                  </div>
+                  <span className="rounded-full bg-[#eaf0e7] px-3 py-1.5 text-sm font-semibold text-[#174b35]">{selectedWeightLabel}</span>
+                </div>
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Available tea weights">
+                  {availableWeightOptions.map((grams) => {
+                    const active = !customWeightInput && selectedWeightGrams === grams;
+                    return <button key={grams} type="button" aria-pressed={active} onClick={() => { setSelectedWeightOption(grams); setCustomWeightInput(''); }} className={`min-h-10 rounded-full border px-4 text-sm font-semibold transition ${active ? 'border-[#174b35] bg-[#174b35] text-white shadow-sm' : 'border-[#d9d5c9] bg-white text-[#244735] hover:border-[#174b35]'}`}>
+                      {formatWeight(grams)}
+                      <span className={`ml-2 text-xs ${active ? 'text-white/75' : 'text-[#78827d]'}`}>₹{getPriceForWeight(product.price, baseWeightGrams, grams).toLocaleString('en-IN')}</span>
+                    </button>;
+                  })}
+                </div>
+                <label className="mt-3 flex flex-col gap-1.5 text-xs font-medium text-[#53645d] sm:flex-row sm:items-center sm:justify-between">
+                  <span>Custom weight (grams)</span>
+                  <input type="number" min="1" max="10000" step="1" inputMode="numeric" value={customWeightInput} onChange={(event) => setCustomWeightInput(event.target.value)} placeholder="Enter grams" aria-label="Custom weight in grams" aria-invalid={!weightSelectionValid} className="h-10 w-full rounded-lg border border-[#d9d5c9] bg-white px-3 text-sm text-[#203d30] outline-none transition focus:border-[#174b35] focus:ring-2 focus:ring-[#174b35]/10 sm:w-40" />
+                </label>
+                {!weightSelectionValid && <p className="mt-1 text-xs text-royal-terracotta">Enter a whole weight between 1g and 10000g.</p>}
               </div>
               <p className="mt-1 text-xs text-[#65736d]">Inclusive of all taxes</p>
             </div>
@@ -1733,7 +1780,7 @@ export default function ProductDetail() {
             {/* Product details */}
             <div className="grid grid-cols-2 gap-x-5 gap-y-4 py-1 sm:gap-x-8">
               {[
-                { label: 'Weight', value: product.weight || '100g', icon: Scale },
+                { label: 'Weight', value: selectedWeightLabel, icon: Scale },
                 { label: 'Origin', value: product.origin || 'India', icon: MapPin },
                 { label: 'Caffeine', value: product.caffeine || 'Medium', icon: Leaf },
                 { label: 'Fermentation', value: product.fermentation || 'Full', icon: Lightbulb },

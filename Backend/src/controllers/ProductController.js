@@ -4,6 +4,7 @@ const Review = require('../models/ReviewModel');
 const Category = require('../models/CategoryModel');
 const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
+const { parseWeightOptions } = require('../utils/productPricing');
 
 const includeSeededReviews = process.env.ENABLE_SEEDED_REVIEWS === 'true'
   || (process.env.NODE_ENV === 'production' && process.env.ENABLE_SEEDED_REVIEWS !== 'false');
@@ -262,6 +263,10 @@ const getProductBySlug = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    const weightOptions = parseWeightOptions(productData.weightOptions);
+    delete productData.weightOptions;
+    if (weightOptions === null) return errorResponse(res, 'Weight options must be whole grams between 1 and 10000.', 400);
+    if (weightOptions !== undefined) productData.weightOptions = weightOptions;
     delete productData.catalogRating;
     delete productData.thumbnailImagePath;
     delete productData.thumbnailImageFileIndex;
@@ -325,6 +330,10 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const productData = { ...req.body };
+    const weightOptions = parseWeightOptions(productData.weightOptions);
+    delete productData.weightOptions;
+    if (weightOptions === null) return errorResponse(res, 'Weight options must be whole grams between 1 and 10000.', 400);
+    if (weightOptions !== undefined) productData.weightOptions = weightOptions;
     delete productData.catalogRating;
     delete productData.thumbnailImagePath;
     delete productData.thumbnailImageFileIndex;

@@ -4,6 +4,7 @@ const Razorpay = require('razorpay');
 const Order = require('../models/OrderModel');
 const Product = require('../models/ProductModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
+const { MAX_WEIGHT_GRAMS, parseWeightGrams, normalizeWeightGrams, getPriceForWeight } = require('../utils/productPricing');
 
 const getPaymentCredentials = () => ({
   keyId: process.env.RAZORPAY_KEY_ID,
@@ -60,25 +61,49 @@ const createPaymentOrder = async (req, res) => {
       }, 'Payment order reused');
     }
 
-    const quantities = new Map();
+    const variants = new Map();
     for (const item of items) {
       if (!mongoose.Types.ObjectId.isValid(item.productId) || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1) {
         return errorResponse(res, 'Cart contains an invalid product or quantity', 400);
       }
       const id = String(item.productId);
-      quantities.set(id, (quantities.get(id) || 0) + Number(item.quantity));
+      const requestedWeight = item.weightGrams === undefined || item.weightGrams === null
+        ? null
+        : Number(item.weightGrams);
+      if (requestedWeight !== null && (!Number.isInteger(requestedWeight) || requestedWeight < 1 || requestedWeight > MAX_WEIGHT_GRAMS)) {
+        return errorResponse(res, 'Cart contains an invalid weight', 400);
+      }
+      const key = `${id}:${requestedWeight || 'base'}`;
+      const existing = variants.get(key);
+      variants.set(key, { productId: id, requestedWeight, quantity: (existing?.quantity || 0) + Number(item.quantity) });
     }
 
     const orderItems = [];
+    const inventoryQuantities = new Map();
     let subtotal = 0;
-    for (const [productId, quantity] of quantities.entries()) {
-      const product = await Product.findOne({ _id: productId, isActive: { $ne: false } }).select('name price images inStock stockQuantity');
+    for (const { productId, requestedWeight, quantity } of variants.values()) {
+      const product = await Product.findOne({ _id: productId, isActive: { $ne: false } }).select('name price images inStock stockQuantity weight');
       if (!product) return errorResponse(res, 'A product in your cart is no longer available', 409);
-      if (!product.inStock || product.stockQuantity < quantity) {
-        return errorResponse(res, `${product.name} does not have enough stock`, 409);
+      const baseWeightGrams = parseWeightGrams(product.weight) || 100;
+      const weightGrams = normalizeWeightGrams(requestedWeight, baseWeightGrams);
+      const unitPrice = getPriceForWeight(product.price, baseWeightGrams, weightGrams);
+      inventoryQuantities.set(productId, (inventoryQuantities.get(productId) || 0) + quantity);
+      orderItems.push({
+        productId: product._id,
+        name: product.name,
+        price: unitPrice,
+        quantity,
+        weight: `${weightGrams}g`,
+        weightGrams,
+        image: product.images?.[0] || '',
+      });
+      subtotal += unitPrice * quantity;
+    }
+    for (const [productId, quantity] of inventoryQuantities) {
+      const product = await Product.findById(productId).select('name inStock stockQuantity');
+      if (!product?.inStock || product.stockQuantity < quantity) {
+        return errorResponse(res, `${product?.name || 'A product'} does not have enough stock`, 409);
       }
-      orderItems.push({ productId: product._id, name: product.name, price: product.price, quantity, image: product.images?.[0] || '' });
-      subtotal += product.price * quantity;
     }
 
     const threshold = configuredAmount('FREE_SHIPPING_THRESHOLD_INR', 1000);

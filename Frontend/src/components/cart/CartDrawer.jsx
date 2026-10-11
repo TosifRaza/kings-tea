@@ -282,6 +282,7 @@ import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getProductImage } from '../../utils/image';
+import { getPriceForWeight, parseWeightGrams } from '../../utils/weight';
 import {
   selectCartOpen,
   closeCart,
@@ -318,9 +319,14 @@ export default function CartDrawer() {
   // Match cart items to real products from Redux store
   const cartItems = items
     .map((item) => {
-      const product = (products || []).find(
+      const storedProduct = (products || []).find(
         (p) => (p._id || p.id) === item.productId
-      ) || (item.productName || item.name ? {
+      );
+      const product = storedProduct ? {
+        ...storedProduct,
+        price: getPriceForWeight(storedProduct.price, parseWeightGrams(storedProduct.weight) || 100, item.weightGrams),
+        weight: item.weight || storedProduct.weight || '',
+      } : (item.productName || item.name ? {
         _id: item.productId,
         slug: item.slug || item.productId,
         name: item.productName || item.name,
@@ -334,21 +340,21 @@ export default function CartDrawer() {
 
   // Compute subtotal from REAL product data (not broken selector)
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + (item.product.price || 0) * item.quantity,
+    (sum, item) => sum + (Number(item.price) || 0) * item.quantity,
     0
   );
   const shipping = subtotal > 1000 ? 0 : 99;
   const total = subtotal + shipping;
 
-  const handleRemove = (productId) => {
-    dispatch(removeFromCart(productId));
+  const handleRemove = (item) => {
+    dispatch(removeFromCart({ productId: item.productId, weightGrams: item.weightGrams }));
   };
 
-  const handleUpdateQuantity = (productId, qty) => {
+  const handleUpdateQuantity = (item, qty) => {
     if (qty < 1) {
-      dispatch(removeFromCart(productId));
+      handleRemove(item);
     } else {
-      dispatch(updateQuantity({ productId, quantity: qty }));
+      dispatch(updateQuantity({ productId: item.productId, weightGrams: item.weightGrams, quantity: qty }));
     }
   };
 
@@ -418,7 +424,7 @@ export default function CartDrawer() {
 
                 return (
                   <motion.div
-                    key={item.productId}
+                    key={`${item.productId}-${item.weightGrams}`}
                     layout
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -454,14 +460,14 @@ export default function CartDrawer() {
                         {item.product.name}
                       </h4>
                       <p className="text-[#3A281C]/40 text-[10px]">
-                        {item.product.weight}
+                        {item.weight || item.product.weight}
                       </p>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-[#C9A86A]/20 rounded-sm">
                           <button
                             onClick={() =>
                               handleUpdateQuantity(
-                                item.productId,
+                                item,
                                 item.quantity - 1
                               )
                             }
@@ -475,7 +481,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() =>
                               handleUpdateQuantity(
-                                item.productId,
+                                item,
                                 item.quantity + 1
                               )
                             }
@@ -486,10 +492,10 @@ export default function CartDrawer() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-[#3A281C] text-sm">
-                            ₹{(item.product.price * item.quantity)?.toLocaleString()}
+                            ₹{(item.price * item.quantity)?.toLocaleString('en-IN')}
                           </span>
                           <button
-                            onClick={() => handleRemove(item.productId)}
+                            onClick={() => handleRemove(item)}
                             className="text-[#3A281C]/30 hover:text-[#A65A3A] transition-colors"
                           >
                             <X className="h-3.5 w-3.5" />

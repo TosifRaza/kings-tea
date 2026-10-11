@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearCart, selectCartItems } from '../../store/cartSlice';
 import { orderAPI, paymentAPI } from '../../services/api';
+import { getPriceForWeight, parseWeightGrams } from '../../utils/weight';
 
 const initialAddress = { name: '', phone: '', address: '', city: '', state: '', zip: '', country: 'India' };
 const loadRazorpay = () => new Promise((resolve) => {
@@ -38,12 +39,17 @@ export default function CheckoutPage() {
   }, [user]);
 
   const cartItems = useMemo(() => items.map((item) => {
-    const product = products.find((p) => (p._id || p.id) === item.productId) || (item.productName || item.name ? {
+    const storedProduct = products.find((p) => (p._id || p.id) === item.productId);
+    const product = storedProduct ? {
+      ...storedProduct,
+      price: getPriceForWeight(storedProduct.price, parseWeightGrams(storedProduct.weight) || 100, item.weightGrams),
+      weight: item.weight || storedProduct.weight || '',
+    } : (item.productName || item.name ? {
       _id: item.productId, name: item.productName || item.name, price: Number(item.price) || 0, images: item.image ? [item.image] : [],
     } : null);
     return { ...item, product };
   }).filter((item) => item.product), [items, products]);
-  const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.product.price) || 0) * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0) * item.quantity, 0);
   const shipping = subtotal >= 1000 ? 0 : 99;
 
   const handleChange = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -65,7 +71,7 @@ export default function CheckoutPage() {
       if (!loaded) throw new Error('Secure payment window could not be loaded. Check your connection and try again.');
       const idempotencyKey = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const { data: created } = await orderAPI.createPaymentOrder({
-        items: cartItems.map(({ productId, quantity }) => ({ productId, quantity })),
+        items: cartItems.map(({ productId, quantity, weightGrams }) => ({ productId, quantity, weightGrams })),
         shippingName: form.name,
         shippingPhone: form.phone,
         shippingAddress: form.address,
@@ -149,7 +155,7 @@ export default function CheckoutPage() {
           </section>
           <aside className="h-fit rounded-xl border border-[#C9A86A]/20 bg-white p-5 shadow-sm lg:sticky lg:top-24">
             <h2 className="mb-5 text-lg font-semibold text-[#3A281C]">Order summary</h2>
-            <div className="mb-5 space-y-3">{cartItems.map((item) => <div key={item.productId} className="flex justify-between gap-3 text-sm"><span className="text-[#3A281C]/70">{item.product.name} × {item.quantity}</span><span>₹{(item.product.price * item.quantity).toLocaleString('en-IN')}</span></div>)}</div>
+            <div className="mb-5 space-y-3">{cartItems.map((item) => <div key={`${item.productId}-${item.weightGrams}`} className="flex justify-between gap-3 text-sm"><span className="text-[#3A281C]/70">{item.product.name} · {item.weight || item.product.weight} × {item.quantity}</span><span>₹{(item.price * item.quantity).toLocaleString('en-IN')}</span></div>)}</div>
             <div className="space-y-3 border-t border-[#C9A86A]/20 pt-4 text-sm"><div className="flex justify-between"><span>Subtotal</span><span>₹{subtotal.toLocaleString('en-IN')}</span></div><div className="flex justify-between"><span>Shipping</span><span>{shipping ? `₹${shipping}` : 'Free'}</span></div><div className="flex justify-between border-t border-[#C9A86A]/20 pt-3 text-base font-bold"><span>Total*</span><span>₹{(subtotal + shipping).toLocaleString('en-IN')}</span></div></div>
             <button type="submit" disabled={busy || paymentConfig === null} className="mt-6 flex w-full items-center justify-center gap-2 rounded bg-[#104c38] py-4 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-[#0b3c2c] disabled:cursor-not-allowed disabled:opacity-60">{busy ? 'Opening secure checkout…' : paymentConfig === null ? 'Loading checkout…' : paymentConfig.enabled ? 'Continue to payment' : 'Payments unavailable'}</button>
             {paymentConfig?.enabled ? <p className="mt-3 flex items-center justify-center gap-2 text-center text-xs text-[#3A281C]/60"><ShieldCheck className="h-4 w-4" />Secure payment by Razorpay. Final total is calculated by the server.</p> : <p className="mt-3 text-center text-xs text-[#3A281C]/60">Online checkout will be available after payment credentials are configured.</p>}

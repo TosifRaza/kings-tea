@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { cartAPI } from '../services/api';
+import { parseWeightGrams } from '../utils/weight';
 
 const CART_STORAGE_KEY = 'kingsTeaCart';
 
@@ -17,7 +18,10 @@ const normalizeItems = (items = []) => items
     price: Number(item.price ?? item.product?.price) || 0,
     image: item.image || item.product?.images?.[0] || '',
     weight: item.weight || item.product?.weight || '',
+    weightGrams: Number(item.weightGrams) || parseWeightGrams(item.weight || item.product?.weight) || 100,
   }));
+
+const getCartItemKey = (item) => `${getId(item?.productId)}:${Number(item?.weightGrams) || parseWeightGrams(item?.weight) || 100}`;
 
 const readStoredCart = () => {
   try {
@@ -48,8 +52,9 @@ const mergeItems = (...lists) => {
   lists.flat().forEach((rawItem) => {
     const [item] = normalizeItems([rawItem]);
     if (!item) return;
-    const existing = merged.get(item.productId);
-    merged.set(item.productId, existing
+    const key = getCartItemKey(item);
+    const existing = merged.get(key);
+    merged.set(key, existing
       ? { ...existing, ...item, quantity: existing.quantity + item.quantity }
       : item);
   });
@@ -112,13 +117,15 @@ const cartSlice = createSlice({
       reducer: (state, action) => {
         const { productId, quantity = 1 } = action.payload;
         const normalizedId = getId(productId);
-        const existing = state.items.find((item) => getId(item.productId) === normalizedId);
+        const cartKey = getCartItemKey(action.payload);
+        const existing = state.items.find((item) => getCartItemKey(item) === cartKey);
         if (existing) {
           existing.quantity += quantity;
           existing.productName = action.payload.productName || existing.productName;
           existing.price = Number(action.payload.price) || existing.price;
           existing.image = action.payload.image || existing.image;
           existing.weight = action.payload.weight || existing.weight;
+          existing.weightGrams = action.payload.weightGrams || existing.weightGrams;
         } else {
           state.items.push({
             productId: normalizedId,
@@ -127,6 +134,7 @@ const cartSlice = createSlice({
             price: Number(action.payload.price) || 0,
             image: action.payload.image || '',
             weight: action.payload.weight || '',
+            weightGrams: Number(action.payload.weightGrams) || parseWeightGrams(action.payload.weight) || 100,
           });
         }
         state.notification = {
@@ -135,7 +143,7 @@ const cartSlice = createSlice({
           quantity,
         };
       },
-      prepare: ({ productId, quantity = 1, productName = 'Tea', price = 0, image = '', weight = '' }) => ({
+      prepare: ({ productId, quantity = 1, productName = 'Tea', price = 0, image = '', weight = '', weightGrams }) => ({
         payload: {
           productId,
           quantity,
@@ -143,6 +151,7 @@ const cartSlice = createSlice({
           price,
           image,
           weight,
+          weightGrams: Number(weightGrams) || parseWeightGrams(weight) || 100,
           notificationId: Date.now(),
         },
       }),
@@ -153,18 +162,18 @@ const cartSlice = createSlice({
       }
     },
     removeFromCart: (state, action) => {
-      state.items = state.items.filter(
-        (item) => getId(item.productId) !== getId(action.payload)
-      );
+      const target = action.payload && typeof action.payload === 'object' ? action.payload : null;
+      state.items = state.items.filter((item) => target
+        ? getCartItemKey(item) !== getCartItemKey(target)
+        : getId(item.productId) !== getId(action.payload));
     },
     updateQuantity: (state, action) => {
-      const { productId, quantity } = action.payload;
-      const item = state.items.find((item) => item.productId === productId);
+      const { productId, quantity, weightGrams } = action.payload;
+      const item = state.items.find((candidate) => getId(candidate.productId) === getId(productId)
+        && (weightGrams === undefined || Number(candidate.weightGrams) === Number(weightGrams)));
       if (item) {
         if (quantity <= 0) {
-          state.items = state.items.filter(
-            (item) => getId(item.productId) !== getId(productId)
-          );
+          state.items = state.items.filter((candidate) => candidate !== item);
         } else {
           item.quantity = quantity;
         }
@@ -210,11 +219,7 @@ export const selectCartCount = (state) =>
 //   }, 0);
 // };
 export const selectCartTotal = (state) => {
-  const products = state.products?.products || [];
-  return state.cart.items.reduce((sum, item) => {
-    const product = products.find((p) => getId(p._id || p.id) === getId(item.productId));
-    return sum + (Number(product?.price ?? item.price) || 0) * item.quantity;
-  }, 0);
+  return state.cart.items.reduce((sum, item) => sum + (Number(item.price) || 0) * item.quantity, 0);
 };
 
 export default cartSlice.reducer;

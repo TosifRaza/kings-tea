@@ -3,7 +3,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../store/productSlice';
 import { getCategories } from '../services/api';
 import { getAdminImageUrl, getTeaCategoryGallery } from '../utils/teaImages';
-import { X, Upload, Image as ImageIcon, Link2, Search, Check } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Link2, Search, Check, Plus } from 'lucide-react';
+
+const parseWeightGrams = (value) => {
+  const match = String(value || '').trim().match(/(\d+(?:\.\d+)?)\s*(kg|g)?/i);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  return Math.round(match[2]?.toLowerCase() === 'kg' ? amount * 1000 : amount);
+};
+
+const getInitialWeightOptions = (product) => {
+  if (!product) return [];
+  const baseWeight = parseWeightGrams(product?.weight) || 100;
+  const configuredWeights = Array.isArray(product?.weightOptions) ? product.weightOptions.map(Number) : [];
+  return [...new Set([...configuredWeights, baseWeight])].filter((grams) => Number.isInteger(grams) && grams > 0 && grams <= 10000).sort((a, b) => a - b);
+};
 
 const ProductFormModal = ({ product, products = [], onClose }) => {
   const dispatch = useDispatch();
@@ -14,6 +28,8 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
   const [saving, setSaving] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [relatedSearch, setRelatedSearch] = useState('');
+  const [weightOptions, setWeightOptions] = useState(() => getInitialWeightOptions(product));
+  const [newWeightOption, setNewWeightOption] = useState('');
   const [relatedProducts, setRelatedProducts] = useState(
     (product?.relatedProducts || []).map((related) => String(related?._id || related))
   );
@@ -34,7 +50,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
     fermentation: product?.fermentation || 'none',
     season: product?.season || 'spring',
     tastingNotes: product?.tastingNotes?.join(', ') || '',
-    weight: product?.weight || '',
+    weight: product?.weight || '100g',
     caffeine: product?.caffeine || 'medium',
     stockQuantity: product?.stockQuantity || '',
     inStock: product?.inStock !== undefined ? product.inStock : true,
@@ -77,6 +93,14 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
       }));
     }
   };
+
+  const addWeightOption = () => {
+    const grams = Number(newWeightOption);
+    if (!Number.isInteger(grams) || grams < 1 || grams > 10000) return;
+    setWeightOptions((current) => [...new Set([...current, grams])].sort((a, b) => a - b));
+    setNewWeightOption('');
+  };
+  const visibleWeightOptions = [...new Set([...weightOptions, parseWeightGrams(formData.weight) || 100])].sort((a, b) => a - b);
 
   const handleCategoryChange = (e) => {
     const selectedCategory = categories.find(c => c._id === e.target.value);
@@ -219,6 +243,8 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
       });
     }
     if (formData.weight) data.append('weight', formData.weight);
+    const baseWeightGrams = parseWeightGrams(formData.weight) || 100;
+    data.append('weightOptions', JSON.stringify([...new Set([...weightOptions, baseWeightGrams])].sort((a, b) => a - b)));
     data.append('caffeine', formData.caffeine);
     data.append('stockQuantity', Number(formData.stockQuantity));
     data.append('inStock', Number(formData.stockQuantity) > 0);
@@ -377,7 +403,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-deep-walnut/70 mb-1.5">
-                Weight
+                Base weight
               </label>
               <input
                 type="text"
@@ -387,6 +413,7 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                 className="w-full px-4 py-2.5 text-sm border border-imperial-gold/20 rounded-lg bg-white text-deep-walnut focus:outline-none focus:ring-2 focus:ring-imperial-gold/30 focus:border-imperial-gold"
                 placeholder="e.g., 100g"
               />
+              <p className="mt-1 text-xs text-deep-walnut/45">The product price is for this weight.</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-deep-walnut/70 mb-1.5">
@@ -400,6 +427,28 @@ const ProductFormModal = ({ product, products = [], onClose }) => {
                 className="w-full px-4 py-2.5 text-sm border border-imperial-gold/20 rounded-lg bg-white text-deep-walnut focus:outline-none focus:ring-2 focus:ring-imperial-gold/30 focus:border-imperial-gold"
                 placeholder="e.g., Darjeeling"
               />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-imperial-gold/20 bg-[#fbfaf6] p-4">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <label className="block text-sm font-medium text-deep-walnut/80">Available weight options</label>
+                <p className="mt-1 text-xs leading-5 text-deep-walnut/55">Add the pack sizes customers can choose. Prices scale from the base weight and product price.</p>
+              </div>
+              <span className="rounded-full bg-[#edf2e8] px-2.5 py-1 text-[11px] font-medium text-tea-green">{visibleWeightOptions.length} options</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {visibleWeightOptions.map((grams) => (
+                <span key={grams} className="inline-flex items-center gap-1.5 rounded-full border border-[#dce5d7] bg-white px-3 py-2 text-sm font-semibold text-tea-green">
+                  {grams}g{grams === parseWeightGrams(formData.weight) ? ' · base' : ''}
+                  {grams !== parseWeightGrams(formData.weight) && <button type="button" aria-label={`Remove ${grams} gram option`} onClick={() => setWeightOptions((current) => current.filter((value) => value !== grams))} className="rounded-full p-0.5 text-deep-walnut/45 transition hover:bg-[#f5eee3] hover:text-royal-terracotta"><X className="h-3.5 w-3.5" /></button>}
+                </span>
+              ))}
+              <div className="flex h-10 items-center overflow-hidden rounded-lg border border-imperial-gold/25 bg-white focus-within:border-imperial-gold focus-within:ring-2 focus-within:ring-imperial-gold/20">
+                <input type="number" min="1" max="10000" step="1" value={newWeightOption} onChange={(event) => setNewWeightOption(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addWeightOption(); } }} placeholder="Weight (g)" aria-label="New weight in grams" className="h-full w-24 border-0 bg-transparent px-3 text-sm outline-none" />
+                <button type="button" onClick={addWeightOption} className="flex h-full items-center gap-1 border-l border-imperial-gold/20 px-3 text-xs font-semibold text-tea-green transition hover:bg-[#f1f3eb]"><Plus className="h-3.5 w-3.5" />Add</button>
+              </div>
             </div>
           </div>
 

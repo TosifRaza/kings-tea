@@ -20,6 +20,15 @@ const OrderItemSchema = new mongoose.Schema({
     required: true,
     min: [1, 'Quantity must be at least 1']
   },
+  weight: {
+    type: String,
+    default: '',
+  },
+  weightGrams: {
+    type: Number,
+    min: 1,
+    max: 10000,
+  },
   image: {
     type: String,
     default: ''

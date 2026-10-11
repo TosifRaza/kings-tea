@@ -893,7 +893,7 @@ export default function UserDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-xs font-medium text-deep-walnut font-[family-name:var(--font-inter)]">{item.name}</p>
-                                  <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">Qty: {item.quantity}</p>
+                                  <p className="text-[10px] text-deep-walnut/40 font-[family-name:var(--font-inter)]">{item.weight || (item.weightGrams ? `${item.weightGrams}g` : '')}{item.weight || item.weightGrams ? ' · ' : ''}Qty: {item.quantity}</p>
                                 </div>
                               </div>
                               <p className="text-xs font-semibold text-deep-walnut font-[family-name:var(--font-inter)]">

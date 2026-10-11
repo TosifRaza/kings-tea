@@ -2142,9 +2142,9 @@ export default function ProductDetail() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#a9772f] sm:text-xs">Selected for you</p>
               <h2 className="mt-1 font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#123b2d] sm:text-4xl">Related products</h2>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {related.map((p) => (
-                <ProductCard key={p._id || p.id} product={p} variant="cherished" />
+                <ProductCard key={p._id || p.id} product={p} variant="collection" />
               ))}
               {related.length === 0 && (
                 <p className="col-span-full rounded-xl border border-[#e8e4d9] bg-white py-10 text-center text-sm text-[#6c756f]">

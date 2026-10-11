@@ -17,8 +17,9 @@ function ProductCard({ product, variant = 'default' }) {
   const [imageFailed, setImageFailed] = useState(false);
   const image = product.images?.[0];
   const imageUrl = image?.startsWith('/uploads/') ? `${IMAGE_URL}${image}` : image;
-  const packetImage = product.images?.length > 1 ? product.images[product.images.length - 1] : '';
+  const packetImage = product.images?.find((imagePath) => imagePath.includes('/kingstea-packets/')) || '';
   const packetImageUrl = packetImage?.startsWith('/uploads/') ? `${IMAGE_URL}${packetImage}` : packetImage;
+  const thumbnailUrl = packetImageUrl || imageUrl;
   const price = Number(product.price || 0);
   const comparePrice = Number(product.comparePrice || 0);
   const hasDiscount = comparePrice > price;
@@ -65,42 +66,22 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className={`relative flex items-center justify-center overflow-hidden ${isCherished ? 'aspect-[1.32/1] bg-[#eef0df]' : 'aspect-[1.62/1] bg-[#e7e9db]'}`}
+            className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#e7e9db]"
           >
-            {!isCherished && imageUrl && !imageFailed && (
+            {thumbnailUrl && !imageFailed ? (
               <img
-                src={imageUrl}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                loading="lazy"
-                decoding="async"
-                onError={() => setImageFailed(true)}
-              />
-            )}
-            {!isCherished && <div className="absolute inset-0 bg-gradient-to-t from-[#082c22]/35 via-[#082c22]/5 to-transparent" />}
-            {isCherished && imageUrl && !imageFailed ? (
-              <img
-                src={imageUrl}
-                alt={product.name}
-                className="h-full w-full scale-[1.12] object-cover transition-transform duration-500 group-hover:scale-[1.16]"
-                loading="lazy"
-                decoding="async"
-                onError={() => setImageFailed(true)}
-              />
-            ) : !isCherished && packetImageUrl ? (
-              <img
-                src={packetImageUrl}
+                src={thumbnailUrl}
                 alt={`${product.name} King's Tea packet`}
-                className="relative z-[1] h-[94%] w-[48%] object-contain drop-shadow-[0_10px_12px_rgba(0,0,0,0.32)] transition-transform duration-500 group-hover:scale-[1.03]"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 loading="lazy"
                 decoding="async"
+                onError={() => setImageFailed(true)}
               />
-            ) : isCherished ? (
+            ) : (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#dfe8d2] to-[#a8c19b]">
                 <span className="font-[family-name:var(--font-playfair)] text-6xl font-semibold text-tea-green/70" aria-hidden="true">{product.name?.charAt(0)}</span>
               </div>
-            ) : null}
+            )}
           </Link>
 
           {!isCherished && <span className="absolute left-2 top-2 rounded-full border border-white/30 bg-[#073b2d]/90 px-2 py-1 text-[9px] font-semibold text-white shadow-sm sm:left-2.5 sm:top-2.5 sm:text-[10px]">{product.category || 'Premium Tea'}</span>}
@@ -203,10 +184,10 @@ function ProductCard({ product, variant = 'default' }) {
           aria-label={`View ${product.name}`}
           className="flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#faf9f6] p-2 sm:p-3"
         >
-          {imageUrl && !imageFailed ? (
+          {thumbnailUrl && !imageFailed ? (
             <img
-              src={imageUrl}
-              alt={product.name}
+              src={thumbnailUrl}
+              alt={`${product.name} King's Tea packet`}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               loading="lazy"
               decoding="async"

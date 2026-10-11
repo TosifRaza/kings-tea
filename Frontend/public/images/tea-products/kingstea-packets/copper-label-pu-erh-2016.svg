@@ -1,34 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1100" viewBox="0 0 900 1100" role="img" aria-labelledby="title desc">
   <title id="title">King's Tea Copper Label Pu-erh 2016 premium tea packet</title>
-  <desc id="desc">Original illustrated King's Tea premium PU-ERH TEA 100 gram packet mockup for Copper Label Pu-erh 2016.</desc>
+  <desc id="desc">A pu-erh tea packet in a scenic mountain tea garden, made for Copper Label Pu-erh 2016.</desc>
   <defs>
-    <linearGradient id="pouch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183b2d"/><stop offset=".55" stop-color="#557641"/><stop offset="1" stop-color="#183b2d"/></linearGradient>
-    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#c7a75b"/><stop offset=".5" stop-color="#f1dda0"/><stop offset="1" stop-color="#9b742e"/></linearGradient>
-    <filter id="shadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="24" stdDeviation="22" flood-color="#1a2c20" flood-opacity=".28"/></filter>
-    <pattern id="grain" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M0 8h32M0 25h32" stroke="#fff" stroke-opacity=".035"/><circle cx="8" cy="17" r="1" fill="#fff" fill-opacity=".07"/></pattern>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#e9c99f"/><stop offset=".45" stop-color="#f6dfba"/><stop offset="1" stop-color="#a5b58a"/></linearGradient>
+    <linearGradient id="hills" x2="0" y2="1"><stop stop-color="#61795a"/><stop offset="1" stop-color="#183d2d"/></linearGradient>
+    <linearGradient id="pouch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#123a3e"/><stop offset=".5" stop-color="#3a7970"/><stop offset="1" stop-color="#123a3e"/></linearGradient>
+    <linearGradient id="foil" x2="1"><stop stop-color="#ae8541"/><stop offset=".5" stop-color="#f0d993"/><stop offset="1" stop-color="#a57a34"/></linearGradient>
+    <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#684323"/><stop offset=".35" stop-color="#9b6636"/><stop offset="1" stop-color="#3d281b"/></linearGradient>
+    <linearGradient id="tea" x2="0" y2="1"><stop stop-color="#ffbf54"/><stop offset="1" stop-color="#8e3515"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="shadow" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#10271d" flood-opacity=".42"/></filter>
+    <filter id="cupShadow" x="-40%" y="-40%" width="180%" height="190%"><feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#20170e" flood-opacity=".5"/></filter>
+    <pattern id="grain" width="38" height="34" patternUnits="userSpaceOnUse"><path d="M0 8h38M0 27h38" stroke="#fff" stroke-opacity=".045"/><circle cx="9" cy="17" r="1.3" fill="#fff" fill-opacity=".1"/></pattern>
   </defs>
-  <rect width="900" height="1100" rx="45" fill="#f7f3e8"/>
-  <ellipse cx="456" cy="1008" rx="275" ry="36" fill="#18271f" opacity=".14"/>
-  <g filter="url(#shadow)">
-    <path d="M200 118 Q210 92 248 92 H652 Q690 92 700 118 L726 190 L712 910 Q710 955 672 968 Q450 1000 228 968 Q190 955 188 910 L174 190 Z" fill="url(#pouch)" stroke="url(#foil)" stroke-width="7"/>
-    <path d="M188 193 H712 M194 212 H706" stroke="#e7cf85" stroke-opacity=".67" stroke-width="5"/>
-    <path d="M198 232 H702 V903 Q450 930 198 903 Z" fill="url(#grain)"/>
-    <path d="M260 287 Q450 243 640 287 L640 297 Q450 265 260 297Z" fill="url(#foil)" opacity=".9"/>
-    <circle cx="450" cy="365" r="64" fill="none" stroke="url(#foil)" stroke-width="4"/>
-    <path d="M450 318 C421 350 425 386 450 403 C475 386 479 350 450 318Z" fill="none" stroke="#faf4df" stroke-width="5"/>
-    <path d="M450 337 V397 M450 365 Q430 350 425 341 M450 375 Q470 357 475 346" fill="none" stroke="#faf4df" stroke-width="4" stroke-linecap="round"/>
-    <text x="450" y="472" text-anchor="middle" font-family="Georgia,serif" font-size="33" letter-spacing="8" fill="#faf4df">KING'S TEA</text>
-    <path d="M310 497 H590" stroke="url(#foil)" stroke-width="3"/>
-    <text x="450" y="545" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" letter-spacing="5" fill="#f5e4b1">PURE TEA · TIMELESS TASTE</text>
-    <text text-anchor="middle" font-family="Georgia,serif" font-size="43" font-weight="bold" fill="#faf4df"><tspan x="450" y="622">Copper Label Pu-erh</tspan><tspan x="450" y="671">2016</tspan></text>
-    <text x="450" y="710" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" letter-spacing="4" fill="#ead58e">PU-ERH TEA</text>
-    <path d="M295 741 H605" stroke="url(#foil)" stroke-width="2" opacity=".85"/>
-    <text x="450" y="789" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#faf4df">warm · mellow · rounded</text>
-    <g transform="translate(450 846)" fill="none" stroke="#e8d58f" stroke-width="4">
-      <path d="M-62 0 Q0 -38 62 0 Q0 38 -62 0Z"/><path d="M-43 0 Q0 -22 43 0 Q0 22 -43 0Z"/>
-      <path d="M-7 0 Q-2 -19 15 -25 Q14 -5 0 2 M0 0 Q-1 14 10 22"/>
-    </g>
-    <text x="450" y="922" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" letter-spacing="4" fill="#faf4df">NET WT. 100g  ·  ₹6,366</text>
+
+  <!-- A shared tea-garden setting keeps every product thumbnail in one family. -->
+  <rect width="900" height="1100" fill="url(#sky)"/>
+  <circle cx="738" cy="164" r="66" fill="#fff1bd" opacity=".86" filter="url(#soft)"/>
+  <circle cx="738" cy="164" r="32" fill="#fff0bd" opacity=".9"/>
+  <path d="M0 378 Q132 260 266 334 T530 307 T900 332 V700 H0Z" fill="#8b9b7a" opacity=".62" filter="url(#soft)"/>
+  <path d="M0 435 Q153 292 306 401 Q424 291 574 390 Q708 281 900 399 V760 H0Z" fill="#718768" opacity=".76"/>
+  <path d="M0 500 Q162 366 328 468 Q489 354 640 458 Q774 366 900 454 V810 H0Z" fill="url(#hills)"/>
+  <g fill="none" stroke="#9eaa72" stroke-width="12" opacity=".46">
+    <path d="M-40 558 Q125 446 310 535 T680 510 T950 530"/><path d="M-40 617 Q135 504 320 595 T680 570 T950 590"/>
+    <path d="M-40 681 Q135 568 320 659 T680 634 T950 654"/>
   </g>
+  <g fill="#174a30" opacity=".78"><circle cx="42" cy="468" r="95"/><circle cx="114" cy="442" r="70"/><circle cx="840" cy="460" r="112"/><circle cx="765" cy="430" r="72"/></g>
+  <g fill="#3f7442" opacity=".8"><circle cx="18" cy="536" r="66"/><circle cx="875" cy="546" r="72"/><circle cx="84" cy="620" r="58"/><circle cx="828" cy="630" r="64"/></g>
+
+  <!-- Rustic tasting table and loose tea establish the same product-photo framing. -->
+  <path d="M0 805 Q450 770 900 805 V1100 H0Z" fill="url(#wood)"/>
+  <path d="M0 840 Q450 808 900 840 M0 912 Q450 880 900 912 M0 1000 Q450 970 900 1000" fill="none" stroke="#d19a57" stroke-width="5" opacity=".32"/>
+  <path d="M28 811 Q72 778 105 817 Q71 844 28 811 M855 818 Q814 779 778 817 Q817 847 855 818" fill="#315a32" stroke="#b18a42" stroke-width="2"/>
+  <g fill="#261a12" opacity=".95">
+    <ellipse cx="747" cy="1000" rx="83" ry="30"/><ellipse cx="714" cy="1014" rx="54" ry="17"/>
+    <path d="M690 991q-14-30 7-28t11 34q18-38 30-22t-12 37q35-29 41-9t-43 25q-35 7-34-37Z"/>
+    <path d="M771 1002q-8-35 9-32t9 39q21-31 31-15t-21 30q36-20 38-2t-42 18Z"/>
+  </g>
+
+  <!-- Product pouch: identical silhouette and label layout, with a product-specific color. -->
+  <g filter="url(#shadow)">
+    <path d="M229 288 Q238 265 273 265 H627 Q662 265 671 288 L693 346 L682 843 Q680 874 650 885 Q450 906 250 885 Q220 874 218 843 L207 346 Z" fill="url(#pouch)" stroke="url(#foil)" stroke-width="6"/>
+    <path d="M213 346 H687 M218 363 H682" stroke="#edda9d" stroke-opacity=".7" stroke-width="4"/>
+    <path d="M229 383 H671 V838 Q450 861 229 838Z" fill="url(#grain)"/>
+    <path d="M279 416 Q450 381 621 416 L621 426 Q450 401 279 426Z" fill="url(#foil)" opacity=".88"/>
+    <circle cx="450" cy="465" r="43" fill="none" stroke="url(#foil)" stroke-width="3.5"/>
+    <path d="M450 433 C430 454 432 478 450 489 C468 478 470 454 450 433Z M450 444 V485 M450 463 Q437 452 433 447 M450 470 Q463 458 467 451" fill="none" stroke="#f8f0d9" stroke-width="3.2" stroke-linecap="round"/>
+    <text x="450" y="532" text-anchor="middle" font-family="Georgia,serif" font-size="26" letter-spacing="6" fill="#f8f0d9">KING'S TEA</text>
+    <path d="M328 550 H572" stroke="url(#foil)" stroke-width="2.5"/>
+    <text x="450" y="581" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" letter-spacing="3.4" fill="#f5e4b1">PURE TEA · TIMELESS TASTE</text>
+    <text text-anchor="middle" font-family="Georgia,serif" font-size="44" font-weight="bold" fill="#fff4d9"><tspan x="450" y="590">Copper Label Pu-erh</tspan><tspan x="450" y="636">2016</tspan></text>
+    <text x="450" y="685" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" letter-spacing="3" fill="#eed999">PU-ERH TEA</text>
+    <path d="M327 728 H573" stroke="url(#foil)" stroke-width="2" opacity=".88"/>
+    <text x="450" y="763" text-anchor="middle" font-family="Georgia,serif" font-size="17" fill="#fff4d9">warm  ·  mellow  ·  rounded</text>
+    <g transform="translate(450 797)" fill="none" stroke="#ead48d" stroke-width="3"><path d="M-42 0 Q0 -26 42 0 Q0 26 -42 0Z"/><path d="M-28 0 Q0 -17 28 0 Q0 17 -28 0Z"/><path d="M0 0 Q0 -17 15 -22 Q14 -5 0 2 M0 0 Q-1 11 9 17"/></g>
+    <text x="450" y="852" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" letter-spacing="2.4" fill="#fff4d9">NET WT. 100g</text>
+  </g>
+
+  <!-- Small glass cup and tea saucer sit in front of the packet. -->
+  <g filter="url(#cupShadow)">
+    <ellipse cx="176" cy="1002" rx="130" ry="25" fill="#4a2d18" opacity=".9"/>
+    <ellipse cx="176" cy="990" rx="126" ry="23" fill="#b9874b" stroke="#e6c17a" stroke-width="4"/>
+    <path d="M84 902 Q86 887 104 887 H239 Q257 887 260 904 L247 972 Q242 993 222 996 H121 Q101 992 97 972Z" fill="#f5ddaa" fill-opacity=".2" stroke="#ffe3a5" stroke-width="6"/>
+    <path d="M99 922 H246 L237 968 Q234 982 218 984 H126 Q109 981 106 966Z" fill="url(#tea)" opacity=".9"/>
+    <path d="M260 915 Q302 910 301 942 Q299 971 248 969" fill="none" stroke="#ffe3a5" stroke-width="8"/>
+    <ellipse cx="172" cy="906" rx="72" ry="10" fill="#fff0cc" fill-opacity=".75" stroke="#fff0cc" stroke-width="3"/>
+  </g>
+  <g fill="none" stroke="#fff4dc" stroke-width="4" stroke-linecap="round" opacity=".55"><path d="M143 876 Q127 850 148 831 Q161 817 151 795"/><path d="M181 876 Q166 851 186 832 Q199 815 188 791"/></g>
+  <g fill="#284e2f" stroke="#c3a65b" stroke-width="2"><path d="M37 760 Q70 705 103 750 Q79 775 37 760Z"/><path d="M8 790 Q37 736 69 777 Q47 802 8 790Z"/><path d="M815 760 Q852 704 883 749 Q857 776 815 760Z"/></g>
 </svg>

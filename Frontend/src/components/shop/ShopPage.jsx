@@ -378,7 +378,7 @@ export default function ShopPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 gap-2 sm:gap-5 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
                     {paginatedProducts.map((product) => (
                       <ProductCard key={product._id || product.id} product={product} variant="collection" />
                     ))}

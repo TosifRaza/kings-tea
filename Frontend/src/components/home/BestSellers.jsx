@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin } from 'lucide-react';
+import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin, Leaf } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';

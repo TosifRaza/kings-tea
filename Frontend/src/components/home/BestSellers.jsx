@@ -100,10 +100,6 @@ function ProductCard({ product, variant = 'default' }) {
               <span className="text-xs font-semibold text-[#34483f]">{rating.toFixed(1)}</span>
             </Link>
           </div>
-          <p className="line-clamp-2 min-h-8 text-[11px] leading-4 text-[#52635b]">
-            {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
-          </p>
-
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
               <span className="text-lg font-bold text-[#07553e]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>

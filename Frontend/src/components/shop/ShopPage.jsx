@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Leaf, LayoutGrid } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Leaf, LayoutGrid, Package, IndianRupee, MapPin } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts } from '../../store/productSlice';
 import { fetchCategories } from '../../store/categorySlice';
 import { ProductCard } from '../home/BestSellers';
+import { IMAGE_URL } from '../../utils/image';
 
 function FilterSidebar({
   categories,
@@ -24,40 +25,41 @@ function FilterSidebar({
 }) {
   const origins = [...new Set(allProducts.map((p) => p.origin).filter(Boolean))];
   const fermentations = [...new Set(allProducts.map((p) => p.fermentation).filter(Boolean))];
+  const countFor = (field, value) => allProducts.filter((product) => product[field] === value).length;
+  const sectionHeading = (Icon, label) => (
+    <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#173a2d]">
+      <Icon className="h-4 w-4 text-[#0a5941]" />{label}
+    </h3>
+  );
+  const filterLabel = (label, checked, onChange, count) => (
+    <label className="group flex cursor-pointer items-center gap-2.5 text-[12px] text-[#52605a] transition hover:text-[#123d2d]">
+      <input type="checkbox" checked={checked} onChange={onChange} className="h-4 w-4 rounded accent-[#075b40]" />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="min-w-6 rounded-full bg-[#edf0e7] px-1.5 py-0.5 text-center text-[10px] text-[#4e6659]">{count}</span>
+    </label>
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-sm mb-3">
-          Category
-        </h3>
-        <div className="space-y-2">
+    <div className="space-y-5 rounded-xl border border-[#e9e7dc] bg-[#fffefa] p-4 shadow-[0_5px_18px_rgba(31,48,38,0.06)] sm:p-5">
+      <div className="border-b border-[#eeece4] pb-4">
+        {sectionHeading(Leaf, 'Category')}
+        <div className="space-y-2.5">
           {categories.map((cat) => (
-            <label key={cat._id || cat} className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedCategories.includes(cat.name || cat)}
-                onChange={() => toggleFilter(selectedCategories, setSelectedCategories, cat.name || cat)}
-                className="accent-tea-green"
-              />
-              <span className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] group-hover:text-deep-walnut transition-colors">
-                {cat.name || cat}
-              </span>
-            </label>
+            <div key={cat._id || cat}>
+              {filterLabel(cat.name || cat, selectedCategories.includes(cat.name || cat), () => toggleFilter(selectedCategories, setSelectedCategories, cat.name || cat), countFor('category', cat.name || cat))}
+            </div>
           ))}
         </div>
       </div>
 
-      <div>
-        <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-sm mb-3">
-          Price Range
-        </h3>
+      <div className="border-b border-[#eeece4] pb-4">
+        {sectionHeading(IndianRupee, 'Price Range')}
         <div className="flex items-center gap-2">
           <input
             type="number"
             value={priceRange[0]}
             onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-            className="h-8 text-xs border border-imperial-gold/20 px-2 w-full focus:outline-none focus:border-imperial-gold"
+            className="h-9 w-full rounded-md border border-[#e8e6dc] bg-[#fffefa] px-2 text-xs focus:border-[#0c6146] focus:outline-none"
             placeholder="Min"
           />
           <span className="text-deep-walnut/40 text-xs">—</span>
@@ -65,50 +67,30 @@ function FilterSidebar({
             type="number"
             value={priceRange[1]}
             onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-            className="h-8 text-xs border border-imperial-gold/20 px-2 w-full focus:outline-none focus:border-imperial-gold"
+            className="h-9 w-full rounded-md border border-[#e8e6dc] bg-[#fffefa] px-2 text-xs focus:border-[#0c6146] focus:outline-none"
             placeholder="Max"
           />
         </div>
       </div>
 
-      <div>
-        <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-sm mb-3">
-          Origin
-        </h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto">
+      <div className="border-b border-[#eeece4] pb-4">
+        {sectionHeading(MapPin, 'Origin')}
+        <div className="max-h-48 space-y-2.5 overflow-y-auto">
           {origins.map((origin) => (
-            <label key={origin} className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedOrigins.includes(origin)}
-                onChange={() => toggleFilter(selectedOrigins, setSelectedOrigins, origin)}
-                className="accent-tea-green"
-              />
-              <span className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] group-hover:text-deep-walnut transition-colors">
-                {origin}
-              </span>
-            </label>
+            <div key={origin}>
+              {filterLabel(origin, selectedOrigins.includes(origin), () => toggleFilter(selectedOrigins, setSelectedOrigins, origin), countFor('origin', origin))}
+            </div>
           ))}
         </div>
       </div>
 
       <div>
-        <h3 className="font-[family-name:var(--font-playfair)] font-semibold text-deep-walnut text-sm mb-3">
-          Fermentation
-        </h3>
-        <div className="space-y-2">
+        {sectionHeading(Package, 'Fermentation')}
+        <div className="space-y-2.5">
           {fermentations.map((f) => (
-            <label key={f} className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={selectedFermentations.includes(f)}
-                onChange={() => toggleFilter(selectedFermentations, setSelectedFermentations, f)}
-                className="accent-tea-green"
-              />
-              <span className="text-deep-walnut/70 text-xs font-[family-name:var(--font-inter)] group-hover:text-deep-walnut transition-colors">
-                {f}
-              </span>
-            </label>
+            <div key={f}>
+              {filterLabel(f === 'none' ? 'None (Non-fermented)' : f, selectedFermentations.includes(f), () => toggleFilter(selectedFermentations, setSelectedFermentations, f), countFor('fermentation', f))}
+            </div>
           ))}
         </div>
       </div>
@@ -116,7 +98,7 @@ function FilterSidebar({
       {hasFilters && (
         <button
           onClick={clearFilters}
-          className="w-full border border-royal-terracotta/30 text-royal-terracotta hover:bg-royal-terracotta/5 text-xs uppercase tracking-wider rounded-none py-2 transition-colors"
+          className="w-full rounded-lg border border-[#0c6146] bg-[#075b40] py-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-[#064833]"
         >
           Clear All Filters
         </button>
@@ -132,6 +114,8 @@ export default function ShopPage() {
 
   const { products, loading } = useSelector((state) => state.products);
   const { categories } = useSelector((state) => state.categories);
+  const bannerImage = products.find((product) => product.images?.[0])?.images?.[0] || '';
+  const bannerImageUrl = bannerImage.startsWith('/uploads/') ? `${IMAGE_URL}${bannerImage}` : bannerImage;
 
   const [query, setQuery] = useState(initialSearch);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -241,28 +225,14 @@ export default function ShopPage() {
       className="min-h-screen bg-[#fbfaf5] pb-12 pt-[68px] sm:pt-20"
     >
       <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-        <section className="relative -mx-2 mb-4 flex min-h-[122px] flex-col items-center justify-center overflow-hidden border-b border-[#e8e2d3] bg-[linear-gradient(180deg,#faf8ef_0%,#f3f0e4_72%,#eeecdf_100%)] px-4 py-4 text-center sm:mx-0 sm:mb-7 sm:min-h-[190px] sm:rounded-2xl">
-          <svg className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] w-full opacity-60" viewBox="0 0 1200 180" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 112 120 78 220 101 330 54 440 101 555 68 670 103 790 48 900 96 1010 55 1120 93 1200 68V180H0Z" fill="#fffdf5" />
-            <path d="M0 139 140 105 270 127 390 91 520 131 650 100 770 134 900 91 1040 128 1140 96 1200 118V180H0Z" fill="#e7e7d9" opacity=".65" />
-          </svg>
-          <svg className="pointer-events-none absolute -left-3 top-1 h-[92%] w-[86px] text-[#61784d]/65 sm:w-28" viewBox="0 0 100 220" fill="none" aria-hidden="true">
-            <path d="M4 210C44 166 22 105 83 18M16 175C8 146-1 137 2 117c18 2 28 15 29 34M30 139c-3-24 2-39 20-52 12 20 7 38-11 55M49 100c4-27 18-42 38-49 8 25-3 44-34 56M18 169c22-15 41-15 57-5-12 23-31 28-55 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 117c18 2 28 15 29 34-18-2-28-14-29-34ZM50 87c12 20 7 38-11 55-7-21-3-39 11-55ZM87 51c8 25-3 44-34 56 4-27 18-42 34-56ZM75 164c-12 23-31 28-55 17 22-15 41-15 55-17Z" fill="currentColor" fillOpacity=".22" />
-          </svg>
-          <svg className="pointer-events-none absolute -right-3 top-1 h-[92%] w-[86px] -scale-x-100 text-[#61784d]/65 sm:w-28" viewBox="0 0 100 220" fill="none" aria-hidden="true">
-            <path d="M4 210C44 166 22 105 83 18M16 175C8 146-1 137 2 117c18 2 28 15 29 34M30 139c-3-24 2-39 20-52 12 20 7 38-11 55M49 100c4-27 18-42 38-49 8 25-3 44-34 56M18 169c22-15 41-15 57-5-12 23-31 28-55 17" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M2 117c18 2 28 15 29 34-18-2-28-14-29-34ZM50 87c12 20 7 38-11 55-7-21-3-39 11-55ZM87 51c8 25-3 44-34 56 4-27 18-42 34-56ZM75 164c-12 23-31 28-55 17 22-15 41-15 55-17Z" fill="currentColor" fillOpacity=".22" />
-          </svg>
-          <div className="relative z-10 mb-1 flex items-center gap-2 text-[#c99c3a]">
-            <span className="h-px w-8 bg-[#d6a12e]" />
-            <Leaf className="h-5 w-5 rotate-[-28deg] fill-current/30" />
-            <span className="h-px w-8 bg-[#d6a12e]" />
+        <section className="relative -mx-2 mb-4 flex min-h-[112px] items-center justify-between overflow-hidden bg-[#062a20] px-5 py-4 text-white sm:mx-0 sm:mb-6 sm:min-h-[100px] sm:rounded-xl sm:px-7">
+          {bannerImageUrl && <img src={bannerImageUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-30" />}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#041c17]/95 via-[#06392b]/80 to-[#062a20]/55" />
+          <div className="relative z-10">
+            <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold leading-tight sm:text-[28px]">Our Premium Tea Collection</h1>
+            <p className="mt-1 text-[11px] tracking-wide text-white/80 sm:text-xs">Pure leaves&nbsp; · &nbsp;Rich aroma&nbsp; · &nbsp;Timeless taste</p>
           </div>
-          <h1 className="relative z-10 font-[family-name:var(--font-playfair)] text-[30px] font-bold leading-none tracking-tight text-[#0d3025] sm:text-5xl">
-            Our Collection
-          </h1>
-          <p className="relative z-10 mt-2 font-[family-name:var(--font-playfair)] text-base text-[#60776c] sm:mt-3 sm:text-xl">Find your perfect cup</p>
+          <p className="relative z-10 hidden items-center gap-2 text-xs text-white/90 sm:flex" aria-label="Breadcrumb">⌂ <span>Home</span><span className="text-white/50">/</span><span>Shop</span></p>
         </section>
 
         {/* Search & Sort Bar */}

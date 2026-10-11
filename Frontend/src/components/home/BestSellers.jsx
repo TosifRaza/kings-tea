@@ -1,10 +1,11 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, Crown, Sparkles, Flame } from 'lucide-react';
+import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { fetchProducts } from '../../store/productSlice';
+import { addToCart, openCart } from '../../store/cartSlice';
 import { IMAGE_URL } from "../../utils/image";
 
 function ProductCard({ product, variant = 'default' }) {
@@ -16,6 +17,8 @@ function ProductCard({ product, variant = 'default' }) {
   const [imageFailed, setImageFailed] = useState(false);
   const image = product.images?.[0];
   const imageUrl = image?.startsWith('/uploads/') ? `${IMAGE_URL}${image}` : image;
+  const packetImage = product.images?.length > 1 ? product.images[product.images.length - 1] : '';
+  const packetImageUrl = packetImage?.startsWith('/uploads/') ? `${IMAGE_URL}${packetImage}` : packetImage;
   const price = Number(product.price || 0);
   const comparePrice = Number(product.comparePrice || 0);
   const hasDiscount = comparePrice > price;
@@ -33,6 +36,20 @@ function ProductCard({ product, variant = 'default' }) {
 
   if (variant === 'collection' || variant === 'cherished') {
     const isCherished = variant === 'cherished';
+    const addProductToCart = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (isOutOfStock) return;
+      dispatch(addToCart({
+        productId,
+        productName: product.name,
+        price,
+        image: imageUrl,
+        weight: product.weight,
+        quantity: 1,
+      }));
+      dispatch(openCart());
+    };
     return (
       <motion.article
         layout
@@ -42,31 +59,52 @@ function ProductCard({ product, variant = 'default' }) {
         onKeyDown={openProductFromKeyboard}
         tabIndex={0}
         aria-label={`View ${product.name}`}
-        className={`group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35] ${isCherished ? 'sm:rounded-[22px]' : 'sm:rounded-[26px]'}`}
+        className={`group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#e8e6dc] bg-[#fffefa] shadow-[0_8px_24px_rgba(58,40,28,0.10)] transition-shadow duration-200 hover:shadow-[0_12px_30px_rgba(58,40,28,0.15)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35] ${isCherished ? 'sm:rounded-[22px]' : 'sm:rounded-[15px]'}`}
       >
-        <div className="relative">
+        <div className={`relative ${isCherished ? '' : 'bg-[#e7e9db]'}`}>
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className={`flex items-center justify-center overflow-hidden bg-[#eef0df] ${isCherished ? 'aspect-[1.32/1]' : 'aspect-[1.3/1]'}`}
+            className={`relative flex items-center justify-center overflow-hidden ${isCherished ? 'aspect-[1.32/1] bg-[#eef0df]' : 'aspect-[1.62/1] bg-[#e7e9db]'}`}
           >
-            {imageUrl && !imageFailed ? (
+            {!isCherished && imageUrl && !imageFailed && (
               <img
                 src={imageUrl}
-                alt={product.name}
-                className={`h-full w-full object-cover transition-transform duration-500 ${isCherished ? 'scale-[1.12] group-hover:scale-[1.16]' : 'group-hover:scale-[1.04]'}`}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                 loading="lazy"
                 decoding="async"
                 onError={() => setImageFailed(true)}
               />
-            ) : (
+            )}
+            {!isCherished && <div className="absolute inset-0 bg-gradient-to-t from-[#082c22]/35 via-[#082c22]/5 to-transparent" />}
+            {isCherished && imageUrl && !imageFailed ? (
+              <img
+                src={imageUrl}
+                alt={product.name}
+                className="h-full w-full scale-[1.12] object-cover transition-transform duration-500 group-hover:scale-[1.16]"
+                loading="lazy"
+                decoding="async"
+                onError={() => setImageFailed(true)}
+              />
+            ) : !isCherished && packetImageUrl ? (
+              <img
+                src={packetImageUrl}
+                alt={`${product.name} King's Tea packet`}
+                className="relative z-[1] h-[94%] w-[48%] object-contain drop-shadow-[0_10px_12px_rgba(0,0,0,0.32)] transition-transform duration-500 group-hover:scale-[1.03]"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : isCherished ? (
               <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#dfe8d2] to-[#a8c19b]">
                 <span className="font-[family-name:var(--font-playfair)] text-6xl font-semibold text-tea-green/70" aria-hidden="true">{product.name?.charAt(0)}</span>
               </div>
-            )}
+            ) : null}
           </Link>
 
-          <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-4 sm:top-4">
+          {!isCherished && <span className="absolute left-2 top-2 rounded-full border border-white/30 bg-[#073b2d]/90 px-2 py-1 text-[9px] font-semibold text-white shadow-sm sm:left-2.5 sm:top-2.5 sm:text-[10px]">{product.category || 'Premium Tea'}</span>}
+          {isCherished && <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5 sm:left-4 sm:top-4">
             {product.bestSeller && (
               <span className={`inline-flex items-center gap-1 font-semibold shadow-sm ${isCherished ? 'rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] text-white sm:gap-1.5 sm:px-3 sm:text-xs' : 'rounded-md bg-[#07553e] px-1.5 py-1 text-[8px] text-white sm:gap-1.5 sm:rounded-lg sm:px-2.5 sm:py-1.5 sm:text-xs'}`}>
                 <Crown className="h-3 w-3 text-[#f5d27b] sm:h-3.5 sm:w-3.5" /> Best Seller
@@ -83,38 +121,36 @@ function ProductCard({ product, variant = 'default' }) {
             {isCherished && !product.bestSeller && !product.isNew && !product.featured && (
               <span className="inline-flex items-center gap-1 rounded-full border border-white/35 bg-[#07553e] px-2 py-1.5 text-[9px] font-semibold text-white shadow-sm sm:px-3 sm:text-xs"><Flame className="h-3 w-3" />Popular</span>
             )}
-          </div>
+          </div>}
 
           <button
             onClick={() => dispatch(toggleWishlist(productId))}
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white sm:right-3 sm:top-3 sm:h-10 sm:w-10"
+            className={`absolute right-2 top-2 z-[2] flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e8df] bg-white/95 shadow-sm transition hover:scale-105 hover:bg-white sm:right-3 sm:top-3 sm:h-9 sm:w-9 ${isCherished ? 'sm:h-10 sm:w-10' : ''}`}
           >
             <Heart className={`h-4 w-4 transition-colors sm:h-5 sm:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#263b32]'}`} />
           </button>
         </div>
 
-        <div className={`flex flex-1 flex-col pb-3 pt-3 ${isCherished ? 'px-3 sm:px-4 sm:pb-4' : 'px-2.5 sm:px-5 sm:pb-5 sm:pt-4'}`}>
-          <div className={`mb-1 flex min-w-0 ${isCherished ? '' : 'items-center justify-between gap-1'}`}>
-            <p className={`min-w-0 truncate font-semibold uppercase text-[#34483f] ${isCherished ? 'text-[10px] tracking-[0.08em] sm:text-xs sm:tracking-[0.12em]' : 'flex-1 text-[10px] tracking-[0.03em] sm:text-[13px] sm:tracking-[0.13em]'}`}>
+        <div className={`flex flex-1 flex-col pb-3 pt-2 ${isCherished ? 'px-3 sm:px-4 sm:pb-4 sm:pt-3' : 'px-2.5 sm:px-3.5 sm:pb-3 sm:pt-2'}`}>
+          {isCherished && <div className="mb-1 flex min-w-0">
+            <p className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[#34483f] sm:text-xs sm:tracking-[0.12em]">
               {product.origin || product.category || 'Premium tea'}
             </p>
-            {!isCherished && (
-              <Link to={`/product/${productSlug}`} className="inline-flex shrink-0 items-center gap-0.5 text-[8px] sm:gap-1 sm:text-xs" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
-                <span className="flex items-center" aria-hidden="true">
-                  {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-2 w-2 sm:h-3.5 sm:w-3.5 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
-                </span>
-                <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
-                <span className="hidden text-[#61756d] sm:inline">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
-              </Link>
-            )}
-          </div>
-          <Link to={`/product/${productSlug}`} className={`line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] font-semibold leading-tight text-[#202923] hover:text-tea-green ${isCherished ? 'text-lg sm:text-[22px]' : 'text-xl sm:text-[26px]'}`}>
+          </div>}
+          <Link to={`/product/${productSlug}`} className={`line-clamp-2 min-h-[1.5em] font-[family-name:var(--font-playfair)] font-semibold leading-tight text-[#202923] hover:text-tea-green ${isCherished ? 'text-lg sm:text-[22px]' : 'text-base sm:text-[17px]'}`}>
             {product.name}
           </Link>
-          <p className={`line-clamp-2 ${isCherished ? 'mt-1 min-h-9 text-xs leading-[18px] sm:mt-1.5 sm:min-h-10 sm:text-sm sm:leading-5' : 'mt-1 min-h-9 text-[13px] leading-[18px] text-[#61756d] sm:mt-2 sm:min-h-10 sm:text-base sm:leading-[22px]'}`}>
+          {!isCherished && <Link to={`/product/${productSlug}`} className="mt-1 inline-flex min-w-0 items-center gap-1 text-[9px] sm:gap-1.5 sm:text-[10px]" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+            <span className="flex items-center" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(product.rating || 0) ? 'fill-[#efa900] text-[#efa900]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
+            </span>
+            <span className="font-medium text-[#263b32]">{Number(product.rating || 0).toFixed(1)}</span>
+            <span className="text-[#61756d]">({(product.reviewCount || 0).toLocaleString('en-IN')})</span>
+          </Link>}
+          <p className={`line-clamp-2 ${isCherished ? 'mt-1 min-h-9 text-xs leading-[18px] sm:mt-1.5 sm:min-h-10 sm:text-sm sm:leading-5' : 'mt-1 min-h-9 text-[11px] leading-[17px] text-[#52635b] sm:min-h-9 sm:text-[12px] sm:leading-[18px]'}`}>
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
@@ -128,13 +164,23 @@ function ProductCard({ product, variant = 'default' }) {
             <span className="truncate text-[#78827d]">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
           </Link>}
 
-          <div className={`mt-1 min-w-0 items-center sm:mt-2 ${isCherished ? 'flex flex-nowrap justify-between gap-x-1' : 'flex flex-wrap gap-x-1.5 gap-y-1 sm:gap-x-2'}`}>
+          <div className={`mt-1 min-w-0 items-center sm:mt-1.5 flex flex-nowrap justify-between gap-x-1`}>
             <span className={`font-bold tracking-tight text-[#07553e] ${isCherished ? 'shrink-0 text-base leading-none sm:text-2xl' : 'text-lg sm:text-2xl'}`}>{'\u20B9'}{price.toLocaleString('en-IN')}</span>
             {hasDiscount && <span className={`shrink-0 text-[#8a918d] line-through ${isCherished ? 'text-[8px] sm:text-xs' : 'text-[9px] sm:text-xs'}`}>{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
-            {hasDiscount && <span className={`shrink-0 rounded-full bg-[#fde9e6] font-semibold text-[#b3261e] ${isCherished ? 'px-1.5 py-1 text-[7px] sm:px-2.5 sm:text-[10px]' : 'ml-auto px-2 py-1 text-[8px] sm:px-3 sm:text-[10px]'}`}>Save {discount}%</span>}
+            {hasDiscount && <span className={`shrink-0 rounded-full bg-[#fde9e6] font-semibold text-[#b3261e] ${isCherished ? 'px-1.5 py-1 text-[7px] sm:px-2.5 sm:text-[10px]' : 'px-2 py-1 text-[8px] sm:px-2.5 sm:text-[9px]'}`}>Save {discount}%</span>}
           </div>
 
-          {isOutOfStock && <p className="mt-auto pt-3 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
+          {!isCherished && <div className="mt-2 flex min-h-8 items-center justify-between gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#edf2e8] px-2 py-1 text-[8px] font-medium text-[#365843] sm:text-[9px]"><Leaf className="h-3 w-3" /> Premium Quality</span>
+            {product.origin && <span className="hidden min-w-0 items-center gap-1 truncate text-[9px] text-[#50635a] sm:inline-flex"><MapPin className="h-3 w-3 shrink-0" />{product.origin}</span>}
+            <button
+              type="button"
+              onClick={addProductToCart}
+              disabled={isOutOfStock}
+              className="ml-auto flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-[#006447] to-[#002d25] px-2 text-[9px] font-semibold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:from-[#78847c] disabled:to-[#69736c] sm:px-2.5 sm:text-[10px]"
+            ><ShoppingCart className="h-3.5 w-3.5" />{isOutOfStock ? 'Unavailable' : 'Add to Cart'}</button>
+          </div>}
+          {isCherished && isOutOfStock && <p className="mt-auto pt-3 text-[11px] font-medium text-[#b42318]">Currently unavailable</p>}
         </div>
       </motion.article>
     );

@@ -84,9 +84,40 @@ function ProductTile({ product }) {
 
 export function NewArrivals({ content = {} }) {
   const [products, setProducts] = useState([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(false);
-  useEffect(() => { let active = true; productAPI.getProducts({ limit: 12, sort: '-createdAt' }).then((r) => { if (active) setProducts(unwrapList(r, ['products']).filter((p) => p.isActive !== false && p.inStock !== false && !(p.stockQuantity !== undefined && p.stockQuantity <= 0)).slice(0, Number(content.limit) || 4)); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [content.limit]);
-  return <section className="bg-[#f7f5ee] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Recently added'} title={content.heading || 'Fresh to the collection'} description={content.description || 'Explore the latest teas added to our catalog.'} action={{ href: '/shop?sort=newest', label: 'Shop all teas' }} />
-    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">New teas could not be loaded.</p> : products.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{products.map((product) => <ProductTile key={product._id} product={product} />)}</div> : <EmptyState>{content.emptyText || 'New arrivals will appear here when products are published.'}</EmptyState>}
+  useEffect(() => {
+    let active = true;
+    const loadRecentProducts = async () => {
+      try {
+        const firstPage = await productAPI.getProducts({ page: 1, limit: 100, sort: '-createdAt' });
+        const pageCount = Number(firstPage?.data?.data?.totalPages) || 1;
+        const otherPages = await Promise.all(
+          Array.from({ length: pageCount - 1 }, (_, index) => productAPI.getProducts({ page: index + 2, limit: 100, sort: '-createdAt' }))
+        );
+        const allProducts = [
+          ...unwrapList(firstPage, ['products']),
+          ...otherPages.flatMap((response) => unwrapList(response, ['products'])),
+        ];
+        const cutoff = new Date();
+        cutoff.setMonth(cutoff.getMonth() - 1);
+        const now = Date.now();
+        const recentProducts = allProducts
+          .filter((product) => {
+            const addedAt = new Date(product.createdAt).getTime();
+            return product.isActive !== false && Number.isFinite(addedAt) && addedAt >= cutoff.getTime() && addedAt <= now;
+          })
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        if (active) setProducts(recentProducts);
+      } catch {
+        if (active) setError(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    loadRecentProducts();
+    return () => { active = false; };
+  }, []);
+  return <section className="bg-[#f7f5ee] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Recently added'} title={content.heading || 'Fresh to the collection'} description={content.description || 'Explore all teas added to our catalog in the last month.'} action={{ href: '/shop?sort=newest', label: 'Shop all teas' }} />
+    {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="aspect-[.8/1] animate-pulse rounded-2xl bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-800">New teas could not be loaded.</p> : products.length ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{products.map((product) => <ProductTile key={product._id} product={product} />)}</div> : <EmptyState>{content.emptyText || 'No teas have been added in the last month.'}</EmptyState>}
   </div></section>;
 }
 

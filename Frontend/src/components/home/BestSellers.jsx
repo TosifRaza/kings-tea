@@ -347,14 +347,20 @@ export default function BestSellers({ content = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const dispatch = useDispatch();
-  const { products } = useSelector((state) => state.products);
+  const { products, loading, error } = useSelector((state) => state.products);
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  const taggedBestSellers = products.filter((p) => p.bestSeller);
-  const bestSellers = (taggedBestSellers.length ? taggedBestSellers : products.filter((p) => p.featured)).slice(0, Number(content.limit) || 4);
+  const preferredProducts = products.filter((product) => product.bestSeller || product.featured);
+  const preferredIds = new Set(preferredProducts.map((product) => product._id || product.id));
+  const allProductsInDisplayOrder = [
+    ...preferredProducts,
+    ...products.filter((product) => !preferredIds.has(product._id || product.id)),
+  ];
+  const productLimit = Math.max(12, Math.min(Number(content.limit) || 16, 16));
+  const bestSellers = allProductsInDisplayOrder.slice(0, productLimit);
 
   return (
     <section ref={ref} className="pt-4 pb-12 lg:pt-6 lg:pb-16 bg-warm-ivory">
@@ -376,7 +382,12 @@ export default function BestSellers({ content = {} }) {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+        {loading && bestSellers.length === 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4" aria-label="Loading tea products">
+            {[...Array(8)].map((_, index) => <div key={index} className="h-[360px] animate-pulse rounded-2xl bg-[#1F4D3A]/10" />)}
+          </div>
+        ) : bestSellers.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {bestSellers.map((product, i) => (
             <motion.div
               key={product._id || product.id}
@@ -387,7 +398,12 @@ export default function BestSellers({ content = {} }) {
               <ProductCard product={product} variant="cherished" />
             </motion.div>
           ))}
-        </div>
+          </div>
+        ) : (
+          <p className="py-10 text-center text-sm text-[#65706a]" role="status">
+            {error || 'Tea products are not available right now.'}
+          </p>
+        )}
 
         <motion.div
           initial={{ opacity: 0 }}

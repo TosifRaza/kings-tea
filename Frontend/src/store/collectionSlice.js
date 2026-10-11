@@ -7,7 +7,8 @@ export const fetchCollections = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       const response = await collectionAPI.getCollections(params);
-      return response.data.data.collections;
+      const data = response.data?.data;
+      return Array.isArray(data?.collections) ? data.collections : Array.isArray(data) ? data : [];
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch collections'
@@ -56,7 +57,7 @@ const collectionSlice = createSlice({
       })
       .addCase(fetchCollections.fulfilled, (state, action) => {
         state.loading = false;
-        state.collections = action.payload;
+        state.collections = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchCollections.rejected, (state, action) => {
         state.loading = false;

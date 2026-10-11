@@ -8,9 +8,12 @@ export const fetchProducts = createAsyncThunk(
     try {
       const response = await productAPI.getProducts(params);
       const data = response.data.data;
+      const products = Array.isArray(data?.products)
+        ? data.products
+        : Array.isArray(data) ? data : [];
       return {
-        products: data.products || data || [],
-        totalProducts: data.totalProducts || 0,
+        products,
+        totalProducts: Number(data?.totalProducts) || products.length,
       };
     } catch (error) {
       return rejectWithValue(
@@ -54,7 +57,7 @@ export const fetchProductsByCategory = createAsyncThunk(
     try {
       const response = await productAPI.getProducts({ category });
       const data = response.data.data;
-      return data.products || data || [];
+      return Array.isArray(data?.products) ? data.products : Array.isArray(data) ? data : [];
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch products'
@@ -90,7 +93,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload.products;
+        state.products = Array.isArray(action.payload?.products) ? action.payload.products : [];
         state.totalProducts = action.payload.totalProducts;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
@@ -133,7 +136,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.products = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.loading = false;

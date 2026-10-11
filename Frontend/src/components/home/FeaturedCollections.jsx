@@ -95,8 +95,12 @@ const CollectionCard = ({ collection }) => {
 
 const FeaturedCollections = ({ content = {} }) => {
   const dispatch = useDispatch();
-  const { collections, loading, error } = useSelector((state) => state.collections);
-  const { products, loading: productsLoading } = useSelector((state) => state.products);
+  const collectionState = useSelector((state) => state.collections || {});
+  const productState = useSelector((state) => state.products || {});
+  const collections = Array.isArray(collectionState.collections) ? collectionState.collections : [];
+  const products = Array.isArray(productState.products) ? productState.products : [];
+  const { loading, error } = collectionState;
+  const productsLoading = productState.loading;
 
   useEffect(() => {
     dispatch(fetchCollections({ featured: 'true' }));
@@ -121,7 +125,7 @@ const FeaturedCollections = ({ content = {} }) => {
     );
   }
 
-  if (!collections || collections.length === 0) {
+  if (collections.length === 0) {
     const teaProducts = products.slice(0, 12);
 
     if (teaProducts.length > 0) {

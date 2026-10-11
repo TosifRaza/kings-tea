@@ -227,7 +227,7 @@ export default function ShopPage() {
     >
       <div className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-8">
         <div className="grid items-start gap-4 lg:grid-cols-[230px_minmax(0,1fr)] xl:gap-5">
-        <aside className="hidden lg:block">
+        <aside className="sticky top-24 z-20 hidden self-start lg:block">
           <FilterSidebar {...filterProps} />
           <div className="relative mt-4 min-h-[120px] overflow-hidden rounded-xl bg-[#06412e] p-4 text-white shadow-sm">
             <Leaf className="h-6 w-6" />

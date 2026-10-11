@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
-import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin, Leaf } from 'lucide-react';
+import { Heart, Star, Crown, Sparkles, Flame, ShoppingCart, MapPin, Leaf, Mountain, ShieldCheck, Minus, Plus } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
@@ -15,6 +15,7 @@ function ProductCard({ product, variant = 'default' }) {
   const isWishlisted = useSelector((state) => selectIsWishlisted(state, productId));
   const productSlug = product.slug || productId;
   const [imageFailed, setImageFailed] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const image = product.images?.[0];
   const imageUrl = image?.startsWith('/uploads/') ? `${IMAGE_URL}${image}` : image;
   const packetImage = product.slug === 'himalayan-black-reserve'
@@ -37,7 +38,139 @@ function ProductCard({ product, variant = 'default' }) {
     navigate(`/product/${productSlug}`);
   };
 
-  if (variant === 'collection' || variant === 'cherished') {
+  if (variant === 'collection') {
+    const features = [
+      { icon: Leaf, label: 'Premium Quality' },
+      { icon: Mountain, label: product.origin || 'Tea Origin' },
+      { icon: Sparkles, label: 'Rich Aroma' },
+      { icon: ShieldCheck, label: 'Trusted Brand' },
+    ];
+    const addCollectionProductToCart = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (isOutOfStock) return;
+      dispatch(addToCart({
+        productId,
+        productName: product.name,
+        price,
+        image: thumbnailUrl,
+        weight: product.weight,
+        quantity,
+      }));
+      dispatch(openCart());
+    };
+    return (
+      <motion.article
+        layout
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        onClick={openProduct}
+        onKeyDown={openProductFromKeyboard}
+        tabIndex={0}
+        aria-label={`View ${product.name}`}
+        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[28px] border border-[#e9e6da] bg-[#fffefa] shadow-[0_12px_34px_rgba(58,40,28,0.11)] transition-shadow duration-200 hover:shadow-[0_18px_44px_rgba(58,40,28,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35] sm:rounded-[34px]"
+      >
+        <div className="relative p-3 pb-0 sm:p-4 sm:pb-0">
+          <Link
+            to={`/product/${productSlug}`}
+            aria-label={`View ${product.name}`}
+            className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[22px] bg-[#e9eadb] sm:rounded-[27px]"
+          >
+            {thumbnailUrl && !imageFailed ? (
+              <img
+                src={thumbnailUrl}
+                alt={`${product.name} King's Tea packet`}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+                style={product.slug === 'himalayan-black-reserve' ? { objectPosition: 'center 51%' } : undefined}
+                loading="lazy"
+                decoding="async"
+                onError={() => setImageFailed(true)}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#dfe8d2] to-[#a8c19b]">
+                <span className="font-[family-name:var(--font-playfair)] text-7xl font-semibold text-tea-green/70" aria-hidden="true">{product.name?.charAt(0)}</span>
+              </div>
+            )}
+          </Link>
+          <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full bg-[#064b3a] px-3.5 py-2.5 text-xs font-semibold text-white shadow-md sm:left-8 sm:top-8 sm:gap-3 sm:px-6 sm:py-4 sm:text-lg">
+            <Leaf className="h-4 w-4 fill-[#f0d27c] text-[#f0d27c] sm:h-6 sm:w-6" />
+            {product.category || 'Premium Tea'}
+          </span>
+          <button
+            onClick={() => dispatch(toggleWishlist(productId))}
+            type="button"
+            aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+            aria-pressed={isWishlisted}
+            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white shadow-md transition-transform hover:scale-105 sm:right-8 sm:top-8 sm:h-14 sm:w-14"
+          >
+            <Heart className={`h-5 w-5 sm:h-8 sm:w-8 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
+          </button>
+        </div>
+
+        <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5 pt-4 sm:px-10 sm:pb-9 sm:pt-7">
+          <Leaf aria-hidden="true" className="pointer-events-none absolute -right-4 top-12 h-40 w-40 rotate-[25deg] text-[#778d5b]/[0.055] sm:-right-2 sm:top-16 sm:h-64 sm:w-64" strokeWidth={0.7} />
+          <div className="relative mb-3 flex items-center gap-3 sm:mb-5 sm:gap-5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#c99c35] text-[#b9871b] sm:h-14 sm:w-14 sm:border-[3px]">
+              <Leaf className="h-5 w-5 sm:h-8 sm:w-8" strokeWidth={1.5} />
+            </span>
+            <span className="font-sans text-xs font-semibold tracking-[0.22em] text-[#07553e] sm:text-xl sm:tracking-[0.26em]">KING'S TEA</span>
+          </div>
+          <Link to={`/product/${productSlug}`} className="relative font-[family-name:var(--font-playfair)] text-[25px] font-semibold leading-[1.08] text-[#073b2d] hover:text-tea-green sm:text-[38px]">
+            {product.name}
+          </Link>
+          <p className="relative mt-2 line-clamp-2 text-sm leading-5 text-[#52635b] sm:mt-3 sm:text-xl sm:leading-7">
+            {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
+          </p>
+
+          <Link to={`/product/${productSlug}`} className="relative mt-3 inline-flex min-w-0 items-center gap-1.5 sm:mt-5 sm:gap-3" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+            <span className="flex items-center" aria-hidden="true">
+              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-4 w-4 sm:h-7 sm:w-7 ${i < Math.round(product.rating || 0) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
+            </span>
+            <span className="text-xs font-semibold text-[#34483f] sm:text-xl">{Number(product.rating || 0).toFixed(1)}</span>
+            <span className="truncate text-xs text-[#78827d] sm:text-lg">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
+          </Link>
+
+          <div className="relative mt-4 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-7 sm:gap-x-5">
+            <span className="text-[28px] font-bold tracking-tight text-[#07553e] sm:text-[48px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+            {hasDiscount && <span className="text-sm text-[#8a918d] line-through sm:text-2xl">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            {hasDiscount && <span className="rounded-full bg-[#e1eadb] px-2.5 py-1 text-[10px] font-semibold text-[#07553e] sm:px-4 sm:py-2 sm:text-lg">{discount}% OFF</span>}
+          </div>
+
+          <div className="relative mt-4 grid grid-cols-4 rounded-[20px] bg-[#f3f5ec]/90 px-1 py-3 sm:mt-7 sm:rounded-[28px] sm:px-3 sm:py-5">
+            {features.map(({ icon: FeatureIcon, label }, index) => (
+              <div key={`${label}-${index}`} className={`flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-center text-[9px] font-medium leading-tight text-[#183d33] sm:gap-2 sm:px-2 sm:text-base ${index ? 'border-l border-[#d9dfd1]' : ''}`}>
+                <FeatureIcon className="h-5 w-5 sm:h-8 sm:w-8" strokeWidth={1.7} />
+                <span className="line-clamp-2">{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="relative mt-auto flex items-stretch gap-2.5 pt-4 sm:gap-5 sm:pt-7">
+            <div className="flex h-12 shrink-0 items-center rounded-full border border-[#e7e8dd] bg-white p-1 shadow-sm sm:h-[76px] sm:p-2">
+              <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14">
+                <Minus className="h-4 w-4 sm:h-7 sm:w-7" />
+              </button>
+              <span className="flex h-full min-w-8 items-center justify-center border-x border-[#ecece5] px-2 text-sm font-semibold text-[#203a32] sm:min-w-14 sm:px-4 sm:text-2xl">{quantity}</span>
+              <button type="button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14">
+                <Plus className="h-4 w-4 sm:h-7 sm:w-7" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={addCollectionProductToCart}
+              disabled={isOutOfStock}
+              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#063e31] px-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(6,62,49,0.18)] transition hover:bg-[#07553e] disabled:cursor-not-allowed disabled:bg-[#7b8781] sm:min-h-[76px] sm:gap-4 sm:px-6 sm:text-2xl"
+            >
+              <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8" />
+              {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
+            </button>
+          </div>
+        </div>
+      </motion.article>
+    );
+  }
+
+  if (variant === 'cherished') {
     const isCherished = variant === 'cherished';
     const addProductToCart = (event) => {
       event.preventDefault();

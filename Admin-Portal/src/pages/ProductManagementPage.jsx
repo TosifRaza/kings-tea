@@ -150,7 +150,7 @@ const ProductManagementPage = () => {
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Star className="w-3.5 h-3.5 text-imperial-gold fill-imperial-gold" />
-                    <span className="text-xs font-medium text-deep-walnut">{Number(product.reviewCount ? product.rating : product.demoRating || 0).toFixed(1)} ({product.reviewCount || product.demoReviewCount || 0}{!product.reviewCount && product.demoReviewCount ? ' demo' : ''})</span>
+                    <span className="text-xs font-medium text-deep-walnut">{Number(product.rating || 0).toFixed(1)} ({product.reviewCount || 0})</span>
                   </div>
                 </div>
 

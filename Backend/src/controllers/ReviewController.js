@@ -20,7 +20,7 @@ const listReviews = async (req, res) => {
     }
     const filter = {
       ...(productId ? { productId } : {}),
-      ...(!isModerator ? { approved: true } : {}),
+      ...(!isModerator ? { approved: true, isSeeded: { $ne: true } } : {}),
     };
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);

@@ -1475,11 +1475,8 @@ export default function ProductDetail() {
     .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category));
   const related = (configuredRelated.length ? configuredRelated : automaticRelated).slice(0, 10);
   const reviewItems = Array.isArray(reviews) ? reviews : [];
-  const customerReviewCount = Number(product.reviewCount) || 0;
-  const demoReviewCount = Number(product.demoReviewCount) || 0;
-  const showingDemoRating = customerReviewCount === 0 && demoReviewCount > 0;
-  const displayedRating = showingDemoRating ? Number(product.demoRating) || 0 : Number(product.rating) || 0;
-  const displayedReviewCount = showingDemoRating ? demoReviewCount : customerReviewCount;
+  const displayedRating = Number(product.rating) || 0;
+  const displayedReviewCount = Number(product.reviewCount) || 0;
   const reviewBreakdown = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
     count: reviewItems.filter((review) => Number(review.rating) === rating).length,
@@ -1619,7 +1616,7 @@ export default function ProductDetail() {
                   ))}
                 </div>
                 <span className="text-sm text-[#53645d]">
-                  {displayedRating.toFixed(1)} ({displayedReviewCount} {showingDemoRating ? 'demo ' : ''}{displayedReviewCount === 1 ? 'review' : 'reviews'})
+                  {displayedRating.toFixed(1)} ({displayedReviewCount} {displayedReviewCount === 1 ? 'review' : 'reviews'})
                 </span>
               </div>
             </div>
@@ -1822,7 +1819,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                   <p className="text-[#3A281C]/50 text-sm">
-                    Based on {displayedReviewCount} {showingDemoRating ? 'demo ' : ''}{displayedReviewCount === 1 ? 'review' : 'reviews'}
+                    Based on {displayedReviewCount} {displayedReviewCount === 1 ? 'review' : 'reviews'}
                   </p>
                 </div>
 
@@ -1984,11 +1981,6 @@ export default function ProductDetail() {
                         {review.verified && (
                           <span className="text-[10px] text-[#1F4D3A] bg-[#1F4D3A]/10 px-2 py-0.5 rounded">
                             Verified Buyer
-                          </span>
-                        )}
-                        {review.isSeeded && (
-                          <span className="text-[10px] text-[#3A281C]/55 bg-[#3A281C]/5 px-2 py-0.5 rounded">
-                            Demo sample
                           </span>
                         )}
                       </div>

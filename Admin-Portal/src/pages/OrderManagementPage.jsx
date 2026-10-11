@@ -55,7 +55,16 @@ const OrderManagementPage = () => {
       label: 'Total',
       render: (value) => (
         <span className="font-semibold text-deep-walnut">
-          ${typeof value === 'number' ? value.toFixed(2) : value || '0.00'}
+          ₹{Number(value || 0).toLocaleString('en-IN')}
+        </span>
+      ),
+    },
+    {
+      key: 'paymentMethod',
+      label: 'Payment',
+      render: (value, row) => (
+        <span className="text-xs text-deep-walnut/70">
+          {value === 'cod' ? 'Cash on delivery' : 'UPI / online'} · {row.paymentStatus === 'cod_due' ? 'Due' : row.paymentStatus === 'paid' ? 'Paid' : row.paymentStatus || 'Pending'}
         </span>
       ),
     },

@@ -104,11 +104,10 @@ const OrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    // Keep legacy historical values readable/updatable; new customer checkout
-    // can only create Razorpay orders through PaymentController.
-    enum: ['razorpay', 'card'],
+    enum: ['razorpay', 'card', 'cod'],
     default: 'razorpay'
   },
+  inventoryReserved: { type: Boolean, default: false },
   razorpayOrderId: {
     type: String,
     unique: true,
@@ -124,7 +123,7 @@ const OrderSchema = new mongoose.Schema({
   refundId: { type: String, default: '' },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'paid', 'failed', 'refunded'],
+    enum: ['pending', 'cod_due', 'paid', 'failed', 'refunded'],
     default: 'pending'
   },
   notes: {

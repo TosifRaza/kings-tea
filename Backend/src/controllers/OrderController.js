@@ -1,4 +1,6 @@
 const Order = require('../models/OrderModel');
+const Product = require('../models/ProductModel');
+const mongoose = require('mongoose');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
 const listOrders = async (req, res) => {
@@ -72,9 +74,43 @@ const updateOrderStatus = async (req, res) => {
       return errorResponse(res, 'Payment status can only be changed by a verified payment integration', 409);
     }
 
+    const currentOrder = await Order.findById(req.params.id);
+    if (!currentOrder) return errorResponse(res, 'Order not found', 404);
+
+    if (currentOrder.paymentMethod === 'cod' && status === 'cancelled' && currentOrder.inventoryReserved) {
+      const session = await mongoose.startSession();
+      let cancelledOrder;
+      try {
+        await session.withTransaction(async () => {
+          const order = await Order.findById(req.params.id).session(session);
+          if (!order) throw new Error('Order not found');
+          if (order.paymentMethod === 'cod' && order.inventoryReserved) {
+            const grouped = new Map();
+            for (const item of order.items) grouped.set(String(item.productId), (grouped.get(String(item.productId)) || 0) + item.quantity);
+            for (const [productId, quantity] of grouped) {
+              await Product.updateOne({ _id: productId }, { $inc: { stockQuantity: quantity }, $set: { inStock: true } }, { session });
+            }
+            order.inventoryReserved = false;
+            order.paymentStatus = 'failed';
+          }
+          order.status = 'cancelled';
+          if (trackingNumber) order.trackingNumber = trackingNumber;
+          await order.save({ session });
+          cancelledOrder = order;
+        });
+      } finally {
+        await session.endSession();
+      }
+      return successResponse(res, cancelledOrder, 'Order cancelled and reserved stock released');
+    }
+
     const updateData = {};
     if (status) updateData.status = status;
     if (trackingNumber) updateData.trackingNumber = trackingNumber;
+    if (currentOrder.paymentMethod === 'cod' && status === 'delivered' && currentOrder.paymentStatus === 'cod_due') {
+      updateData.paymentStatus = 'paid';
+      updateData.inventoryReserved = false;
+    }
 
     const order = await Order.findByIdAndUpdate(
       req.params.id,

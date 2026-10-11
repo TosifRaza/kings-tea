@@ -193,12 +193,13 @@ existing MongoDB documents, back up the database, run
 ### Checkout and payments
 - `GET /api/payments/config` — public payment readiness and public Razorpay key ID.
 - `POST /api/payments/create-order` — authenticated server-priced checkout; requires an `Idempotency-Key` header.
+- `POST /api/payments/cod-order` — authenticated cash-on-delivery order; reserves stock until delivered or cancelled.
 - `POST /api/payments/verify` — authenticated payment signature and captured-payment verification.
 - `POST /api/payments/webhook` — Razorpay webhook signature verification.
 
-See `Backend/src/routes/` for other endpoints and role requirements. Checkout is enabled only when all payment credentials are configured. The server calculates prices, validates stock, verifies captured payments, and decrements inventory in a database transaction. Card details are handled by Razorpay Checkout and are never stored by this application.
+See `Backend/src/routes/` for other endpoints and role requirements. Cash on Delivery works without gateway credentials. UPI and QR checkout require Razorpay credentials and UPI to be active on the merchant account. The server calculates prices, validates stock, verifies captured payments, and updates inventory in a database transaction. Card or UPI credentials are handled by Razorpay Checkout and are never stored by this application.
 
-Order amounts are in INR. Configure `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in the backend environment and configure the Razorpay webhook URL as `https://<backend-host>/api/payments/webhook` for `payment.captured` events. Keep secrets server-side. Configure the same values in Render's backend environment before checkout can be used.
+Order amounts are in INR. Configure `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` in the backend environment and configure the Razorpay webhook URL as `https://<backend-host>/api/payments/webhook` for `payment.captured` events. Keep secrets server-side. Enable UPI and UPI QR in the Razorpay Dashboard payment configuration. Configure the same credentials in Render's backend environment to turn on online UPI/QR payments; COD remains available without them.
 
 ### Media metadata migration
 Product uploads now go to Cloudinary and create durable database metadata records;

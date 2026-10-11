@@ -126,6 +126,7 @@ export const orderAPI = {
 export const paymentAPI = {
   getConfig: () => api.get('/payments/config'),
   createPaymentOrder: (data, idempotencyKey) => api.post('/payments/create-order', data, { headers: { 'Idempotency-Key': idempotencyKey } }),
+  createCodOrder: (data, idempotencyKey) => api.post('/payments/cod-order', data, { headers: { 'Idempotency-Key': idempotencyKey } }),
   verifyPayment: (data) => api.post('/payments/verify', data),
 };
 

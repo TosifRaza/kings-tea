@@ -22,9 +22,121 @@ const getPaymentConfig = (req, res) => {
   const { keyId, keySecret, webhookSecret } = getPaymentCredentials();
   return successResponse(res, {
     enabled: Boolean(keyId && keySecret && webhookSecret),
+    onlineEnabled: Boolean(keyId && keySecret && webhookSecret),
+    cashOnDeliveryEnabled: true,
     keyId: keyId || '',
     currency: 'INR',
   }, 'Payment configuration fetched');
+};
+
+const createCashOnDeliveryOrder = async (req, res) => {
+  const items = req.body.items;
+  if (!Array.isArray(items) || !items.length || items.length > 30) {
+    return errorResponse(res, 'Your cart must contain between 1 and 30 products', 400);
+  }
+  const checkoutKey = String(req.get('Idempotency-Key') || '').trim();
+  if (!/^[A-Za-z0-9._:-]{8,100}$/.test(checkoutKey)) return errorResponse(res, 'A valid checkout request key is required', 400);
+
+  const session = await mongoose.startSession();
+  try {
+    let createdOrder;
+    await session.withTransaction(async () => {
+      const previous = await Order.findOne({ userId: req.user.userId, checkoutKey }).session(session);
+      if (previous) {
+        if (previous.paymentMethod !== 'cod' || previous.paymentStatus !== 'cod_due') throw new Error('CHECKOUT_KEY_USED');
+        createdOrder = previous;
+        return;
+      }
+
+      const variants = new Map();
+      for (const item of items) {
+        if (!mongoose.Types.ObjectId.isValid(item.productId) || !Number.isInteger(Number(item.quantity)) || Number(item.quantity) < 1 || Number(item.quantity) > 100) {
+          throw new Error('INVALID_CART');
+        }
+        const requestedWeight = item.weightGrams === undefined || item.weightGrams === null ? null : Number(item.weightGrams);
+        if (requestedWeight !== null && (!Number.isInteger(requestedWeight) || requestedWeight < 1 || requestedWeight > MAX_WEIGHT_GRAMS)) {
+          throw new Error('INVALID_CART_WEIGHT');
+        }
+        const id = String(item.productId);
+        const key = `${id}:${requestedWeight || 'base'}`;
+        const existing = variants.get(key);
+        variants.set(key, { productId: id, requestedWeight, quantity: (existing?.quantity || 0) + Number(item.quantity) });
+      }
+
+      const orderItems = [];
+      const inventoryQuantities = new Map();
+      let subtotal = 0;
+      for (const { productId, requestedWeight, quantity } of variants.values()) {
+        const product = await Product.findOne({ _id: productId, isActive: { $ne: false } }).select('name price images inStock stockQuantity weight').session(session);
+        if (!product) throw new Error('PRODUCT_UNAVAILABLE');
+        const baseWeightGrams = parseWeightGrams(product.weight) || 100;
+        const weightGrams = normalizeWeightGrams(requestedWeight, baseWeightGrams);
+        const unitPrice = getPriceForWeight(product.price, baseWeightGrams, weightGrams);
+        inventoryQuantities.set(productId, (inventoryQuantities.get(productId) || 0) + quantity);
+        orderItems.push({ productId: product._id, name: product.name, price: unitPrice, quantity, weight: `${weightGrams}g`, weightGrams, image: product.images?.[0] || '' });
+        subtotal += unitPrice * quantity;
+      }
+
+      const threshold = configuredAmount('FREE_SHIPPING_THRESHOLD_INR', 1000);
+      const flatRate = configuredAmount('SHIPPING_FLAT_RATE_INR', 99);
+      const taxRate = configuredAmount('TAX_RATE_PERCENT', 0);
+      if (![threshold, flatRate, taxRate].every(Number.isFinite) || taxRate > 100) throw new Error('STORE_PRICING_UNAVAILABLE');
+      const shipping = subtotal >= threshold ? 0 : flatRate;
+      const tax = Math.round(subtotal * taxRate) / 100;
+      const total = Math.round((subtotal + shipping + tax) * 100) / 100;
+      if (!Number.isSafeInteger(Math.round(total * 100)) || total <= 0) throw new Error('INVALID_ORDER_AMOUNT');
+
+      for (const [productId, quantity] of inventoryQuantities) {
+        const updated = await Product.findOneAndUpdate(
+          { _id: productId, isActive: { $ne: false }, inStock: true, stockQuantity: { $gte: quantity } },
+          { $inc: { stockQuantity: -quantity }, $set: { inStock: true } },
+          { new: true, session, runValidators: true },
+        );
+        if (!updated) throw new Error('INSUFFICIENT_STOCK');
+        if (updated.stockQuantity <= 0) {
+          updated.inStock = false;
+          await updated.save({ session });
+        }
+      }
+
+      const orderNumber = `KT-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+      [createdOrder] = await Order.create([{
+        orderNumber,
+        userId: req.user.userId,
+        items: orderItems,
+        subtotal: Math.round(subtotal * 100) / 100,
+        shipping,
+        tax,
+        total,
+        currency: 'INR',
+        shippingName: String(req.body.shippingName || '').trim(),
+        shippingPhone: String(req.body.shippingPhone || '').trim(),
+        customerEmail: req.user.email || '',
+        shippingAddress: String(req.body.shippingAddress || '').trim(),
+        shippingCity: String(req.body.shippingCity || '').trim(),
+        shippingState: String(req.body.shippingState || '').trim(),
+        shippingZip: String(req.body.shippingZip || '').trim(),
+        shippingCountry: String(req.body.shippingCountry || '').trim(),
+        paymentMethod: 'cod',
+        paymentStatus: 'cod_due',
+        status: 'pending',
+        inventoryReserved: true,
+        checkoutKey,
+      }], { session });
+    });
+    return successResponse(res, createdOrder, 'Cash-on-delivery order placed', 201);
+  } catch (error) {
+    if (error.code === 11000 || error.message === 'CHECKOUT_KEY_USED') return errorResponse(res, 'This checkout request has already been used', 409);
+    if (error.message === 'INVALID_CART') return errorResponse(res, 'Cart contains an invalid product or quantity', 400);
+    if (error.message === 'INVALID_CART_WEIGHT') return errorResponse(res, 'Cart contains an invalid weight', 400);
+    if (error.message === 'PRODUCT_UNAVAILABLE') return errorResponse(res, 'A product in your cart is no longer available', 409);
+    if (error.message === 'INSUFFICIENT_STOCK') return errorResponse(res, 'A product in your cart does not have enough stock', 409);
+    if (error.message === 'STORE_PRICING_UNAVAILABLE') return errorResponse(res, 'Store pricing is not configured correctly', 503);
+    if (error.message === 'INVALID_ORDER_AMOUNT') return errorResponse(res, 'Order amount is invalid', 400);
+    return errorResponse(res, 'Unable to place your cash-on-delivery order', 500);
+  } finally {
+    await session.endSession();
+  }
 };
 
 const configuredAmount = (name, fallback) => {
@@ -274,4 +386,4 @@ const paymentWebhook = async (req, res) => {
   }
 };
 
-module.exports = { getPaymentConfig, createPaymentOrder, verifyPayment, paymentWebhook };
+module.exports = { getPaymentConfig, createPaymentOrder, createCashOnDeliveryOrder, verifyPayment, paymentWebhook };

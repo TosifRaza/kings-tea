@@ -885,6 +885,9 @@ export default function UserDashboard() {
                           </span>
                         </div>
                         <div className="px-5 py-3 space-y-2">
+                          <p className="pl-11 text-[10px] text-deep-walnut/45 font-[family-name:var(--font-inter)]">
+                            Payment: {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'UPI / online'} · {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'cod_due' ? 'Due on delivery' : order.paymentStatus}
+                          </p>
                           {order.items?.map((item, idx) => (
                             <div key={idx} className="flex items-center justify-between">
                               <div className="flex items-center gap-3">

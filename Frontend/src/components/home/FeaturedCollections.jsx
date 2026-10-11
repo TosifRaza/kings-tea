@@ -9,6 +9,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCollections } from '../../store/collectionSlice';
+import { fetchProducts } from '../../store/productSlice';
+import { ProductCard } from './BestSellers';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
@@ -94,12 +96,14 @@ const CollectionCard = ({ collection }) => {
 const FeaturedCollections = ({ content = {} }) => {
   const dispatch = useDispatch();
   const { collections, loading, error } = useSelector((state) => state.collections);
+  const { products, loading: productsLoading } = useSelector((state) => state.products);
 
   useEffect(() => {
     dispatch(fetchCollections({ featured: 'true' }));
-  }, [dispatch]);
+    if (!products.length) dispatch(fetchProducts());
+  }, [dispatch, products.length]);
 
-  if (loading) {
+  if (loading && !collections.length && !products.length) {
     return (
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
         <div className="max-w-7xl mx-auto">
@@ -117,23 +121,50 @@ const FeaturedCollections = ({ content = {} }) => {
     );
   }
 
-  if (error) {
-    return (
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A]">{content.heading || 'Curated Collections'}</h2>
-          <p className="text-[#A65A3A] mt-3">Failed to load collections. Please try again later.</p>
-        </div>
-      </section>
-    );
-  }
-
   if (!collections || collections.length === 0) {
+    const teaProducts = products.slice(0, 12);
+
+    if (teaProducts.length > 0) {
+      return (
+        <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-7 text-center">
+              <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#1F4D3A] md:text-4xl">{content.heading || 'Our Premium Tea Collection'}</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm text-[#3A281C]/70 md:text-base">{content.description || 'Explore our handpicked teas, crafted for a better cup every day.'}</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {teaProducts.map((product) => (
+                <ProductCard key={product._id || product.id} product={product} variant="collection" />
+              ))}
+            </div>
+            <div className="mt-7 text-center">
+              <Link to="/shop" className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F4D3A] hover:underline">Browse all teas <ArrowRight size={15} /></Link>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (productsLoading) {
+      return (
+        <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-7 text-center">
+              <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#1F4D3A] md:text-4xl">{content.heading || 'Our Premium Tea Collection'}</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div key={item} className="h-[360px] animate-pulse rounded-2xl bg-[#1F4D3A]/10" />)}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl rounded-2xl border border-dashed border-[#d8d2c3] bg-white/60 px-5 py-8 text-center">
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#1F4D3A]">{content.heading || 'Curated Collections'}</h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#3A281C]/70">{content.emptyText || 'Collections will appear here when they are published.'}</p>
+          <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#3A281C]/70">{error ? 'Tea products could not be loaded right now.' : content.emptyText || 'Tea products will appear here when they are available.'}</p>
           <Link to="/shop" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#1F4D3A] hover:underline">Browse teas <ArrowRight size={15} /></Link>
         </div>
       </section>

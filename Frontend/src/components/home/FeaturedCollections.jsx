@@ -136,7 +136,7 @@ const FeaturedCollections = ({ content = {} }) => {
               <h2 className="mx-auto max-w-[16ch] text-balance font-[family-name:var(--font-playfair)] text-[clamp(1.8rem,8vw,2.5rem)] font-semibold leading-[1.08] text-[#1F4D3A] md:max-w-none md:text-4xl">{content.heading || 'Our Premium Tea Collection'}</h2>
               <p className="mx-auto mt-3 max-w-xl text-pretty px-1 text-[14px] leading-6 text-[#3A281C]/70 sm:text-base">{content.description || 'Explore our handpicked teas, crafted for a better cup every day.'}</p>
             </div>
-            <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
               {teaProducts.map((product) => (
                 <ProductCard key={product._id || product.id} product={product} variant="collection" />
               ))}

@@ -54,7 +54,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex h-[148px] w-full items-center justify-center overflow-hidden rounded-t-2xl bg-[#e9eadb] sm:h-[230px] sm:rounded-t-xl lg:h-[250px]"
+            className="relative flex h-[136px] w-full items-center justify-center overflow-hidden rounded-t-2xl bg-[#e9eadb] sm:h-[230px] sm:rounded-t-xl lg:h-[250px]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img
@@ -96,17 +96,17 @@ function ProductCard({ product, variant = 'default' }) {
           <div className="flex items-center">
             <Link to={`/product/${productSlug}`} className="flex shrink-0 items-center gap-1" aria-label={`${rating.toFixed(1)} out of 5 from ${reviewCount} reviews`}>
               <span className="flex items-center" aria-hidden="true">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
+                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-2.5 w-2.5 sm:h-3 sm:w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
               </span>
-              <span className="text-[10px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+              <span className="text-[9px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
             </Link>
           </div>
-          <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
-            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-              <span className="text-base font-bold text-[#07553e] sm:text-lg">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-              {showCardDiscount && <span className="text-[10px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-[#eeeae1] pt-2">
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-1 sm:gap-x-2">
+              <span className="text-[15px] font-bold text-[#07553e] sm:text-lg">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+              {showCardDiscount && <span className="text-[9px] text-[#8a918d] line-through sm:text-sm">{'\u20B9'}{cardComparePrice.toLocaleString('en-IN')}</span>}
             </div>
-            {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-1.5 py-1 text-[8px] font-semibold text-[#07553e] sm:px-2.5 sm:text-xs">{cardDiscount}% OFF</span>}
+            {showCardDiscount && <span className="shrink-0 rounded-full bg-[#e1eadb] px-1 py-1 text-[7px] font-semibold text-[#07553e] sm:px-2.5 sm:text-xs">{cardDiscount}% OFF</span>}
           </div>
           <div className="mt-auto flex items-center gap-1 overflow-hidden pt-1.5 text-[8px] text-[#476354] sm:gap-1.5 sm:text-[9px]">
             <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#edf2e8] px-1.5 py-1 sm:px-2"><Leaf className="h-3 w-3" />Natural</span>

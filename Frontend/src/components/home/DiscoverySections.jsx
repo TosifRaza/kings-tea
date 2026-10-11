@@ -163,7 +163,7 @@ export function ShopByMood({ content = {} }) {
       </div>
       <div aria-live="polite">
         <p className="mb-3 mt-1 max-w-2xl text-[13px] leading-5 text-deep-walnut/70 sm:mb-4 sm:text-sm">{selectedMoment.description}</p>
-        <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
       </div>
     </> : <EmptyState icon={Leaf} href="/shop" action="Browse available teas">{content.emptyText || 'There are no in-stock teas for these moments right now.'}</EmptyState>}
   </div></section>;

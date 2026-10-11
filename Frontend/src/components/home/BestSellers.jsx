@@ -58,7 +58,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex aspect-[1.9/1] min-h-[120px] items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:min-h-[160px]"
+            className="relative flex aspect-[1.68/1] min-h-[135px] items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:min-h-[175px]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img

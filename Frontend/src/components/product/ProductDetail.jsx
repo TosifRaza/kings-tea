@@ -1317,10 +1317,12 @@ export default function ProductDetail() {
     if (Array.isArray(product.images) && product.images.length > 0) {
       const productImages = product.images.map((img) =>
         typeof img === 'string' ? img : img?.url || img?.src || ''
-      ).filter(Boolean);
+      ).filter((image) => Boolean(image) && (
+        !image.includes('/kingstea-packets/') || image.endsWith('/himalayan-black-reserve-estate.png')
+      ));
       if (product.slug === 'himalayan-black-reserve') {
         const estatePhoto = '/images/tea-products/kingstea-packets/himalayan-black-reserve-estate.png';
-        return [estatePhoto, ...productImages.filter((image) => image !== estatePhoto && !image.includes('/kingstea-packets/'))];
+        return [estatePhoto, ...productImages.filter((image) => image !== estatePhoto)];
       }
       return productImages;
     }

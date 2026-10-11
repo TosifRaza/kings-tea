@@ -10,6 +10,7 @@ const SiteContent = require('../models/SiteContentModel');
 const products = require('../data/catalogBatch50');
 
 const assetDir = path.resolve(__dirname, '../../../Frontend/public/images/tea-products');
+const packetArtworkPattern = /^\/images\/tea-products\/kingstea-packets\/.*\.svg$/i;
 const attribution = {
   'black-tea.jpg': { creator: 'André Helbig', provider: 'Wikimedia Commons', license: 'CC BY-SA 3.0', url: 'https://commons.wikimedia.org/wiki/File:Assam-Tee_SFTGFOP1.jpg' },
   'black-tea-2.jpg': { creator: '荼兰 DSGC', provider: 'Pexels', license: 'Pexels License', url: 'https://www.pexels.com/photo/elegant-display-of-black-tea-with-tea-cup-31959376/' },
@@ -72,6 +73,21 @@ const getAssetMetadata = (product, imagePath) => {
   };
 };
 
+const removePacketArtworkFromProducts = async () => {
+  const productsWithArtwork = await Product.find({ images: packetArtworkPattern })
+    .select('_id images')
+    .lean();
+  if (productsWithArtwork.length === 0) return 0;
+
+  await Product.bulkWrite(productsWithArtwork.map((product) => ({
+    updateOne: {
+      filter: { _id: product._id },
+      update: { $set: { images: product.images.filter((image) => !packetArtworkPattern.test(image)) } },
+    },
+  })), { ordered: true });
+  return productsWithArtwork.length;
+};
+
 async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 === 'true', connected = false } = {}) {
   if (!confirmed && process.env.NODE_ENV !== 'production') {
     throw new Error('Set CONFIRM_CATALOG_BATCH_50=true to run this additive catalog import.');
@@ -83,7 +99,8 @@ async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 ==
   }
 
   for (const product of products) {
-    if (product.images.length !== 5) throw new Error(`${product.slug} must have exactly five gallery images.`);
+    const expectedImageCount = product.slug === 'himalayan-black-reserve' ? 5 : 4;
+    if (product.images.length !== expectedImageCount) throw new Error(`${product.slug} must have exactly ${expectedImageCount} gallery images.`);
     for (const image of product.images) {
       const metadata = getAssetMetadata(product, image);
       if (!fs.existsSync(path.join(assetDir, path.basename(image)))) {
@@ -114,6 +131,8 @@ async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 ==
         }
       }
       if (assets.length) await MediaAsset.bulkWrite(assets, { ordered: false });
+      const artworkRemoved = await removePacketArtworkFromProducts();
+      if (artworkRemoved) console.log(`Removed packet artwork from ${artworkRemoved} existing product galleries.`);
       console.log('Catalog batch 50 exists; restored photo-first galleries and New Arrival labels.');
       return;
     }
@@ -171,7 +190,9 @@ async function seedCatalog({ confirmed = process.env.CONFIRM_CATALOG_BATCH_50 ==
       { $setOnInsert: { key: markerKey, content: { importedProducts: 50, completedAt: new Date().toISOString() }, published: false } },
       { upsert: true },
     );
-    console.log(`Catalog import finished: ${inserted} products added, ${alreadyPresent} already existed, 250 image metadata records ensured.`);
+    const artworkRemoved = await removePacketArtworkFromProducts();
+    if (artworkRemoved) console.log(`Removed packet artwork from ${artworkRemoved} existing product galleries.`);
+    console.log(`Catalog import finished: ${inserted} products added, ${alreadyPresent} already existed, product image metadata ensured.`);
     console.log('All new products have zero stock and no customer rating/reviews. Update inventory in admin after confirming the physical products.');
   } finally {
     if (!connected) await mongoose.disconnect();

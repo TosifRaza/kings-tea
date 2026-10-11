@@ -95,9 +95,9 @@ after setup. It does not seed demo products or reviews.
 ### Optional: add the 50-product catalog batch
 
 The batch is additive and safe to rerun. It requires the six existing catalog
-categories and writes 50 unique products plus their five gallery references
-and media metadata. The packet illustrations are original SVG mockups; the
-other four images are the existing licensed category photographs. Confirm the
+categories and writes 50 unique products plus their photo gallery references
+and media metadata. Product galleries use the four licensed category photos;
+Himalayan Black Reserve also includes its estate photograph. Confirm the
 real product names, prices, packaging, and inventory before making products
 available for purchase. The batch starts with zero stock, no ratings or
 reviews, and no bestseller claims.

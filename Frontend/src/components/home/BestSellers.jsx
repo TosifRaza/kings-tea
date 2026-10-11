@@ -15,13 +15,9 @@ function ProductCard({ product, variant = 'default' }) {
   const isWishlisted = useSelector((state) => selectIsWishlisted(state, productId));
   const productSlug = product.slug || productId;
   const [imageFailed, setImageFailed] = useState(false);
-  const image = product.images?.[0];
+  const image = product.images?.find((imagePath) => !imagePath.includes('/kingstea-packets/'));
   const imageUrl = image?.startsWith('/uploads/') ? `${IMAGE_URL}${image}` : image;
-  const packetImage = product.slug === 'himalayan-black-reserve'
-    ? '/images/tea-products/kingstea-packets/himalayan-black-reserve-estate.png'
-    : product.images?.find((imagePath) => imagePath.includes('/kingstea-packets/')) || '';
-  const packetImageUrl = packetImage?.startsWith('/uploads/') ? `${IMAGE_URL}${packetImage}` : packetImage;
-  const thumbnailUrl = packetImageUrl || imageUrl;
+  const thumbnailUrl = imageUrl;
   const price = Number(product.price || 0);
   const comparePrice = Number(product.comparePrice || 0);
   const hasDiscount = comparePrice > price;

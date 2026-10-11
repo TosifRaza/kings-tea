@@ -173,7 +173,7 @@ export default function ShopPage() {
         result.sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+        result.sort((a, b) => Number(b.reviewCount ? b.rating : b.demoRating || 0) - Number(a.reviewCount ? a.rating : a.demoRating || 0));
         break;
       case 'newest':
         result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));

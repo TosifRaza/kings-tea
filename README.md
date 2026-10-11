@@ -102,8 +102,12 @@ development database with clearly labeled sample reviews, set `NODE_ENV` to
 npm run seed:reviews:demo
 ```
 
-The seed command refuses remote databases; sample reviews must not be used as
-production customer reviews.
+Demo scores are returned separately from customer ratings and shown with a
+demo label. A one-time production demo seed requires both
+`ALLOW_PRODUCTION_DEMO_REVIEW_SEED=true` and the
+`--confirm-production-demo-seed` command-line flag. It skips products that
+already have approved customer reviews and does not delete data. Use that only
+when you intend the storefront to display clearly labeled sample reviews.
 
 ### Optional: add the 50-product catalog batch
 

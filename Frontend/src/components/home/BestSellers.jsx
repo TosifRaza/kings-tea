@@ -34,8 +34,11 @@ function ProductCard({ product, variant = 'default' }) {
   };
 
   if (variant === 'collection') {
-    const rating = Number(product.rating) || 0;
-    const reviewCount = Number(product.reviewCount) || 0;
+    const customerReviewCount = Number(product.reviewCount) || 0;
+    const demoReviewCount = Number(product.demoReviewCount) || 0;
+    const showingDemoRating = customerReviewCount === 0 && demoReviewCount > 0;
+    const rating = Number(showingDemoRating ? product.demoRating : product.rating) || 0;
+    const reviewCount = showingDemoRating ? demoReviewCount : customerReviewCount;
     const cardComparePrice = hasDiscount ? comparePrice : Math.round(price / 0.84 / 10) * 10;
     const cardDiscount = hasDiscount ? discount : 16;
     const showCardDiscount = price > 0 && cardComparePrice > price;
@@ -98,7 +101,7 @@ function ProductCard({ product, variant = 'default' }) {
               <span className="flex items-center" aria-hidden="true">
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
               </span>
-              <span className="text-[10px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
+              <span className="text-[10px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)} ({reviewCount} {showingDemoRating ? 'demo ' : ''}{reviewCount === 1 ? 'review' : 'reviews'})</span>
             </Link>
           </div>
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">

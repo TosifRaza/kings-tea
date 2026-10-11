@@ -16,8 +16,10 @@ const withLiveReviewStats = async (products) => {
       {
         $group: {
           _id: '$productId',
-          averageRating: { $avg: '$rating' },
-          reviewCount: { $sum: 1 },
+          averageRating: { $avg: { $cond: [{ $eq: ['$isSeeded', true] }, null, '$rating'] } },
+          reviewCount: { $sum: { $cond: [{ $ne: ['$isSeeded', true] }, 1, 0] } },
+          demoAverageRating: { $avg: { $cond: [{ $eq: ['$isSeeded', true] }, '$rating', null] } },
+          demoReviewCount: { $sum: { $cond: [{ $eq: ['$isSeeded', true] }, 1, 0] } },
         },
       },
     ])
@@ -36,6 +38,8 @@ const withLiveReviewStats = async (products) => {
       isNew: isNewArrival,
       rating: reviewStats ? Math.round(reviewStats.averageRating * 10) / 10 : 0,
       reviewCount: reviewStats?.reviewCount || 0,
+      demoRating: reviewStats?.demoAverageRating ? Math.round(reviewStats.demoAverageRating * 10) / 10 : 0,
+      demoReviewCount: reviewStats?.demoReviewCount || 0,
     };
   });
 };

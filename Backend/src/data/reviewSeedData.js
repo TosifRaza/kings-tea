@@ -1,5 +1,5 @@
-// Fictional sample reviews for local/demo environments. They are not verified purchases.
-module.exports = [
+// Fictional sample reviews for clearly labeled local/demo environments. They are not verified purchases.
+const curatedReviewSeedData = [
   {
     productSlug: 'royal-darjeeling',
     reviews: [
@@ -101,3 +101,51 @@ module.exports = [
     ],
   },
 ];
+
+const demoReviewerNames = [
+  'Aarav Mehta', 'Anaya Bose', 'Kabir Sen', 'Ira Kapoor', 'Rohan Das', 'Meera Nair',
+  'Arjun Roy', 'Diya Ghosh', 'Vihaan Paul', 'Sana Dutta', 'Aditi Shah', 'Kunal Iyer',
+  'Nisha Banerjee', 'Dev Malhotra', 'Rhea Chatterjee', 'Samar Mukherjee', 'Tara Menon',
+  'Neel Saha', 'Pooja Kulkarni', 'Ayan Mitra', 'Leena Dey', 'Ishita Jain', 'Pranav Sen',
+  'Ritika Das', 'Omkar Bose', 'Kavya Roy', 'Mili Nair', 'Siddharth Ghosal', 'Tithi Paul',
+  'Sreeja Kapoor', 'Nandini Dutta', 'Rahul Choudhury', 'Madhurima Sharma', 'Vikram Saha',
+  'Sayan Iyer', 'Roshni Mehta', 'Ananya Roy', 'Aditya Banerjee', 'Sohini Sen',
+];
+
+const reviewStyles = [
+  { title: 'A pleasant cup', comment: 'The aroma is inviting and the flavour stays smooth through the cup.' },
+  { title: 'Lovely flavour', comment: 'A balanced brew with a clean finish. I enjoyed taking my time with it.' },
+  { title: 'Easy to brew', comment: 'It is simple to prepare and has a gentle flavour that is easy to come back to.' },
+  { title: 'A calming tea', comment: 'The taste is rounded and comforting, especially during a quiet break.' },
+  { title: 'Good daily tea', comment: 'A dependable cup with a pleasant aroma and no harsh aftertaste.' },
+];
+
+const categoryComments = [
+  { match: /black/i, comment: 'The malty notes make a satisfying morning cup, with enough body to take a little milk.' },
+  { match: /green/i, comment: 'The fresh, grassy flavour comes through best when brewed with slightly cooler water.' },
+  { match: /oolong/i, comment: 'The floral aroma opens up over a few infusions and leaves a soft, sweet finish.' },
+  { match: /pu-erh/i, comment: 'It has an earthy, mellow depth that develops nicely over multiple short steeps.' },
+  { match: /matcha/i, comment: 'It whisks into a smooth cup with a fresh flavour and a gentle sweetness.' },
+  { match: /white/i, comment: 'The delicate floral flavour is gentle and smooth when brewed without boiling water.' },
+];
+
+const hashText = (value) => [...String(value)].reduce((hash, character) => ((hash * 31) + character.charCodeAt(0)) >>> 0, 7);
+
+const buildDemoReviews = (product) => {
+  const seed = hashText(product.slug);
+  const style = categoryComments.find(({ match }) => match.test(product.category || '')) || categoryComments[0];
+  const reviewCount = 3 + (seed % 2);
+
+  return Array.from({ length: reviewCount }, (_, index) => {
+    const copy = reviewStyles[(seed + index * 3) % reviewStyles.length];
+    return {
+      reviewerName: demoReviewerNames[(seed + index * 7) % demoReviewerNames.length],
+      rating: [5, 4, 5, 3, 4, 5][(seed + index * 5) % 6],
+      title: copy.title,
+      comment: `${style.comment} ${copy.comment}`,
+      daysAgo: 6 + ((seed + index * 23) % 170),
+    };
+  });
+};
+
+module.exports = { curatedReviewSeedData, buildDemoReviews };

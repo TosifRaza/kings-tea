@@ -1475,6 +1475,11 @@ export default function ProductDetail() {
     .sort((a, b) => Number(b.category === product.category) - Number(a.category === product.category));
   const related = (configuredRelated.length ? configuredRelated : automaticRelated).slice(0, 10);
   const reviewItems = Array.isArray(reviews) ? reviews : [];
+  const customerReviewCount = Number(product.reviewCount) || 0;
+  const demoReviewCount = Number(product.demoReviewCount) || 0;
+  const showingDemoRating = customerReviewCount === 0 && demoReviewCount > 0;
+  const displayedRating = showingDemoRating ? Number(product.demoRating) || 0 : Number(product.rating) || 0;
+  const displayedReviewCount = showingDemoRating ? demoReviewCount : customerReviewCount;
   const reviewBreakdown = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
     count: reviewItems.filter((review) => Number(review.rating) === rating).length,
@@ -1608,13 +1613,13 @@ export default function ProductDetail() {
                     <Star
                       key={i}
                       className={`h-4 w-4 ${
-                        i < Math.round(product.rating || 0) ? 'fill-[#b0803e] text-[#b0803e]' : 'text-[#b0803e]/35'
+                        i < Math.round(displayedRating) ? 'fill-[#b0803e] text-[#b0803e]' : 'text-[#b0803e]/35'
                       }`}
                     />
                   ))}
                 </div>
                 <span className="text-sm text-[#53645d]">
-                  {Number(product.rating || 0).toFixed(1)} ({product.reviewCount || 0} reviews)
+                  {displayedRating.toFixed(1)} ({displayedReviewCount} {showingDemoRating ? 'demo ' : ''}{displayedReviewCount === 1 ? 'review' : 'reviews'})
                 </span>
               </div>
             </div>
@@ -1802,14 +1807,14 @@ export default function ProductDetail() {
               <div className="grid grid-cols-1 md:grid-cols-[180px_minmax(0,1fr)] gap-6 pb-6 border-b border-[#C9A86A]/10">
                 <div className="text-center md:text-left">
                   <div className="text-5xl font-bold text-[#3A281C] mb-2 font-[family-name:var(--font-playfair)]">
-                    {product.rating?.toFixed(1) || '0.0'}
+                    {displayedRating.toFixed(1)}
                   </div>
                   <div className="flex items-center justify-center md:justify-start gap-1 mb-2">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < Math.round(product.rating || 0)
+                          i < Math.round(displayedRating)
                             ? 'text-[#C9A86A] fill-[#C9A86A]'
                             : 'text-[#3A281C]/15'
                         }`}
@@ -1817,7 +1822,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                   <p className="text-[#3A281C]/50 text-sm">
-                    Based on {product.reviewCount || 0} reviews
+                    Based on {displayedReviewCount} {showingDemoRating ? 'demo ' : ''}{displayedReviewCount === 1 ? 'review' : 'reviews'}
                   </p>
                 </div>
 

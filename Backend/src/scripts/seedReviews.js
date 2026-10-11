@@ -5,7 +5,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const Product = require('../models/ProductModel');
 const Review = require('../models/ReviewModel');
-const reviewSeedData = require('../data/reviewSeedData');
+const { curatedReviewSeedData, buildDemoReviews } = require('../data/reviewSeedData');
 
 const getSeedUserId = (productSlug, reviewerName) => {
   const hexId = crypto
@@ -23,8 +23,15 @@ const seedReviews = async () => {
   if (!uriMatch) throw new Error('MONGODB_URI or MONGO_URI is not a valid MongoDB connection string.');
   const databaseHosts = uriMatch[1].split(',').map((entry) => entry.replace(/:\d+$/, '').replace(/^\[|\]$/g, '').toLowerCase());
   const isLocalDatabase = databaseHosts.every((host) => ['localhost', '127.0.0.1', '::1'].includes(host));
-  if (process.env.NODE_ENV !== 'development' || process.env.ENABLE_DEMO_REVIEW_SEED !== 'true' || !isLocalDatabase) {
-    throw new Error('Sample reviews are limited to an explicitly enabled local development database.');
+  const isLocalDemoSeed = isLocalDatabase
+    && process.env.NODE_ENV === 'development'
+    && process.env.ENABLE_DEMO_REVIEW_SEED === 'true';
+  const isConfirmedProductionDemoSeed = !isLocalDatabase
+    && process.env.NODE_ENV === 'production'
+    && process.env.ALLOW_PRODUCTION_DEMO_REVIEW_SEED === 'true'
+    && process.argv.includes('--confirm-production-demo-seed');
+  if (!isLocalDemoSeed && !isConfirmedProductionDemoSeed) {
+    throw new Error('Use the local development opt-in, or explicitly confirm a production demo seed with ALLOW_PRODUCTION_DEMO_REVIEW_SEED=true and --confirm-production-demo-seed.');
   }
 
   await mongoose.connect(mongoUri, {
@@ -32,19 +39,27 @@ const seedReviews = async () => {
   });
 
   let createdOrUpdated = 0;
-  let missingProducts = 0;
-  const aggregateRows = [];
+  let skippedProductsWithRealReviews = 0;
+  let productsToSeed = 0;
+  let reviewsToSeed = 0;
+  const isDryRun = process.argv.includes('--dry-run');
+  const curatedBySlug = new Map(curatedReviewSeedData.map((entry) => [entry.productSlug, entry.reviews]));
+  const products = await Product.find({ isActive: { $ne: false } }).select('_id slug name category').sort({ slug: 1 });
 
-  for (const productSeed of reviewSeedData) {
-    const product = await Product.findOne({ slug: productSeed.productSlug }).select('_id slug');
-    if (!product) {
-      missingProducts += 1;
-      console.warn(`Skipping ${productSeed.productSlug}: product not found.`);
+  for (const product of products) {
+    const realReviewCount = await Review.countDocuments({ productId: product._id, approved: true, isSeeded: { $ne: true } });
+    if (realReviewCount > 0) {
+      skippedProductsWithRealReviews += 1;
       continue;
     }
 
-    for (const sample of productSeed.reviews) {
-      const userId = getSeedUserId(productSeed.productSlug, sample.reviewerName);
+    productsToSeed += 1;
+    const sampleReviews = curatedBySlug.get(product.slug) || buildDemoReviews(product);
+    reviewsToSeed += sampleReviews.length;
+    if (isDryRun) continue;
+
+    for (const sample of sampleReviews) {
+      const userId = getSeedUserId(product.slug, sample.reviewerName);
       const createdAt = new Date(Date.now() - sample.daysAgo * 24 * 60 * 60 * 1000);
       await Review.findOneAndUpdate(
         { userId, productId: product._id },
@@ -65,24 +80,14 @@ const seedReviews = async () => {
       );
       createdOrUpdated += 1;
     }
-
-    const [stats] = await Review.aggregate([
-      { $match: { productId: product._id, approved: true } },
-      { $group: { _id: '$productId', average: { $avg: '$rating' }, count: { $sum: 1 } } },
-    ]);
-
-    if (stats) {
-      await Product.updateOne(
-        { _id: product._id },
-        { $set: { rating: Math.round(stats.average * 10) / 10, reviewCount: stats.count } },
-      );
-      aggregateRows.push({ name: product.slug, reviewCount: stats.count });
-    }
   }
 
-  console.log(`Seeded ${createdOrUpdated} sample reviews across ${aggregateRows.length} products.`);
-  if (missingProducts) console.log(`${missingProducts} product groups were skipped because those products are not in the database.`);
-  console.table(aggregateRows);
+  if (isDryRun) {
+    console.log(`Dry run: ${reviewsToSeed} demo reviews would be added across ${productsToSeed} products; ${skippedProductsWithRealReviews} products with approved customer reviews would be skipped.`);
+  } else {
+    console.log(`Seeded or refreshed ${createdOrUpdated} demo reviews across ${productsToSeed} products.`);
+    if (skippedProductsWithRealReviews) console.log(`Skipped ${skippedProductsWithRealReviews} products that already have approved customer reviews.`);
+  }
 };
 
 seedReviews()

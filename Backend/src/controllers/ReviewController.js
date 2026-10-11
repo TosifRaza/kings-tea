@@ -111,7 +111,7 @@ const deleteReview = async (req, res) => {
     await Review.findByIdAndDelete(req.params.id);
 
     const [stats] = await Review.aggregate([
-      { $match: { productId: new mongoose.Types.ObjectId(productId.toString()), approved: true } },
+      { $match: { productId: new mongoose.Types.ObjectId(productId.toString()), approved: true, isSeeded: { $ne: true } } },
       {
         $group: {
           _id: '$productId',
@@ -153,7 +153,7 @@ const moderateReview = async (req, res) => {
     await review.save();
 
     const [stats] = await Review.aggregate([
-      { $match: { productId: review.productId, approved: true } },
+      { $match: { productId: review.productId, approved: true, isSeeded: { $ne: true } } },
       { $group: { _id: '$productId', average: { $avg: '$rating' }, count: { $sum: 1 } } },
     ]);
     await Product.findByIdAndUpdate(review.productId, {

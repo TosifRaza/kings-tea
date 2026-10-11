@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import { Mail, CheckCircle } from 'lucide-react';
 import { newsletterAPI } from '../../services/api';
 
-export default function Newsletter() {
+export default function Newsletter({ content = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const [email, setEmail] = useState('');
@@ -57,11 +57,10 @@ export default function Newsletter() {
         >
           <Mail className="h-8 w-8 text-imperial-gold mx-auto mb-4" />
           <h2 className="font-[family-name:var(--font-playfair)] text-2xl sm:text-3xl font-bold text-deep-walnut mb-3">
-            Join the Royal Tea Circle
+            {content.heading || 'Join the Royal Tea Circle'}
           </h2>
           <p className="text-deep-walnut/60 font-[family-name:var(--font-inter)] text-sm mb-6 max-w-md mx-auto">
-            Receive exclusive offers, early access to new teas, brewing tips, and
-            invitations to virtual tasting events.
+            {content.description || 'Get occasional tea updates and product news from King’s Tea.'}
           </p>
 
           {submitted ? (

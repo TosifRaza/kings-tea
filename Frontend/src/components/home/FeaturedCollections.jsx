@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCollections } from '../../store/collectionSlice';
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 const CollectionCard = ({ collection }) => {
   const gradientMap = {
@@ -90,7 +91,7 @@ const CollectionCard = ({ collection }) => {
   );
 };
 
-const FeaturedCollections = () => {
+const FeaturedCollections = ({ content = {} }) => {
   const dispatch = useDispatch();
   const { collections, loading, error } = useSelector((state) => state.collections);
 
@@ -103,7 +104,7 @@ const FeaturedCollections = () => {
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A]">Curated Collections</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A]">{content.heading || 'Curated Collections'}</h2>
             <p className="text-[#3A281C]/70 mt-3">Loading collections...</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -120,7 +121,7 @@ const FeaturedCollections = () => {
     return (
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#F8F3E9]">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A]">Curated Collections</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A]">{content.heading || 'Curated Collections'}</h2>
           <p className="text-[#A65A3A] mt-3">Failed to load collections. Please try again later.</p>
         </div>
       </section>
@@ -128,7 +129,15 @@ const FeaturedCollections = () => {
   }
 
   if (!collections || collections.length === 0) {
-    return null;
+    return (
+      <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl rounded-2xl border border-dashed border-[#d8d2c3] bg-white/60 px-5 py-8 text-center">
+          <h2 className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#1F4D3A]">{content.heading || 'Curated Collections'}</h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#3A281C]/70">{content.emptyText || 'Collections will appear here when they are published.'}</p>
+          <Link to="/shop" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#1F4D3A] hover:underline">Browse teas <ArrowRight size={15} /></Link>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -136,11 +145,9 @@ const FeaturedCollections = () => {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Discover</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Curated Collections</h2>
-          <p className="text-[#3A281C]/70 mt-3 max-w-2xl mx-auto">
-            Explore our carefully curated tea collections, each telling a unique story of terroir, tradition, and taste.
-          </p>
+          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">{content.eyebrow || 'Discover'}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">{content.heading || 'Curated Collections'}</h2>
+          <p className="text-[#3A281C]/70 mt-3 max-w-2xl mx-auto">{content.description || 'Browse collections currently available in the store.'}</p>
         </div>
 
         {/* Collections Grid */}

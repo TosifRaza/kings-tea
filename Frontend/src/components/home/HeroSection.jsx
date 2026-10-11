@@ -35,6 +35,9 @@ export default function HeroSection({ content = {} }) {
   const slides = Array.isArray(content.slides) && content.slides.length ? content.slides : heroSlides;
   const slideIndex = activeSlide % slides.length;
   const currentSlide = slides[slideIndex];
+  const overlayOpacity = Number.isFinite(Number(content.overlayOpacity)) ? Math.min(0.85, Math.max(0, Number(content.overlayOpacity))) : 0.55;
+  const alignment = content.textAlignment === 'left' ? 'items-start text-left' : content.textAlignment === 'right' ? 'items-end text-right' : 'items-center text-center';
+  const mobileImage = content.mobileImage || currentSlide.mobileImage || currentSlide.image;
 
   useEffect(() => {
     if (prefersReducedMotion || isPaused) return undefined;
@@ -77,17 +80,27 @@ export default function HeroSection({ content = {} }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ opacity: { duration: prefersReducedMotion ? 0 : 1.2 }, scale: { duration: 4, ease: 'linear' } }}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 hidden bg-cover bg-center bg-no-repeat sm:block"
             style={{ backgroundImage: `url('${currentSlide.image}')`, backgroundPosition: 'center 56%' }}
           />
+          <motion.div
+            key={`mobile-${mobileImage}`}
+            aria-hidden="true"
+            initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 1.2 }}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat sm:hidden"
+            style={{ backgroundImage: `url('${mobileImage}')`, backgroundPosition: content.mobileImagePosition || 'center 56%' }}
+          />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-[#10261d]/20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1d1a18]/45 via-[#17281f]/35 to-[#101d16]/70" />
+        <div className="absolute inset-0" style={{ backgroundColor: /^#[0-9a-f]{6}$/i.test(content.overlayColor || '') ? content.overlayColor : '#10261d', opacity: overlayOpacity * 0.45 }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1d1a18]/30 via-[#17281f]/20 to-[#101d16]/70" />
       </motion.div>
 
       <motion.div
         style={{ opacity }}
-        className="relative z-10 flex h-full flex-col items-center justify-center px-4 pb-8 text-center sm:px-8"
+        className={`relative z-10 flex h-full flex-col justify-center px-5 pb-8 sm:px-8 ${alignment} ${content.textAlignment === 'left' ? 'sm:pl-[10vw]' : content.textAlignment === 'right' ? 'sm:pr-[10vw]' : ''}`}
       >
         <motion.div
           initial={{ width: 0 }}
@@ -102,14 +115,14 @@ export default function HeroSection({ content = {} }) {
           transition={{ duration: 0.7, delay: 0.35 }}
           className="mb-3 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#f2d28b] sm:text-xs"
         >
-          <Leaf className="h-4 w-4" /> From gardens grown with care
+          <Leaf className="h-4 w-4" /> {content.eyebrow || 'From gardens grown with care'}
         </motion.p>
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="mb-5 max-w-5xl font-[family-name:var(--font-playfair)] text-4xl font-bold leading-[1.08] tracking-wide text-white drop-shadow-[0_3px_16px_rgba(0,0,0,0.3)] sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl"
+          className={`mb-5 max-w-5xl font-[family-name:var(--font-playfair)] text-4xl font-bold leading-[1.08] tracking-wide text-white drop-shadow-[0_3px_16px_rgba(0,0,0,0.3)] sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl ${content.textAlignment === 'left' ? 'sm:mr-auto' : content.textAlignment === 'right' ? 'sm:ml-auto' : ''}`}
         >
           {content.heading || 'THE ART OF ROYAL TEA'}
         </motion.h1>
@@ -118,7 +131,7 @@ export default function HeroSection({ content = {} }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
-          className="mb-7 max-w-xl font-[family-name:var(--font-cormorant)] text-xl tracking-wide text-warm-ivory/90 drop-shadow sm:mb-8 sm:text-2xl"
+          className={`mb-7 max-w-xl font-[family-name:var(--font-cormorant)] text-xl tracking-wide text-warm-ivory/90 drop-shadow sm:mb-8 sm:text-2xl ${content.textAlignment === 'left' ? 'sm:mr-auto' : content.textAlignment === 'right' ? 'sm:ml-auto' : ''}`}
         >
           {content.description || 'Discover carefully selected teas for your everyday rituals.'}
         </motion.p>
@@ -127,7 +140,7 @@ export default function HeroSection({ content = {} }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.9 }}
-          className="flex w-full max-w-[360px] flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4"
+          className={`flex w-full max-w-[360px] flex-col gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:gap-4 ${content.textAlignment === 'left' ? 'sm:mr-auto' : content.textAlignment === 'right' ? 'sm:ml-auto' : ''}`}
         >
           <Link
             to={content.primaryHref || '/shop'}
@@ -157,8 +170,8 @@ export default function HeroSection({ content = {} }) {
       </motion.div>
 
       <div className="absolute bottom-5 right-4 z-20 flex items-center gap-2.5 rounded-full border border-white/20 bg-black/25 px-3 py-2 backdrop-blur-md sm:bottom-7 sm:right-8 sm:gap-3 sm:px-4">
-        <span className="mr-1 hidden text-[10px] font-medium uppercase tracking-[0.16em] text-white/75 sm:inline">{currentSlide.location}</span>
-        <span className="text-[10px] tabular-nums text-white/65">{String(activeSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}</span>
+        <span className="mr-1 hidden text-[10px] font-medium uppercase tracking-[0.16em] text-white/75 sm:inline">{currentSlide.location || 'King’s Tea'}</span>
+        <span className="text-[10px] tabular-nums text-white/65">{String(slideIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
         <div className="flex items-center gap-1.5" role="group" aria-label="Choose hero image">
           {slides.map((slide, index) => (
             <button

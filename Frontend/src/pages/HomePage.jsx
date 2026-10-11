@@ -9,19 +9,40 @@ import Newsletter from '../components/home/Newsletter';
 import { useEffect, useState } from 'react';
 import { siteContentAPI } from '../services/api';
 import TeaFinder from '../components/home/TeaFinder';
+import {
+  BrewingGuides,
+  CustomerReviews,
+  CustomerTrust,
+  GiftCollections,
+  HomepageFAQ,
+  NewArrivals,
+  ShopByCategory,
+  ShopByMood,
+  TrustBenefits,
+} from '../components/home/DiscoverySections';
 
 const sectionComponents = {
   hero: HeroSection,
+  benefits: TrustBenefits,
+  categories: ShopByCategory,
   brandStory: BrandStory,
   collections: FeaturedCollections,
   bestSellers: BestSellers,
+  newArrivals: NewArrivals,
+  moods: ShopByMood,
+  gifts: GiftCollections,
+  customerReviews: CustomerReviews,
   culture: TeaCulture,
+  brewingGuides: BrewingGuides,
   subscriptions: SubscriptionSection,
   testimonials: Testimonials,
+  faq: HomepageFAQ,
+  customerTrust: CustomerTrust,
   newsletter: Newsletter,
   teaFinder: TeaFinder,
 };
-const defaultSections = Object.keys(sectionComponents).map((key, sortOrder) => ({ key, sortOrder, enabled: key !== 'teaFinder' }));
+const defaultOrder = ['hero', 'benefits', 'categories', 'collections', 'bestSellers', 'newArrivals', 'teaFinder', 'moods', 'brandStory', 'gifts', 'customerReviews', 'culture', 'brewingGuides', 'subscriptions', 'testimonials', 'faq', 'customerTrust', 'newsletter'];
+const defaultSections = defaultOrder.map((key, sortOrder) => ({ key, sortOrder, enabled: true, settings: {} }));
 
 export default function HomePage() {
   const [config, setConfig] = useState(null);
@@ -32,7 +53,12 @@ export default function HomePage() {
     }).catch(() => {}).finally(() => {});
     return () => { active = false; };
   }, []);
-  const sections = (config?.sections || defaultSections)
+  const publishedSections = Array.isArray(config?.sections) ? config.sections : [];
+  const publishedKeys = new Set();
+  const configured = publishedSections.filter((section) => sectionComponents[section.key] && !publishedKeys.has(section.key) && publishedKeys.add(section.key));
+  const maxOrder = configured.reduce((max, section) => Math.max(max, Number(section.sortOrder) || 0), -1);
+  const appendedDefaults = defaultSections.filter((section) => !publishedKeys.has(section.key)).map((section, index) => ({ ...section, sortOrder: maxOrder + index + 1 }));
+  const sections = [...configured, ...appendedDefaults]
     .filter((section) => section.enabled && sectionComponents[section.key])
     .sort((a, b) => Number(a.sortOrder) - Number(b.sortOrder));
   return (

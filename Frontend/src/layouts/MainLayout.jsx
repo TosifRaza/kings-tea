@@ -691,9 +691,9 @@ function Footer() {
             <span className="text-xs text-warm-ivory/50">Available methods shown at checkout</span>
           </div>
           <div className="flex items-center gap-2 font-[family-name:var(--font-cormorant)] text-xs text-warm-ivory/80 sm:hidden">
-            <button type="button" className="hover:text-imperial-gold">Privacy</button>
+            <Link to="/policies/privacy-policy" className="hover:text-imperial-gold">Privacy</Link>
             <span aria-hidden="true">•</span>
-            <button type="button" className="hover:text-imperial-gold">Terms</button>
+            <Link to="/policies/terms" className="hover:text-imperial-gold">Terms</Link>
           </div>
         </div>
       </div>

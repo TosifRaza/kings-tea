@@ -27,7 +27,7 @@ const StarRating = ({ rating }) => {
   );
 };
 
-const Testimonials = () => {
+const Testimonials = ({ content = {} }) => {
   const dispatch = useDispatch();
   const { testimonials, loading, error } = useSelector((state) => state.testimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,8 +51,8 @@ const Testimonials = () => {
     return (
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#1F4D3A]">
         <div className="max-w-7xl mx-auto text-center">
-          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Testimonials</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">What Our Royals Say</h2>
+          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">{content.eyebrow || 'Testimonials'}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">{content.heading || 'What Our Customers Say'}</h2>
           <p className="text-white/70 mt-3">Loading testimonials...</p>
         </div>
       </section>
@@ -83,10 +83,10 @@ const Testimonials = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Testimonials</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">What Our Royals Say</h2>
+          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">{content.eyebrow || 'Testimonials'}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">{content.heading || 'What Our Customers Say'}</h2>
           <p className="text-white/60 mt-3 max-w-2xl mx-auto">
-            Hear from our community of tea lovers who have elevated their daily ritual with King's Tea.
+            {content.description || 'Customer testimonials are shown here when available.'}
           </p>
         </div>
 

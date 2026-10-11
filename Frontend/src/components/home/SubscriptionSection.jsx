@@ -11,7 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchSubscriptionPlans } from '../../store/subscriptionSlice';
 import { Link } from 'react-router-dom';
 
-const SubscriptionSection = () => {
+const SubscriptionSection = ({ content = {} }) => {
   const dispatch = useDispatch();
   const { plans, loading, error } = useSelector((state) => state.subscriptions);
 
@@ -40,8 +40,12 @@ const SubscriptionSection = () => {
     );
   }
 
-  if (error || plansList.length === 0) {
+  if (error) {
     return null;
+  }
+
+  if (plansList.length === 0) {
+    return <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl rounded-2xl border border-dashed border-[#d8d2c3] bg-white/60 px-5 py-8 text-center"><h2 className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-[#1F4D3A]">{content.heading || 'Tea subscriptions'}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#3A281C]/70">{content.emptyText || 'Subscription plans will appear here when they are available.'}</p></div></section>;
   }
 
   return (
@@ -49,10 +53,10 @@ const SubscriptionSection = () => {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">Subscriptions</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">Royal Tea Club</h2>
+          <span className="text-[#C9A86A] text-sm font-semibold tracking-widest uppercase">{content.eyebrow || 'Subscriptions'}</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1F4D3A] mt-2">{content.heading || 'Royal Tea Club'}</h2>
           <p className="text-[#3A281C]/70 mt-3 max-w-2xl mx-auto">
-            Join our exclusive tea club and receive hand-selected premium teas delivered to your door. Each box is curated by our tea masters for a truly royal experience.
+            {content.description || 'Explore the subscription plans currently available.'}
           </p>
         </div>
 
@@ -141,7 +145,7 @@ const SubscriptionSection = () => {
         {/* Bottom note */}
         <div className="text-center mt-8">
           <p className="text-[#3A281C]/50 text-sm">
-            All subscriptions include free shipping. Cancel or modify anytime.
+            {content.note || 'Plan prices and details are shown above.'}
           </p>
         </div>
       </div>

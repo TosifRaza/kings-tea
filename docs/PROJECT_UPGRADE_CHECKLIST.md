@@ -17,7 +17,7 @@ Audit baseline: 2026-10-11. This tracks repository work only; it does not includ
 | Area | Status | Audit notes |
 | --- | --- | --- |
 | Product/category/collection browsing | Partially working | Public APIs and customer pages exist; some homepage/product copy and footer/business links remain static. |
-| Admin portal | Improved; still partial | Catalog/order/customer/review screens, homepage draft/publish settings, site-content editor, media library, subscription plan editor now exist. Homepage editing is structured JSON rather than a visual page builder. |
+| Admin portal | Improved; still partial | Catalog/order/customer/review screens, homepage draft/publish settings with section toggles/order/basic copy, site-content editor, media library, subscription plan editor now exist. Advanced homepage settings still use JSON; full visual preview and broader collection/gift workflows remain. |
 | Product media | Improved; existing data migration pending | New product uploads create Cloudinary-backed asset records; category and published content image references are associated with media records. A backup-first migration registers existing catalog assets; rights for older assets still require manual review. |
 | Authentication | Improved; more hardening needed | JWT + bcrypt exist; write-route role checks now cover catalog/content administration, cookie parsing is mounted, and payload sizes are bounded. |
 | Orders/inventory | Implemented, needs provider/database verification | Razorpay checkout creates server-priced orders, checks stock, verifies signatures/captured payment, uses Mongo transactions to decrement inventory, and attempts provider refunds if stock changed. Requires configured Razorpay webhook and transaction-capable MongoDB. |
@@ -43,7 +43,7 @@ Audit baseline: 2026-10-11. This tracks repository work only; it does not includ
 ### P1: genuine content and admin workflows
 - [x] Add review approval API and publish only approved reviews; derive verified-purchase from actual paid and delivered orders.
 - [x] Add admin review approval and rejection workflow.
-- [~] Homepage section config, announcement, hero/story rendering plus admin draft/publish JSON editor are added. Full visual preview and editable content for every homepage module remain.
+- [~] Homepage has API-backed category and newest-product sections, Tea Finder, benefits, collections, genuine approved review highlights, CMS-driven guides/FAQ, policy/contact links, dynamic hero/story, newsletter, and footer. Admin can toggle/reorder sections and edit common copy; advanced banner/module settings remain JSON-based.
 - [x] Add durable Cloudinary media upload/library, metadata fields, product/category/content associations, FAQ/policy/navigation/footer/brewing-guide CMS records and public FAQ/policy rendering. Existing media requires backup-first metadata migration.
 - [x] Homepage draft/published visibility is explicit in schema and public API.
 - [~] Consent storage, token-based unsubscribe endpoint, and protected CSV export are implemented; email delivery/confirmation is blocked on mail-provider credentials.
@@ -78,3 +78,4 @@ Audit baseline: 2026-10-11. This tracks repository work only; it does not includ
 - Production payment readiness is false because Razorpay credentials/webhook configuration are absent. No homepage content document is published yet, so the homepage uses the built-in layout until an administrator publishes a config. The product-arrival and media metadata migrations were not run; create a backup and follow the documented production confirmation steps.
 - Subscription plan administration, site-content CMS endpoints/public FAQ and policy pages, media upload/library and asset metadata, product search validation, SEO sitemap/robots, Tea Finder, auth/newsletter rate limits, and factual contact-page rendering are deployed. Do not run the migration scripts against production without a current backup.
 - Browser viewport checks at the requested mobile sizes, authenticated admin end-to-end flows, payment sandbox flow, and mail-provider confirmation email were not verified here. No browser test runner is configured.
+- Homepage discovery modules are rendered in the built-in layout when no homepage document is published. Mood/gift/review/guide/FAQ content still depends on real published collections, selected catalog products, approved reviews, or CMS entries; empty states are shown instead of invented business content.

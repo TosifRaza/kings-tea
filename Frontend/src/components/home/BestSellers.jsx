@@ -231,7 +231,7 @@ function ProductCard({ product, variant = 'default' }) {
 
 export { ProductCard };
 
-export default function BestSellers() {
+export default function BestSellers({ content = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const dispatch = useDispatch();
@@ -241,7 +241,8 @@ export default function BestSellers() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  const bestSellers = products.filter((p) => p.bestSeller).slice(0, 4);
+  const taggedBestSellers = products.filter((p) => p.bestSeller);
+  const bestSellers = (taggedBestSellers.length ? taggedBestSellers : products.filter((p) => p.featured)).slice(0, Number(content.limit) || 4);
 
   return (
     <section ref={ref} className="pt-4 pb-12 lg:pt-6 lg:pb-16 bg-warm-ivory">
@@ -253,13 +254,13 @@ export default function BestSellers() {
           className="text-center mb-8"
         >
           <span className="text-[#1e5b3e] text-[10px] sm:text-xs font-semibold uppercase tracking-[0.26em] font-[family-name:var(--font-inter)]">
-            Premium Tea Selection
+            {content.eyebrow || 'Premium Tea Selection'}
           </span>
           <h2 className="font-[family-name:var(--font-playfair)] text-4xl sm:text-6xl font-bold text-[#1b211e] mt-2">
-            Most Cherished
+            {content.heading || 'Most Cherished'}
           </h2>
           <p className="mx-auto mt-3 max-w-xl font-[family-name:var(--font-inter)] text-sm text-[#65706a] sm:text-base">
-            Handpicked teas loved by our customers. Discover the finest flavors of nature, in every cup.
+            {content.description || 'Explore the teas currently featured in our collection.'}
           </p>
         </motion.div>
 

@@ -21,7 +21,7 @@ const features = [
   },
 ];
 
-export default function TeaCulture() {
+export default function TeaCulture({ content = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
@@ -37,18 +37,18 @@ export default function TeaCulture() {
           >
             <div className="w-12 h-px bg-imperial-gold mb-4" />
             <span className="text-imperial-gold text-xs font-semibold uppercase tracking-[0.2em] font-[family-name:var(--font-inter)]">
-              Tea Culture
+              {content.eyebrow || 'Tea Culture'}
             </span>
             <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold text-deep-walnut mt-3 mb-6">
-              The Way of Tea
+              {content.heading || 'The Way of Tea'}
             </h2>
             <p className="text-deep-walnut/70 font-[family-name:var(--font-inter)] text-sm leading-relaxed mb-8">
-              Tea is more than a beverage — it is a ritual, a meditation, and a
+              {content.description || <>Tea is more than a beverage — it is a ritual, a meditation, and a
               bridge between cultures. From the precise choreography of the
               Japanese tea ceremony to the convivial British afternoon tea, every
               tradition offers a unique window into the soul of a civilization. At
               KING&apos;S TEA, we honor these traditions while making them
-              accessible to the modern connoisseur.
+              accessible to the modern connoisseur.</>}
             </p>
 
             <div className="space-y-5 mb-8">
@@ -79,7 +79,7 @@ export default function TeaCulture() {
               to="/culture"
               className="btn-luxury bg-tea-green hover:bg-tea-green-light text-warm-ivory px-6 py-5 text-xs font-semibold uppercase tracking-widest rounded-none inline-flex items-center gap-2"
             >
-              Explore Tea Culture <ArrowRight className="h-4 w-4" />
+              {content.ctaLabel || 'Explore Tea Culture'} <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>
 
@@ -92,8 +92,8 @@ export default function TeaCulture() {
           >
             <div className="aspect-[4/3] rounded-sm overflow-hidden img-zoom">
               <img
-                src="/images/tea-ceremony.png"
-                alt="Tea ceremony"
+                src={content.image || '/images/tea-ceremony.png'}
+                alt={content.imageAlt || 'Tea ceremony'}
                 className="w-full h-full object-cover"
               />
             </div>

@@ -70,7 +70,7 @@ function ProductCard({ product, variant = 'default' }) {
         aria-label={`View ${product.name}`}
         className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-[28px] border border-[#e9e6da] bg-[#fffefa] shadow-[0_12px_34px_rgba(58,40,28,0.11)] transition-shadow duration-200 hover:shadow-[0_18px_44px_rgba(58,40,28,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#174b35] sm:rounded-[34px]"
       >
-        <div className="relative p-3 pb-0 sm:p-4 sm:pb-0">
+        <div className="relative p-3 pb-0 sm:p-4 sm:pb-0 2xl:p-3 2xl:pb-0">
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
@@ -92,8 +92,8 @@ function ProductCard({ product, variant = 'default' }) {
               </div>
             )}
           </Link>
-          <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full bg-[#064b3a] px-3.5 py-2.5 text-xs font-semibold text-white shadow-md sm:left-8 sm:top-8 sm:gap-3 sm:px-6 sm:py-4 sm:text-lg">
-            <Leaf className="h-4 w-4 fill-[#f0d27c] text-[#f0d27c] sm:h-6 sm:w-6" />
+          <span className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full bg-[#064b3a] px-3.5 py-2.5 text-xs font-semibold text-white shadow-md sm:left-8 sm:top-8 sm:gap-3 sm:px-6 sm:py-4 sm:text-lg 2xl:left-6 2xl:top-6 2xl:gap-2 2xl:px-3 2xl:py-2.5 2xl:text-xs">
+            <Leaf className="h-4 w-4 fill-[#f0d27c] text-[#f0d27c] sm:h-6 sm:w-6 2xl:h-4 2xl:w-4" />
             {product.category || 'Premium Tea'}
           </span>
           <button
@@ -101,67 +101,67 @@ function ProductCard({ product, variant = 'default' }) {
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white shadow-md transition-transform hover:scale-105 sm:right-8 sm:top-8 sm:h-14 sm:w-14"
+            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white shadow-md transition-transform hover:scale-105 sm:right-8 sm:top-8 sm:h-14 sm:w-14 2xl:right-6 2xl:top-6 2xl:h-10 2xl:w-10"
           >
-            <Heart className={`h-5 w-5 sm:h-8 sm:w-8 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
+            <Heart className={`h-5 w-5 sm:h-8 sm:w-8 2xl:h-5 2xl:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
           </button>
         </div>
 
-        <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5 pt-4 sm:px-10 sm:pb-9 sm:pt-7">
-          <Leaf aria-hidden="true" className="pointer-events-none absolute -right-4 top-12 h-40 w-40 rotate-[25deg] text-[#778d5b]/[0.055] sm:-right-2 sm:top-16 sm:h-64 sm:w-64" strokeWidth={0.7} />
-          <div className="relative mb-3 flex items-center gap-3 sm:mb-5 sm:gap-5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#c99c35] text-[#b9871b] sm:h-14 sm:w-14 sm:border-[3px]">
-              <Leaf className="h-5 w-5 sm:h-8 sm:w-8" strokeWidth={1.5} />
+        <div className="relative flex flex-1 flex-col overflow-hidden px-5 pb-5 pt-4 sm:px-10 sm:pb-9 sm:pt-7 2xl:px-4 2xl:pb-5 2xl:pt-4">
+          <Leaf aria-hidden="true" className="pointer-events-none absolute -right-4 top-12 h-40 w-40 rotate-[25deg] text-[#778d5b]/[0.055] sm:-right-2 sm:top-16 sm:h-64 sm:w-64 2xl:h-40 2xl:w-40" strokeWidth={0.7} />
+          <div className="relative mb-3 flex items-center gap-3 sm:mb-5 sm:gap-5 2xl:mb-3 2xl:gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#c99c35] text-[#b9871b] sm:h-14 sm:w-14 sm:border-[3px] 2xl:h-9 2xl:w-9 2xl:border-2">
+              <Leaf className="h-5 w-5 sm:h-8 sm:w-8 2xl:h-5 2xl:w-5" strokeWidth={1.5} />
             </span>
-            <span className="font-sans text-xs font-semibold tracking-[0.22em] text-[#07553e] sm:text-xl sm:tracking-[0.26em]">KING'S TEA</span>
+            <span className="font-sans text-xs font-semibold tracking-[0.22em] text-[#07553e] sm:text-xl sm:tracking-[0.26em] 2xl:text-xs 2xl:tracking-[0.2em]">KING'S TEA</span>
           </div>
-          <Link to={`/product/${productSlug}`} className="relative font-[family-name:var(--font-playfair)] text-[25px] font-semibold leading-[1.08] text-[#073b2d] hover:text-tea-green sm:text-[38px]">
+          <Link to={`/product/${productSlug}`} className="relative font-[family-name:var(--font-playfair)] text-[25px] font-semibold leading-[1.08] text-[#073b2d] hover:text-tea-green sm:text-[38px] 2xl:text-[24px]">
             {product.name}
           </Link>
-          <p className="relative mt-2 line-clamp-2 text-sm leading-5 text-[#52635b] sm:mt-3 sm:text-xl sm:leading-7">
+          <p className="relative mt-2 line-clamp-2 text-sm leading-5 text-[#52635b] sm:mt-3 sm:text-xl sm:leading-7 2xl:mt-2 2xl:text-sm 2xl:leading-5">
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
 
-          <Link to={`/product/${productSlug}`} className="relative mt-3 inline-flex min-w-0 items-center gap-1.5 sm:mt-5 sm:gap-3" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
+          <Link to={`/product/${productSlug}`} className="relative mt-3 inline-flex min-w-0 items-center gap-1.5 sm:mt-5 sm:gap-3 2xl:mt-3 2xl:gap-1.5" aria-label={`${Number(product.rating || 0).toFixed(1)} out of 5 stars, ${product.reviewCount || 0} reviews`}>
             <span className="flex items-center" aria-hidden="true">
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-4 w-4 sm:h-7 sm:w-7 ${i < Math.round(product.rating || 0) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
+              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-4 w-4 sm:h-7 sm:w-7 2xl:h-4 2xl:w-4 ${i < Math.round(product.rating || 0) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
             </span>
-            <span className="text-xs font-semibold text-[#34483f] sm:text-xl">{Number(product.rating || 0).toFixed(1)}</span>
-            <span className="truncate text-xs text-[#78827d] sm:text-lg">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
+            <span className="text-xs font-semibold text-[#34483f] sm:text-xl 2xl:text-xs">{Number(product.rating || 0).toFixed(1)}</span>
+            <span className="truncate text-xs text-[#78827d] sm:text-lg 2xl:text-xs">({(product.reviewCount || 0).toLocaleString('en-IN')} reviews)</span>
           </Link>
 
-          <div className="relative mt-4 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-7 sm:gap-x-5">
-            <span className="text-[28px] font-bold tracking-tight text-[#07553e] sm:text-[48px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
-            {hasDiscount && <span className="text-sm text-[#8a918d] line-through sm:text-2xl">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
-            {hasDiscount && <span className="rounded-full bg-[#e1eadb] px-2.5 py-1 text-[10px] font-semibold text-[#07553e] sm:px-4 sm:py-2 sm:text-lg">{discount}% OFF</span>}
+          <div className="relative mt-4 flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-7 sm:gap-x-5 2xl:mt-4 2xl:gap-x-3">
+            <span className="text-[28px] font-bold tracking-tight text-[#07553e] sm:text-[48px] 2xl:text-[30px]">{'\u20B9'}{price.toLocaleString('en-IN')}</span>
+            {hasDiscount && <span className="text-sm text-[#8a918d] line-through sm:text-2xl 2xl:text-sm">{'\u20B9'}{comparePrice.toLocaleString('en-IN')}</span>}
+            {hasDiscount && <span className="rounded-full bg-[#e1eadb] px-2.5 py-1 text-[10px] font-semibold text-[#07553e] sm:px-4 sm:py-2 sm:text-lg 2xl:px-2.5 2xl:py-1 2xl:text-[10px]">{discount}% OFF</span>}
           </div>
 
-          <div className="relative mt-4 grid grid-cols-4 rounded-[20px] bg-[#f3f5ec]/90 px-1 py-3 sm:mt-7 sm:rounded-[28px] sm:px-3 sm:py-5">
+          <div className="relative mt-4 grid grid-cols-4 rounded-[20px] bg-[#f3f5ec]/90 px-1 py-3 sm:mt-7 sm:rounded-[28px] sm:px-3 sm:py-5 2xl:mt-4 2xl:rounded-[20px] 2xl:px-1 2xl:py-3">
             {features.map(({ icon: FeatureIcon, label }, index) => (
-              <div key={`${label}-${index}`} className={`flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-center text-[9px] font-medium leading-tight text-[#183d33] sm:gap-2 sm:px-2 sm:text-base ${index ? 'border-l border-[#d9dfd1]' : ''}`}>
-                <FeatureIcon className="h-5 w-5 sm:h-8 sm:w-8" strokeWidth={1.7} />
+              <div key={`${label}-${index}`} className={`flex min-w-0 flex-col items-center justify-center gap-1 px-1 text-center text-[9px] font-medium leading-tight text-[#183d33] sm:gap-2 sm:px-2 sm:text-base 2xl:gap-1 2xl:px-1 2xl:text-[9px] ${index ? 'border-l border-[#d9dfd1]' : ''}`}>
+                <FeatureIcon className="h-5 w-5 sm:h-8 sm:w-8 2xl:h-5 2xl:w-5" strokeWidth={1.7} />
                 <span className="line-clamp-2">{label}</span>
               </div>
             ))}
           </div>
 
-          <div className="relative mt-auto flex items-stretch gap-2.5 pt-4 sm:gap-5 sm:pt-7">
-            <div className="flex h-12 shrink-0 items-center rounded-full border border-[#e7e8dd] bg-white p-1 shadow-sm sm:h-[76px] sm:p-2">
-              <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14">
-                <Minus className="h-4 w-4 sm:h-7 sm:w-7" />
+          <div className="relative mt-auto flex items-stretch gap-2.5 pt-4 sm:gap-5 sm:pt-7 2xl:gap-2 2xl:pt-4">
+            <div className="flex h-12 shrink-0 items-center rounded-full border border-[#e7e8dd] bg-white p-1 shadow-sm sm:h-[76px] sm:p-2 2xl:h-12 2xl:p-1">
+              <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14 2xl:h-9 2xl:w-9">
+                <Minus className="h-4 w-4 sm:h-7 sm:w-7 2xl:h-4 2xl:w-4" />
               </button>
-              <span className="flex h-full min-w-8 items-center justify-center border-x border-[#ecece5] px-2 text-sm font-semibold text-[#203a32] sm:min-w-14 sm:px-4 sm:text-2xl">{quantity}</span>
-              <button type="button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14">
-                <Plus className="h-4 w-4 sm:h-7 sm:w-7" />
+              <span className="flex h-full min-w-8 items-center justify-center border-x border-[#ecece5] px-2 text-sm font-semibold text-[#203a32] sm:min-w-14 sm:px-4 sm:text-2xl 2xl:min-w-8 2xl:px-2 2xl:text-sm">{quantity}</span>
+              <button type="button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity" className="flex h-9 w-9 items-center justify-center text-[#063d30] sm:h-14 sm:w-14 2xl:h-9 2xl:w-9">
+                <Plus className="h-4 w-4 sm:h-7 sm:w-7 2xl:h-4 2xl:w-4" />
               </button>
             </div>
             <button
               type="button"
               onClick={addCollectionProductToCart}
               disabled={isOutOfStock}
-              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#063e31] px-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(6,62,49,0.18)] transition hover:bg-[#07553e] disabled:cursor-not-allowed disabled:bg-[#7b8781] sm:min-h-[76px] sm:gap-4 sm:px-6 sm:text-2xl"
+              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#063e31] px-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(6,62,49,0.18)] transition hover:bg-[#07553e] disabled:cursor-not-allowed disabled:bg-[#7b8781] sm:min-h-[76px] sm:gap-4 sm:px-6 sm:text-2xl 2xl:min-h-12 2xl:gap-2 2xl:px-3 2xl:text-sm"
             >
-              <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8" />
+              <ShoppingCart className="h-5 w-5 sm:h-8 sm:w-8 2xl:h-5 2xl:w-5" />
               {isOutOfStock ? 'Unavailable' : 'Add to Cart'}
             </button>
           </div>

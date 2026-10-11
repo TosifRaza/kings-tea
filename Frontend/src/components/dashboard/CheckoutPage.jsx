@@ -57,7 +57,9 @@ export default function CheckoutPage() {
     return { ...item, product };
   }).filter((item) => item.product), [items, products]);
   const subtotal = cartItems.reduce((sum, item) => sum + (Number(item.price) || 0) * item.quantity, 0);
-  const shipping = subtotal >= 1000 ? 0 : 99;
+  const shippingThreshold = Number(paymentConfig?.shipping?.freeShippingThreshold ?? 1000);
+  const shippingFee = Number(paymentConfig?.shipping?.fee ?? 99);
+  const shipping = subtotal >= shippingThreshold ? 0 : shippingFee;
 
   const handleChange = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
 

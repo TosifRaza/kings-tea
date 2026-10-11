@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Razorpay = require('razorpay');
 const Order = require('../models/OrderModel');
 const Product = require('../models/ProductModel');
+const SiteContent = require('../models/SiteContentModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 const { MAX_WEIGHT_GRAMS, parseWeightGrams, normalizeWeightGrams, getPriceForWeight } = require('../utils/productPricing');
 
@@ -18,15 +19,27 @@ const getRazorpayClient = () => {
   return new Razorpay({ key_id: keyId, key_secret: keySecret });
 };
 
-const getPaymentConfig = (req, res) => {
+const getPaymentConfig = async (req, res) => {
   const { keyId, keySecret, webhookSecret } = getPaymentCredentials();
-  return successResponse(res, {
-    enabled: Boolean(keyId && keySecret && webhookSecret),
-    onlineEnabled: Boolean(keyId && keySecret && webhookSecret),
-    cashOnDeliveryEnabled: true,
-    keyId: keyId || '',
-    currency: 'INR',
-  }, 'Payment configuration fetched');
+  try {
+    const pricing = await getStorePricing();
+    return successResponse(res, {
+      enabled: Boolean(keyId && keySecret && webhookSecret),
+      onlineEnabled: Boolean(keyId && keySecret && webhookSecret),
+      cashOnDeliveryEnabled: true,
+      keyId: keyId || '',
+      currency: 'INR',
+      shipping: {
+        freeShippingThreshold: pricing.threshold,
+        fee: pricing.flatRate,
+        sellerName: pricing.sellerName,
+        minBusinessDays: pricing.minBusinessDays,
+        maxBusinessDays: pricing.maxBusinessDays,
+      },
+    }, 'Payment configuration fetched');
+  } catch {
+    return errorResponse(res, 'Unable to load store delivery settings', 500);
+  }
 };
 
 const createCashOnDeliveryOrder = async (req, res) => {
@@ -77,9 +90,7 @@ const createCashOnDeliveryOrder = async (req, res) => {
         subtotal += unitPrice * quantity;
       }
 
-      const threshold = configuredAmount('FREE_SHIPPING_THRESHOLD_INR', 1000);
-      const flatRate = configuredAmount('SHIPPING_FLAT_RATE_INR', 99);
-      const taxRate = configuredAmount('TAX_RATE_PERCENT', 0);
+      const { threshold, flatRate, taxRate } = await getStorePricing(session);
       if (![threshold, flatRate, taxRate].every(Number.isFinite) || taxRate > 100) throw new Error('STORE_PRICING_UNAVAILABLE');
       const shipping = subtotal >= threshold ? 0 : flatRate;
       const tax = Math.round(subtotal * taxRate) / 100;
@@ -159,6 +170,35 @@ const configuredAmount = (name, fallback) => {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : NaN;
 };
 
+const getStorePricing = async (session = null) => {
+  let query = SiteContent.findOne({ key: 'store-settings', published: true }).select('content').lean();
+  if (session) query = query.session(session);
+  const record = await query;
+  const delivery = record?.content?.delivery || {};
+  const threshold = delivery.freeShippingThreshold === undefined
+    ? configuredAmount('FREE_SHIPPING_THRESHOLD_INR', 1000)
+    : Number(delivery.freeShippingThreshold);
+  const flatRate = delivery.shippingFee === undefined
+    ? configuredAmount('SHIPPING_FLAT_RATE_INR', 99)
+    : Number(delivery.shippingFee);
+  const taxRate = configuredAmount('TAX_RATE_PERCENT', 0);
+  const minBusinessDays = Number(delivery.minBusinessDays ?? 3);
+  const maxBusinessDays = Number(delivery.maxBusinessDays ?? 5);
+  if (![threshold, flatRate, taxRate, minBusinessDays, maxBusinessDays].every(Number.isFinite)
+    || threshold < 0 || flatRate < 0 || taxRate > 100 || minBusinessDays < 1
+    || maxBusinessDays < minBusinessDays || maxBusinessDays > 60) {
+    throw new Error('STORE_PRICING_UNAVAILABLE');
+  }
+  return {
+    threshold,
+    flatRate,
+    taxRate,
+    sellerName: String(delivery.sellerName || 'King\'s Tea').trim().slice(0, 80) || 'King\'s Tea',
+    minBusinessDays,
+    maxBusinessDays,
+  };
+};
+
 const createPaymentOrder = async (req, res) => {
   const razorpay = getRazorpayClient();
   if (!razorpay || !getPaymentCredentials().webhookSecret) return errorResponse(res, 'Online payments are not configured', 503);
@@ -231,9 +271,7 @@ const createPaymentOrder = async (req, res) => {
       }
     }
 
-    const threshold = configuredAmount('FREE_SHIPPING_THRESHOLD_INR', 1000);
-    const flatRate = configuredAmount('SHIPPING_FLAT_RATE_INR', 99);
-    const taxRate = configuredAmount('TAX_RATE_PERCENT', 0);
+    const { threshold, flatRate, taxRate } = await getStorePricing();
     if (![threshold, flatRate, taxRate].every(Number.isFinite) || taxRate > 100) {
       return errorResponse(res, 'Store pricing is not configured correctly', 503);
     }

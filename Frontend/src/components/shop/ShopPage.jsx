@@ -126,7 +126,7 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState('rating');
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const perPage = 12;
+  const perPage = 40;
 
   // Fetch products and categories from API
   useEffect(() => {

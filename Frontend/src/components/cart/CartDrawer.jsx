@@ -279,10 +279,12 @@
 
 import { motion } from 'framer-motion';
 import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getProductImage } from '../../utils/image';
 import { getPriceForWeight, parseWeightGrams } from '../../utils/weight';
+import { paymentAPI } from '../../services/api';
 import {
   selectCartOpen,
   closeCart,
@@ -312,9 +314,18 @@ const gradientMap = {
 export default function CartDrawer() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [shippingConfig, setShippingConfig] = useState({ freeShippingThreshold: 1000, fee: 99 });
   const isOpen = useSelector(selectCartOpen);
   const items = useSelector(selectCartItems);
   const { products } = useSelector((state) => state.products);
+
+  useEffect(() => {
+    let active = true;
+    paymentAPI.getConfig().then(({ data }) => {
+      if (active && data?.data?.shipping) setShippingConfig(data.data.shipping);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   // Match cart items to real products from Redux store
   const cartItems = items
@@ -343,7 +354,8 @@ export default function CartDrawer() {
     (sum, item) => sum + (Number(item.price) || 0) * item.quantity,
     0
   );
-  const shipping = subtotal > 1000 ? 0 : 99;
+  const shippingThreshold = Number(shippingConfig.freeShippingThreshold ?? 1000);
+  const shipping = subtotal >= shippingThreshold ? 0 : Number(shippingConfig.fee ?? 99);
   const total = subtotal + shipping;
 
   const handleRemove = (item) => {
@@ -525,9 +537,9 @@ export default function CartDrawer() {
                 <span className="font-bold text-[#3A281C]">Total</span>
                 <span className="font-bold text-[#3A281C]">₹{total.toLocaleString()}</span>
               </div>
-              {subtotal < 1000 && subtotal > 0 && (
+              {subtotal < shippingThreshold && subtotal > 0 && (
                 <p className="text-[#C9A86A] text-[10px] text-center">
-                  Add ₹{(1000 - subtotal).toLocaleString()} more for free shipping
+                  Add ₹{(shippingThreshold - subtotal).toLocaleString()} more for free shipping
                 </p>
               )}
               <button

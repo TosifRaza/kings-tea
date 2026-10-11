@@ -1213,6 +1213,7 @@ import {
   X,
   Thermometer,
   Clock,
+  CalendarDays,
   Scale,
   Lightbulb,
   MapPin,
@@ -1229,6 +1230,7 @@ import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import { getProductImage } from "../../utils/image";
 import { formatWeight, getPriceForWeight, getProductWeightOptions, parseWeightGrams } from '../../utils/weight';
 import { ProductCard } from '../home/BestSellers';
+import { paymentAPI } from '../../services/api';
 // Add to existing imports
 import { fetchProductReviews, submitReview, clearReviewState } from '../../store/reviewSlice';
 
@@ -1251,6 +1253,17 @@ const gradientMap = {
   'from-pink-100 to-white': 'bg-gradient-to-br from-pink-100 to-white',
 };
 
+const addBusinessDays = (startDate, count) => {
+  const date = new Date(startDate);
+  let added = 0;
+  while (added < count) {
+    date.setDate(date.getDate() + 1);
+    if (date.getDay() !== 0 && date.getDay() !== 6) added += 1;
+  }
+  return date;
+};
+const formatDeliveryDate = (date) => new Intl.DateTimeFormat('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }).format(date);
+
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -1259,6 +1272,11 @@ export default function ProductDetail() {
   const [selectedWeightOption, setSelectedWeightOption] = useState(100);
   const [customWeightInput, setCustomWeightInput] = useState('');
   const [activeTab, setActiveTab] = useState('description');
+  const [deliveryConfig, setDeliveryConfig] = useState({ sellerName: "King's Tea", freeShippingThreshold: 1000, fee: 99, minBusinessDays: 3, maxBusinessDays: 5 });
+  const [deliveryPin, setDeliveryPin] = useState(() => localStorage.getItem('deliveryPincode') || '');
+  const [deliveryPinDraft, setDeliveryPinDraft] = useState(() => localStorage.getItem('deliveryPincode') || '');
+  const [editingDeliveryPin, setEditingDeliveryPin] = useState(!/^\d{6}$/.test(localStorage.getItem('deliveryPincode') || ''));
+  const [deliveryPinError, setDeliveryPinError] = useState('');
 
   // ===== IMAGE GALLERY STATE (NEW) =====
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -1306,6 +1324,35 @@ export default function ProductDetail() {
       dispatch(fetchProducts());
     }
   }, [dispatch, slug]);
+
+  useEffect(() => {
+    let active = true;
+    paymentAPI.getConfig().then(({ data }) => {
+      const shipping = data?.data?.shipping;
+      if (active && shipping) setDeliveryConfig((current) => ({ ...current, ...shipping }));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const saveDeliveryPin = (event) => {
+    event.preventDefault();
+    const normalizedPin = deliveryPinDraft.replace(/\s/g, '');
+    if (!/^\d{6}$/.test(normalizedPin)) {
+      setDeliveryPinError('Enter a valid 6-digit PIN code.');
+      return;
+    }
+    localStorage.setItem('deliveryPincode', normalizedPin);
+    setDeliveryPin(normalizedPin);
+    setDeliveryPinDraft(normalizedPin);
+    setDeliveryPinError('');
+    setEditingDeliveryPin(false);
+  };
+
+  const deliveryWindow = (() => {
+    const minDays = Math.max(1, Number(deliveryConfig.minBusinessDays) || 3);
+    const maxDays = Math.max(minDays, Number(deliveryConfig.maxBusinessDays) || 5);
+    return `${formatDeliveryDate(addBusinessDays(new Date(), minDays))} – ${formatDeliveryDate(addBusinessDays(new Date(), maxDays))}`;
+  })();
 
   useEffect(() => {
     setQuantity(1);
@@ -1616,6 +1663,29 @@ export default function ProductDetail() {
                 </motion.div>
               </div>
             </div>
+            <section className="mt-5 rounded-2xl border border-[#e4e9e0] bg-white p-4 shadow-[0_6px_20px_rgba(30,55,40,0.06)] sm:p-5" aria-label="Delivery details">
+              <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-[#203d30]"><Truck className="h-5 w-5 text-[#174b35]" />Delivery details</h2>
+              {deliveryPin && !editingDeliveryPin ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-[#eef5fa] px-3 py-3">
+                  <p className="flex min-w-0 items-center gap-2 text-sm font-medium text-[#334155]"><MapPin className="h-4 w-4 shrink-0 text-[#365f8a]" /><span className="truncate">Delivering to PIN {deliveryPin}</span></p>
+                  <button type="button" onClick={() => { setDeliveryPinDraft(deliveryPin); setEditingDeliveryPin(true); }} className="shrink-0 text-sm font-semibold text-[#1767cf] hover:underline">Change</button>
+                </div>
+              ) : (
+                <form onSubmit={saveDeliveryPin} className="rounded-xl bg-[#eef5fa] p-3">
+                  <label htmlFor="delivery-pin" className="mb-2 block text-sm font-medium text-[#334155]">Enter your delivery PIN code</label>
+                  <div className="flex gap-2">
+                    <input id="delivery-pin" inputMode="numeric" autoComplete="postal-code" maxLength={6} value={deliveryPinDraft} onChange={(event) => { setDeliveryPinDraft(event.target.value.replace(/[^0-9]/g, '').slice(0, 6)); setDeliveryPinError(''); }} placeholder="6-digit PIN code" className="h-10 min-w-0 flex-1 rounded-lg border border-[#d4dfeb] bg-white px-3 text-sm outline-none focus:border-[#1767cf]" />
+                    <button type="submit" className="h-10 shrink-0 rounded-lg bg-[#1767cf] px-4 text-sm font-semibold text-white transition hover:bg-[#1259b5]">Check</button>
+                  </div>
+                  {deliveryPinError && <p role="alert" className="mt-1.5 text-xs text-red-700">{deliveryPinError}</p>}
+                </form>
+              )}
+              <div className="mt-2 space-y-2 rounded-xl bg-[#f7f7f7] px-3 py-3 text-sm text-[#4b5563]">
+                {deliveryPin && <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 shrink-0 text-[#174b35]" /><span>Estimated delivery: <strong className="text-[#263b32]">{deliveryWindow}</strong></span></p>}
+                <p className="flex items-center gap-2"><Truck className="h-4 w-4 shrink-0 text-[#174b35]" /><span>Seller: <strong className="text-[#263b32]">{deliveryConfig.sellerName || "King's Tea"}</strong></span></p>
+                <p className="pl-6 text-xs text-[#68736d]">Free shipping on orders above ₹{Number(deliveryConfig.freeShippingThreshold || 0).toLocaleString('en-IN')}; ₹{Number(deliveryConfig.fee || 0).toLocaleString('en-IN')} below that.</p>
+              </div>
+            </section>
           </div>
 
           {/* ============ PRODUCT INFO ============ */}
@@ -1765,7 +1835,7 @@ export default function ProductDetail() {
             <div className="mb-5 grid grid-cols-1 gap-3 border-y border-[#e5e1d5] py-4 sm:mb-6 sm:grid-cols-3 sm:gap-4 sm:py-5">
               <div className="flex items-center gap-3 sm:justify-center">
                 <Truck className="h-5 w-5 shrink-0 text-[#173f2f]" />
-                <div><p className="text-sm font-medium text-[#253d32]">Free Shipping</p><p className="text-xs text-[#768079]">On orders above ₹2,000</p></div>
+                <div><p className="text-sm font-medium text-[#253d32]">Free Shipping</p><p className="text-xs text-[#768079]">On orders above ₹{Number(deliveryConfig.freeShippingThreshold || 0).toLocaleString('en-IN')}</p></div>
               </div>
               <div className="flex items-center gap-3 sm:justify-center sm:border-x sm:border-[#e5e1d5] sm:px-3">
                 <ShieldCheck className="h-5 w-5 shrink-0 text-[#173f2f]" />

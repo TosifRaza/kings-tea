@@ -92,7 +92,10 @@ const createCashOnDeliveryOrder = async (req, res) => {
           { $inc: { stockQuantity: -quantity }, $set: { inStock: true } },
           { new: true, session, runValidators: true },
         );
-        if (!updated) throw new Error('INSUFFICIENT_STOCK');
+        if (!updated) {
+          const unavailable = await Product.findById(productId).select('name stockQuantity').session(session);
+          throw new Error(`INSUFFICIENT_STOCK:${unavailable?.name || 'A product'}:${unavailable?.stockQuantity ?? 0}:${quantity}`);
+        }
         if (updated.stockQuantity <= 0) {
           updated.inStock = false;
           await updated.save({ session });
@@ -126,11 +129,21 @@ const createCashOnDeliveryOrder = async (req, res) => {
     });
     return successResponse(res, createdOrder, 'Cash-on-delivery order placed', 201);
   } catch (error) {
-    if (error.code === 11000 || error.message === 'CHECKOUT_KEY_USED') return errorResponse(res, 'This checkout request has already been used', 409);
+    if (error.code === 11000) {
+      const existing = await Order.findOne({ userId: req.user.userId, checkoutKey });
+      if (existing?.paymentMethod === 'cod' && existing.paymentStatus === 'cod_due') {
+        return successResponse(res, existing, 'Cash-on-delivery order already placed');
+      }
+      return errorResponse(res, 'This checkout request has already been used', 409);
+    }
+    if (error.message === 'CHECKOUT_KEY_USED') return errorResponse(res, 'This checkout request has already been used', 409);
     if (error.message === 'INVALID_CART') return errorResponse(res, 'Cart contains an invalid product or quantity', 400);
     if (error.message === 'INVALID_CART_WEIGHT') return errorResponse(res, 'Cart contains an invalid weight', 400);
     if (error.message === 'PRODUCT_UNAVAILABLE') return errorResponse(res, 'A product in your cart is no longer available', 409);
-    if (error.message === 'INSUFFICIENT_STOCK') return errorResponse(res, 'A product in your cart does not have enough stock', 409);
+    if (error.message.startsWith('INSUFFICIENT_STOCK:')) {
+      const [, name, available, requested] = error.message.split(':');
+      return errorResponse(res, `${name} has ${available} pack(s) in stock, but your cart has ${requested}. Reduce the quantity or contact us.`, 409);
+    }
     if (error.message === 'STORE_PRICING_UNAVAILABLE') return errorResponse(res, 'Store pricing is not configured correctly', 503);
     if (error.message === 'INVALID_ORDER_AMOUNT') return errorResponse(res, 'Order amount is invalid', 400);
     return errorResponse(res, 'Unable to place your cash-on-delivery order', 500);

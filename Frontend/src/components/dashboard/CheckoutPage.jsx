@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, CreditCard, ShieldCheck, AlertCircle, Truck, CheckCircle2, QrCode, Banknote } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,6 +27,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [form, setForm] = useState(initialAddress);
   const [busy, setBusy] = useState(false);
+  const submitLock = useRef(false);
+  const checkoutKeys = useRef({});
   const [message, setMessage] = useState('');
   const [confirmedOrder, setConfirmedOrder] = useState(null);
 
@@ -61,6 +63,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submitLock.current) return;
     setMessage('');
     if (!localStorage.getItem('token')) {
       navigate('/login', { state: { from: '/checkout' } });
@@ -70,9 +73,11 @@ export default function CheckoutPage() {
       setMessage('UPI checkout is not configured yet. Choose Cash on Delivery or try again later.');
       return;
     }
+    submitLock.current = true;
     setBusy(true);
     try {
-      const idempotencyKey = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const idempotencyKey = checkoutKeys.current[paymentMethod]
+        || (checkoutKeys.current[paymentMethod] = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`);
       const orderPayload = {
         items: cartItems.map(({ productId, quantity, weightGrams }) => ({ productId, quantity, weightGrams })),
         shippingName: form.name,
@@ -86,8 +91,8 @@ export default function CheckoutPage() {
       if (paymentMethod === 'cod') {
         const { data: created } = await paymentAPI.createCodOrder(orderPayload, idempotencyKey);
         setConfirmedOrder(created?.data);
+        delete checkoutKeys.current.cod;
         dispatch(clearCart());
-        setBusy(false);
         return;
       }
 
@@ -123,6 +128,7 @@ export default function CheckoutPage() {
           try {
             const { data: verification } = await paymentAPI.verifyPayment({ orderId: paymentOrder.orderId, ...response });
             setConfirmedOrder(verification?.data);
+            delete checkoutKeys.current.upi;
             dispatch(clearCart());
           } catch (error) {
             setMessage(error.response?.data?.message || 'Payment is awaiting server verification. Your cart has been kept; contact support with your payment reference if charged.');
@@ -138,6 +144,8 @@ export default function CheckoutPage() {
       checkout.open();
     } catch (error) {
       setMessage(error.response?.data?.message || error.message || 'Could not start secure checkout. Please try again.');
+    } finally {
+      submitLock.current = false;
       setBusy(false);
     }
   };

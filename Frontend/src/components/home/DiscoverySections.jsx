@@ -21,12 +21,12 @@ const getImage = (value) => {
   return url.startsWith('/uploads/') ? `${IMAGE_URL}${url}` : url;
 };
 
-function SectionTitle({ eyebrow, title, description, dark = false, action }) {
+function SectionTitle({ eyebrow, title, description, dark = false, action, compact = false }) {
   return <div className={`mb-7 flex flex-col gap-4 sm:mb-9 sm:flex-row sm:items-end sm:justify-between ${dark ? 'text-white' : ''}`}>
     <div className="max-w-2xl">
-      {eyebrow && <p className="text-[10px] font-semibold uppercase tracking-[.24em] text-imperial-gold sm:text-xs">{eyebrow}</p>}
-      <h2 className={`mt-2 font-[family-name:var(--font-playfair)] text-3xl font-semibold leading-tight sm:text-4xl ${dark ? 'text-white' : 'text-tea-green'}`}>{title}</h2>
-      {description && <p className={`mt-2 max-w-xl text-sm leading-6 sm:text-base ${dark ? 'text-white/70' : 'text-deep-walnut/70'}`}>{description}</p>}
+      {eyebrow && <p className={`font-semibold uppercase text-imperial-gold ${compact ? 'text-[9px] tracking-[.25em] sm:text-xs' : 'text-[10px] tracking-[.24em] sm:text-xs'}`}>{eyebrow}</p>}
+      <h2 className={`mt-2 font-[family-name:var(--font-playfair)] font-semibold leading-[1.08] ${compact ? 'text-[clamp(2rem,8vw,2.75rem)] sm:text-4xl' : 'text-3xl sm:text-4xl'} ${dark ? 'text-white' : 'text-tea-green'}`}>{title}</h2>
+      {description && <p className={`mt-2 max-w-xl leading-6 ${compact ? 'text-[14px] sm:text-base' : 'text-sm sm:text-base'} ${dark ? 'text-white/70' : 'text-deep-walnut/70'}`}>{description}</p>}
     </div>
     {action && <Link to={action.href || '/shop'} className={`inline-flex min-h-10 items-center gap-2 text-sm font-semibold ${dark ? 'text-imperial-gold' : 'text-tea-green'} hover:underline`}>{action.label || 'Explore'} <ArrowRight size={16} /></Link>}
   </div>;
@@ -156,14 +156,14 @@ export function ShopByMood({ content = {} }) {
   })).filter((moment) => moment.products.length > 0), [products]);
   const selectedMoment = groupedMoments.find((moment) => moment.id === activeMoment) || groupedMoments[0];
 
-  return <section className="bg-[#fffefa] px-5 py-12 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle eyebrow={content.eyebrow || 'Choose your moment'} title={content.heading || 'Tea for every ritual'} description={content.description || 'Find a tea to match the pace and flavor you are in the mood for.'} />
+  return <section className="bg-[#fffefa] px-4 py-10 sm:px-8 sm:py-16"><div className="mx-auto max-w-7xl"><SectionTitle compact eyebrow={content.eyebrow || 'Choose your moment'} title={content.heading || 'Tea for every ritual'} description={content.description || 'Find a tea to match the pace and flavor you are in the mood for.'} />
     {loading ? <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">{[0,1,2,3].map((x) => <div key={x} className="h-12 animate-pulse rounded-full bg-[#e9e6dc]" />)}</div> : error ? <p role="alert" className="text-sm text-royal-terracotta">Tea selections could not be loaded.</p> : selectedMoment ? <>
-      <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Choose a tea moment">
-        {groupedMoments.map((moment) => <button key={moment.id} type="button" aria-pressed={selectedMoment.id === moment.id} onClick={() => setActiveMoment(moment.id)} className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${selectedMoment.id === moment.id ? 'border-tea-green bg-tea-green text-white' : 'border-[#ded9cd] bg-white text-tea-green hover:border-tea-green'}`}>{moment.label}<span className="ml-2 text-xs opacity-75">{moment.products.length}</span></button>)}
+      <div className="mb-5 grid max-w-2xl grid-cols-2 gap-2.5 sm:mb-6 sm:flex sm:flex-wrap sm:gap-2" role="group" aria-label="Choose a tea moment">
+        {groupedMoments.map((moment) => <button key={moment.id} type="button" aria-pressed={selectedMoment.id === moment.id} onClick={() => setActiveMoment(moment.id)} className={`flex min-h-12 items-center justify-between gap-2 rounded-2xl border px-3 py-2.5 text-left text-[13px] font-semibold leading-tight transition duration-200 sm:min-h-0 sm:justify-start sm:rounded-full sm:px-4 sm:text-sm ${selectedMoment.id === moment.id ? 'border-tea-green bg-tea-green text-white shadow-[0_6px_16px_rgba(31,77,58,0.18)]' : 'border-[#e4dfd4] bg-white text-tea-green hover:border-tea-green hover:bg-[#f8f6ef]'}`}>{moment.label}<span className={`inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 text-[11px] ${selectedMoment.id === moment.id ? 'bg-white/15 text-white' : 'bg-[#f2efe7] text-[#68756d]'}`}>{moment.products.length}</span></button>)}
       </div>
       <div aria-live="polite">
-        <p className="mb-4 text-sm text-deep-walnut/70">{selectedMoment.description}</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
+        <p className="mb-3 mt-1 max-w-2xl text-[13px] leading-5 text-deep-walnut/70 sm:mb-4 sm:text-sm">{selectedMoment.description}</p>
+        <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
       </div>
     </> : <EmptyState icon={Leaf} href="/shop" action="Browse available teas">{content.emptyText || 'There are no in-stock teas for these moments right now.'}</EmptyState>}
   </div></section>;

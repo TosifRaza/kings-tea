@@ -130,13 +130,13 @@ const FeaturedCollections = ({ content = {} }) => {
 
     if (teaProducts.length > 0) {
       return (
-        <section className="bg-[#F8F3E9] px-4 py-10 sm:px-6 lg:px-8">
+        <section className="bg-[#F8F3E9] px-4 py-9 sm:px-6 sm:py-12 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-7 text-center">
-              <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-semibold text-[#1F4D3A] md:text-4xl">{content.heading || 'Our Premium Tea Collection'}</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-[#3A281C]/70 md:text-base">{content.description || 'Explore our handpicked teas, crafted for a better cup every day.'}</p>
+            <div className="mx-auto mb-6 max-w-2xl text-center sm:mb-8">
+              <h2 className="mx-auto max-w-[16ch] text-balance font-[family-name:var(--font-playfair)] text-[clamp(1.8rem,8vw,2.5rem)] font-semibold leading-[1.08] text-[#1F4D3A] md:max-w-none md:text-4xl">{content.heading || 'Our Premium Tea Collection'}</h2>
+              <p className="mx-auto mt-3 max-w-xl text-pretty px-1 text-[14px] leading-6 text-[#3A281C]/70 sm:text-base">{content.description || 'Explore our handpicked teas, crafted for a better cup every day.'}</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 min-[380px]:grid-cols-2 sm:gap-5 lg:grid-cols-4">
               {teaProducts.map((product) => (
                 <ProductCard key={product._id || product.id} product={product} variant="collection" />
               ))}

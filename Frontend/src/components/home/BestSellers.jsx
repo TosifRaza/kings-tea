@@ -54,7 +54,7 @@ function ProductCard({ product, variant = 'default' }) {
           <Link
             to={`/product/${productSlug}`}
             aria-label={`View ${product.name}`}
-            className="relative flex h-[132px] w-full items-center justify-center overflow-hidden rounded-t-xl bg-[#e9eadb] sm:h-[230px] lg:h-[250px]"
+            className="relative flex h-[148px] w-full items-center justify-center overflow-hidden rounded-t-2xl bg-[#e9eadb] sm:h-[230px] sm:rounded-t-xl lg:h-[250px]"
           >
             {thumbnailUrl && !imageFailed ? (
               <img
@@ -78,7 +78,7 @@ function ProductCard({ product, variant = 'default' }) {
             type="button"
             aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             aria-pressed={isWishlisted}
-            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-black/5 bg-white/95 shadow-md transition-transform hover:scale-105 sm:right-3 sm:top-3 sm:h-9 sm:w-9"
+            className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-white/95 shadow-md transition-transform hover:scale-105 sm:right-3 sm:top-3 sm:h-9 sm:w-9"
           >
             <Heart className={`h-4 w-4 sm:h-5 sm:w-5 ${isWishlisted ? 'fill-royal-terracotta text-royal-terracotta' : 'text-[#173f35]'}`} />
           </button>

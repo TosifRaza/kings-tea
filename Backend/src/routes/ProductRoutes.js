@@ -2,6 +2,8 @@ const express = require('express');
 const { body } = require('express-validator');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const cloudinary = require('../config/cloudinary');
 const MediaAsset = require('../models/MediaAssetModel');
 const {
@@ -62,6 +64,46 @@ const uploadProductImages = [upload.array('images', 5), async (req, res, next) =
         return res.status(400).json({ success: false, message: 'Image content does not match its declared file type.' });
       }
     }
+
+    const cloudinaryConfig = cloudinary.config();
+    const hasCloudinaryCredentials = Boolean(
+      cloudinaryConfig.cloud_name && cloudinaryConfig.api_key && cloudinaryConfig.api_secret
+    );
+    if (!hasCloudinaryCredentials && process.env.NODE_ENV !== 'production') {
+      const uploadsDir = path.resolve(__dirname, '../../uploads');
+      fs.mkdirSync(uploadsDir, { recursive: true });
+      const uploadedLocalFiles = [];
+      try {
+        for (const file of req.files) {
+          const extension = path.extname(file.originalname).toLowerCase();
+          const filename = `product-${crypto.randomUUID()}${extension}`;
+          const localPath = path.join(uploadsDir, filename);
+          await fs.promises.writeFile(localPath, file.buffer, { flag: 'wx' });
+          uploadedLocalFiles.push(localPath);
+          file.path = `/uploads/${filename}`;
+          file.filename = filename;
+        }
+        await MediaAsset.insertMany(req.files.map((file) => ({
+          url: file.path,
+          publicId: file.filename,
+          provider: 'static',
+          sourceProvider: 'Local development upload',
+          altText: path.parse(file.originalname).name.replace(/[-_]+/g, ' ').slice(0, 300),
+          mimeType: file.mimetype,
+          bytes: file.size,
+          format: path.extname(file.originalname).slice(1).toLowerCase(),
+          usage: 'product',
+        })));
+        return next();
+      } catch (error) {
+        await Promise.all(uploadedLocalFiles.map((filePath) => fs.promises.unlink(filePath).catch(() => null)));
+        return next(error);
+      }
+    }
+    if (!hasCloudinaryCredentials) {
+      throw new Error('Cloudinary is not configured for product image uploads.');
+    }
+
     await Promise.all(req.files.map((file) => new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream({
         folder: 'kings-tea/products',

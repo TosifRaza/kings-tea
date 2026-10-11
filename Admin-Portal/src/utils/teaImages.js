@@ -48,11 +48,21 @@ export const TEA_CATEGORY_GALLERIES = {
 
 const defaultPublicSiteUrl = 'https://kings-tea-frontend.onrender.com';
 const publicSiteUrl = (import.meta.env.VITE_PUBLIC_SITE_URL || defaultPublicSiteUrl).replace(/\/$/, '');
+const configuredApiBaseUrl = String(import.meta.env.VITE_API_URL || '')
+  .trim()
+  .replace(/\/api\/?$/i, '')
+  .replace(/\/$/, '');
+const defaultApiBaseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:5001'
+  : 'https://kings-tea-backend.onrender.com';
+const apiBaseUrl = configuredApiBaseUrl || defaultApiBaseUrl;
 
 export function getAdminImageUrl(path) {
   if (!path) return '';
   if (/^(https?:|data:|blob:)/i.test(path)) return path;
-  return `${publicSiteUrl}${path.startsWith('/') ? path : `/${path}`}`;
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const assetBaseUrl = normalizedPath.startsWith('/uploads/') ? apiBaseUrl : publicSiteUrl;
+  return `${assetBaseUrl}${normalizedPath}`;
 }
 
 export function getTeaCategoryImage(category) {

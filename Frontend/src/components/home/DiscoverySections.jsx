@@ -163,7 +163,7 @@ export function ShopByMood({ content = {} }) {
       </div>
       <div aria-live="polite">
         <p className="mb-4 text-sm text-deep-walnut/70">{selectedMoment.description}</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductTile key={product._id || product.slug} product={product} />)}</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">{selectedMoment.products.slice(0, Number(content.limit) || 4).map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
       </div>
     </> : <EmptyState icon={Leaf} href="/shop" action="Browse available teas">{content.emptyText || 'There are no in-stock teas for these moments right now.'}</EmptyState>}
   </div></section>;
@@ -209,7 +209,7 @@ export function GiftCollections({ content = {} }) {
       <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Filter tea gift ideas by style">
         {giftStyles.filter((style) => style.id === 'all' || products.some(style.matches)).map((style) => <button key={style.id} type="button" aria-pressed={activeStyle === style.id} onClick={() => setActiveStyle(style.id)} className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${activeStyle === style.id ? 'border-tea-green bg-tea-green text-white' : 'border-[#ded9cd] bg-white text-tea-green hover:border-tea-green'}`}>{style.label}<span className="ml-2 text-xs opacity-75">{style.id === 'all' ? products.length : products.filter(style.matches).length}</span></button>)}
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{visibleProducts.map((product) => <ProductTile key={product._id || product.slug} product={product} />)}</div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">{visibleProducts.map((product) => <ProductCard key={product._id || product.slug} product={product} variant="collection" />)}</div>
     </> : <EmptyState icon={Gift} href="/shop" action="Browse the tea collection">{content.emptyText || 'No in-stock teas are available for gift ideas right now.'}</EmptyState>}
   </div></section>;
 }

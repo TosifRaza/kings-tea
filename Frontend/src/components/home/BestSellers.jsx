@@ -34,7 +34,8 @@ function ProductCard({ product, variant = 'default' }) {
   };
 
   if (variant === 'collection') {
-    const rating = Number(product.catalogRating ?? product.rating) || 0;
+    const rating = Number(product.catalogRating);
+    const hasCatalogRating = Number.isFinite(rating) && rating >= 1 && rating <= 5;
     const cardComparePrice = hasDiscount ? comparePrice : Math.round(price / 0.84 / 10) * 10;
     const cardDiscount = hasDiscount ? discount : 16;
     const showCardDiscount = price > 0 && cardComparePrice > price;
@@ -93,12 +94,12 @@ function ProductCard({ product, variant = 'default' }) {
             {product.shortDescription || product.description || 'A carefully selected tea for a memorable cup.'}
           </p>
           <div className="flex items-center">
-            <Link to={`/product/${productSlug}`} className="flex shrink-0 items-center gap-1" aria-label={`Catalog rating ${rating.toFixed(1)} out of 5`}>
+            {hasCatalogRating && <Link to={`/product/${productSlug}`} className="flex shrink-0 items-center gap-1" aria-label={`Catalog rating ${rating.toFixed(1)} out of 5`}>
               <span className="flex items-center" aria-hidden="true">
                 {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < Math.round(rating) ? 'fill-[#dca32a] text-[#dca32a]' : 'fill-[#e7e5e4] text-[#e7e5e4]'}`} />)}
               </span>
               <span className="text-[10px] font-semibold text-[#34483f] sm:text-xs">{rating.toFixed(1)}</span>
-            </Link>
+            </Link>}
           </div>
           <div className="flex items-center justify-between gap-2 border-t border-[#eeeae1] pt-2">
             <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">

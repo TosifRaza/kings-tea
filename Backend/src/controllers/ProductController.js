@@ -5,7 +5,7 @@ const Category = require('../models/CategoryModel');
 const MediaAsset = require('../models/MediaAssetModel');
 const { successResponse, errorResponse } = require('../utils/ResponseHandler');
 
-const makeRandomCatalogRating = () => (Math.floor(Math.random() * 15) + 35) / 10;
+const { makeRandomCatalogRating } = require('../utils/CatalogRating');
 const parseCatalogRating = (value) => {
   if (value === '' || value === null) return null;
   const rating = Number(value);

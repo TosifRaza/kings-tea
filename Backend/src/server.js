@@ -33,6 +33,7 @@ const { authorize } = require('./middleware/AuthorizationMiddleware');
 const Category = require('./models/CategoryModel');
 const Product = require('./models/ProductModel');
 const seedCatalogBatch50 = require('./scripts/seedCatalogBatch50');
+const fillMissingCatalogRatings = require('./scripts/fillMissingCatalogRatings');
 
 const TEA_CATEGORY_IMAGES = {
   'Black Tea': '/images/tea-products/black-tea.jpg',
@@ -632,6 +633,12 @@ mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI, {
         await seedCatalogBatch50({ confirmed: true, connected: true });
       } catch (error) {
         console.error('Initial 50-product catalog import failed:', error.message);
+      }
+      try {
+        const updatedRatings = await fillMissingCatalogRatings();
+        console.log(`Saved catalog ratings for ${updatedRatings} products missing a score.`);
+      } catch (error) {
+        console.error('Catalog rating backfill failed:', error.message);
       }
     }
     app.listen(PORT, () => {
